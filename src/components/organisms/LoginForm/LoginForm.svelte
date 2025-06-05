@@ -3,6 +3,8 @@
     import NeonButton from "../../atoms/NeonButton.svelte";
 
     let passValid = $state(false);
+    let password = $state("");
+    let confirmPassword = $state("");
 </script>
 
 <div id="login-container">
@@ -17,26 +19,37 @@
         <Input type="text" placeholder="Enter username" id="username" />
     </div>
 
-    <div class="input-group">
-        <label for="password">Password </label>
-        <Input
-            type="password"
-            placeholder="Enter password (8 characters minimum)"
-            id="password"
-            minlength="8"
-            required
-            oninput={() => {
-                console.log("Password input changed");
-            }}
-            bind:isValid={passValid}
-        />
+    <div class="dual-input-group">
+        <div class="input-group">
+            <label for="password">Password </label>
+            <Input
+                type="password"
+                placeholder="Enter password (8 characters minimum)"
+                id="password"
+                minlength="8"
+                required
+                bind:value={password}
+                bind:isValid={passValid}
+            />
+        </div>
+        <div class="input-group">
+            <label for="confirm-password">Confirm password </label>
+            <Input
+                type="password"
+                placeholder="Confirm password"
+                id="confirm-password"
+                minlength="8"
+                required
+                bind:value={confirmPassword}
+            />
+        </div>
     </div>
 
     <NeonButton
         type="submit"
         id="loginbtn"
         class="greatbtn"
-        disabled={!passValid}
+        disabled={!(passValid && password === confirmPassword)}
         text="Login"
     />
 </div>
@@ -62,11 +75,11 @@
     }
 
     #photo-container {
-        overflow: hidden;
         display: flex;
         justify-content: center;
-        min-width: none;
-        min-height: none;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
     }
 
     img {
@@ -79,6 +92,19 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
+        width: 100%;
+    }
+
+    .dual-input-group {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .dual-input-group .input-group {
+        flex: 1 1 200px; /* grow, shrink, min-width basis */
+        min-width: 200px;
     }
 
     label {
