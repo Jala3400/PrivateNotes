@@ -95,6 +95,7 @@
         flex-direction: column;
         gap: 20px;
 
+        width: 100%;
         max-width: 800px;
         height: 100%;
         margin: 0 auto;

@@ -11,7 +11,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100%;
-        width: 100%;
+        height: clamp(30rem, 80vh, 35rem);
+        width: clamp(20rem, 60vw, 30rem);
     }
 </style>

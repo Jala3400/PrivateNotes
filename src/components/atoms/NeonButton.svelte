@@ -19,9 +19,11 @@
         font-weight: bold;
 
         transition: var(--transition);
+        outline: none;
     }
 
-    button:hover:enabled {
+    button:hover:enabled,
+    button:focus-visible {
         color: var(--text-primary);
         background-color: var(--main-color);
         box-shadow: none;

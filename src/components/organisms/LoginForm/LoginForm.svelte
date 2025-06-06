@@ -8,7 +8,9 @@
     let password = $state("");
     let confirmPassword = $state("");
 
-    async function login() {
+    async function login(event: Event) {
+        event.preventDefault();
+
         // Validate inputs
         if (!password || !confirmPassword) {
             alert("Please fill in the password fields!");
@@ -39,7 +41,7 @@
     }
 </script>
 
-<div id="login-container">
+<form id="login-container" onsubmit={login}>
     <div id="photo-container">
         <img src="/hacker.png" alt="hacker" />
     </div>
@@ -53,6 +55,7 @@
             type="text"
             placeholder="Enter username"
             id="username"
+            autocomplete="off"
         />
     </div>
 
@@ -69,6 +72,7 @@
                 bind:isValid={passValid}
             />
         </div>
+
         <div class="input-group">
             <label for="confirm-password">Confirm password </label>
             <Input
@@ -88,9 +92,8 @@
         class="greatbtn"
         disabled={!(passValid && password === confirmPassword)}
         text="Login"
-        onclick={login}
     />
-</div>
+</form>
 
 <style>
     /* Container */
@@ -99,8 +102,8 @@
         flex-direction: column;
         gap: 16px;
 
-        width: clamp(20rem, 61.8%, 42rem);
-        height: clamp(28rem, 80%, 42rem);
+        width: 100%;
+        height: 100%;
 
         padding: 1.5rem;
         padding-bottom: 1.2rem;
@@ -141,15 +144,15 @@
     }
 
     .dual-input-group .input-group {
-        flex: 1 1 200px; /* grow, shrink, min-width basis */
-        min-width: 200px;
+        flex: 1 1 130px; /* grow, shrink, min-width basis */
+        min-width: 130px;
     }
 
     label {
         user-select: none;
     }
 
-    @media (max-height: 28rem) {
+    @media (max-height: 30rem) {
         #login-container {
             height: auto;
         }
