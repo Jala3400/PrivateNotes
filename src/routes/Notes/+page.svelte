@@ -1,6 +1,39 @@
-<script>
+<script lang="ts">
+    import { invoke } from "@tauri-apps/api/core";
+
     let content = $state("");
+    let title = $state("");
+    let isSaving = $state(false);
+
+    async function saveNote() {
+        if (!title.trim() || !content.trim()) {
+            alert("Please enter both title and content");
+            return;
+        }
+
+        isSaving = true;
+        try {
+            await invoke("save_encrypted_note", {
+                title: title.trim(),
+                content: content.trim(),
+            });
+        } catch (error) {
+            console.error("Failed to save note:", error);
+        } finally {
+            isSaving = false;
+        }
+    }
+
+    function handlekeydown(event: KeyboardEvent) {
+        if (event.ctrlKey && event.key === "s") {
+            event.preventDefault();
+            saveNote();
+        }
+    }
+
 </script>
+
+<svelte:window onkeydown={handlekeydown} />
 
 <div class="editor-container">
     <input
@@ -8,14 +41,16 @@
         class="editor-component"
         type="text"
         placeholder="Note Title"
+        bind:value={title}
+        disabled={isSaving}
     />
 
     <textarea
         id="note-content"
         class="editor-component"
-        bind:value={content}
         placeholder="Start typing..."
-        autofocus
+        bind:value={content}
+        disabled={isSaving}
     >
     </textarea>
 </div>
