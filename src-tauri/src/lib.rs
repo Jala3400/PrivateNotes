@@ -1,7 +1,7 @@
 use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit, Nonce};
 use argon2::Argon2;
-use std::sync::Mutex;
-use tauri::{Manager, State};
+use std::{path::PathBuf, sync::Mutex};
+use tauri::{DragDropEvent, Emitter, Manager, State, Window, WindowEvent};
 use tauri_plugin_dialog::DialogExt;
 
 #[derive(Default)]
@@ -82,9 +82,8 @@ fn save_encrypted_note(
     Ok(())
 }
 
-#[tauri::command]
 fn open_encrypted_note(
-    file_path: String,
+    file_path: &str,
     app_state: State<Mutex<AppState>>,
 ) -> Result<String, String> {
     let app_state = app_state.lock().unwrap();
@@ -114,10 +113,50 @@ fn open_encrypted_note(
     Ok(String::from_utf8(decrypted_content).unwrap_or_default())
 }
 
+fn open_from_path(file_path: &PathBuf, window: &Window) {
+    // Check if the file path ends with .lockd
+    if file_path.extension().and_then(|s| s.to_str()) == Some("lockd") {
+        let app_state = window.state::<Mutex<AppState>>();
+        match open_encrypted_note(file_path.to_str().unwrap(), app_state) {
+            // If successful, emit the content to the frontend
+            Ok(content) => {
+                let title = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                window.emit("note-opened", (title, content)).unwrap();
+            }
+            // If an error occurs, emit the error message
+            Err(err) => {
+                window.emit("error", err).unwrap();
+            }
+        }
+    } else {
+        // If the file type is not .lockd, emit an error message
+        window
+            .emit("error", "Invalid file type. Please select a .lockd file.")
+            .unwrap();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .on_window_event(|window, event| match event {
+            // Drag and drop event handling
+            WindowEvent::DragDrop(e) => match e {
+                // When a file is dropped
+                DragDropEvent::Drop { paths, .. } => {
+                    if let Some(path) = paths.first() {
+                        open_from_path(path, window);
+                    } else {
+                        window
+                            .emit("error", "No file dropped. Please drop a .lockd file.")
+                            .unwrap();
+                    }
+                }
+                _ => {}
+            },
+            _ => {}
+        })
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             Ok(())
@@ -125,8 +164,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             derive_encryption_key,
-            save_encrypted_note,
-            open_encrypted_note
+            save_encrypted_note
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

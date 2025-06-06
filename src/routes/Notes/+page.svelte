@@ -6,7 +6,6 @@
     let content = $state("");
     let title = $state("");
     let isSaving = $state(false);
-    let isLoading = $state(false);
 
     async function saveNote() {
         if (!title.trim() || !content.trim()) {
@@ -16,6 +15,7 @@
 
         isSaving = true;
         try {
+            // Call the Tauri command to save the note
             await invoke("save_encrypted_note", {
                 title: title.trim(),
                 content: content.trim(),
@@ -27,26 +27,8 @@
         }
     }
 
-    async function openNote(filePath: string) {
-        isLoading = true;
-        try {
-            const noteContents: string = await invoke("open_encrypted_note", {
-                filePath: filePath,
-            });
-
-            content = noteContents || "";
-            title = filePath.split("\\").pop()?.replace(".lockd", "") || "";
-        } catch (error) {
-            console.error("Failed to open note:", error);
-            alert(
-                "Failed to open note. Please check if the file is a valid encrypted note."
-            );
-        } finally {
-            isLoading = false;
-        }
-    }
-
     function handlekeydown(event: KeyboardEvent) {
+        // Save note on Ctrl+S
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
             saveNote();
@@ -56,10 +38,16 @@
     // Listen for drag-and-drop events to open notes
     let unlisten: (() => void) | undefined;
 
+    type NoteOpenedEvent = {
+        payload: string[];
+    };
+
     onMount(async () => {
-        unlisten = await listen("tauri://drag-drop", async (event) => {
-            // event.payload.paths is an array of file paths
-            await openNote((event.payload as any).paths[0]);
+        unlisten = await listen("note-opened", (event: NoteOpenedEvent) => {
+            // Reset the editor when a note is opened
+            const [noteTitle, noteContent] = event.payload;
+            title = noteTitle || "";
+            content = noteContent || "";
         });
     });
 
@@ -79,7 +67,7 @@
         type="text"
         placeholder="Note Title"
         bind:value={title}
-        disabled={isSaving || isLoading}
+        disabled={isSaving}
     />
 
     <textarea
@@ -87,7 +75,7 @@
         class="editor-component"
         placeholder="Start typing..."
         bind:value={content}
-        disabled={isSaving || isLoading}
+        disabled={isSaving}
     >
     </textarea>
 </div>
