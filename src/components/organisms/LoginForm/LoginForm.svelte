@@ -30,6 +30,8 @@
         // Attempt to derive the encryption key
         try {
             await invoke("derive_encryption_key", { username, password });
+            // Navigate to /Notes after successful login
+            window.location.replace("/Notes");
         } catch (error) {
             console.error("Error during login:", error);
             alert("An unexpected error occurred. Please try again.");
