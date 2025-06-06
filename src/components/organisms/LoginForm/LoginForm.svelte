@@ -1,10 +1,40 @@
 <script lang="ts">
+    import { invoke } from "@tauri-apps/api/core";
     import Input from "../../atoms/Input.svelte";
     import NeonButton from "../../atoms/NeonButton.svelte";
 
+    let username = $state("");
     let passValid = $state(false);
     let password = $state("");
     let confirmPassword = $state("");
+
+    async function login() {
+        // Validate inputs
+        if (!password || !confirmPassword) {
+            alert("Please fill in the password fields!");
+            return;
+        }
+
+        // Check password length
+        if (password.length < 8) {
+            alert("Password must be at least 8 characters long!");
+            return;
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        // Attempt to derive the encryption key
+        try {
+            await invoke("derive_encryption_key", { username, password });
+        } catch (error) {
+            console.error("Error during login:", error);
+            alert("An unexpected error occurred. Please try again.");
+        }
+    }
 </script>
 
 <div id="login-container">
@@ -16,7 +46,12 @@
 
     <div class="input-group">
         <label for="username">Username </label>
-        <Input type="text" placeholder="Enter username" id="username" />
+        <Input
+            bind:value={username}
+            type="text"
+            placeholder="Enter username"
+            id="username"
+        />
     </div>
 
     <div class="dual-input-group">
@@ -51,6 +86,7 @@
         class="greatbtn"
         disabled={!(passValid && password === confirmPassword)}
         text="Login"
+        onclick={login}
     />
 </div>
 

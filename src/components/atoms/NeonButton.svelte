@@ -1,13 +1,8 @@
 <script lang="ts">
-    let {
-        text = "",
-        disabled = $bindable(false),
-        onClick = () => {},
-        ...restProps
-    } = $props();
+    let { text = "", ...restProps } = $props();
 </script>
 
-<button {disabled} {...restProps}>{text}</button>
+<button {...restProps}>{text}</button>
 
 <style>
     button {
@@ -26,8 +21,7 @@
         transition: var(--transition);
     }
 
-    button:hover:enabled,
-    button:focus:enabled {
+    button:hover:enabled {
         color: var(--text-primary);
         background-color: var(--main-color);
         box-shadow: none;
