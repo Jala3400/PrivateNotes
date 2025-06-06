@@ -82,6 +82,38 @@ fn save_encrypted_note(
     Ok(())
 }
 
+#[tauri::command]
+fn open_encrypted_note(
+    file_path: String,
+    app_state: State<Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = app_state.lock().unwrap();
+
+    // Read the file content
+    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+    // Extract nonce and encrypted content
+    if file_data.len() < 12 {
+        return Err("File is too short".to_string());
+    }
+    let nonce_bytes = &file_data[..12];
+    let encrypted_content = &file_data[12..];
+
+    // Create nonce from bytes
+    let nonce = Nonce::from_slice(nonce_bytes);
+
+    // Create cipher instance
+    let cipher = Aes256Gcm::new_from_slice(&app_state.key)
+        .map_err(|e| format!("Failed to create cipher: {}", e))?;
+
+    // Decrypt the content
+    let decrypted_content = cipher
+        .decrypt(nonce, encrypted_content)
+        .map_err(|e| format!("Decryption failed: {}", e))?;
+
+    Ok(String::from_utf8(decrypted_content).unwrap_or_default())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -93,7 +125,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             derive_encryption_key,
-            save_encrypted_note
+            save_encrypted_note,
+            open_encrypted_note
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
