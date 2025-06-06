@@ -8,14 +8,22 @@
     let isSaving = $state(false);
 
     async function saveNote() {
+        // Validate title and content
         if (!title.trim() || !content.trim()) {
             alert("Please enter both title and content");
             return;
         }
 
+        // Prevent multiple save operations
+        if (isSaving) {
+            console.warn("Save operation already in progress");
+            return;
+        }
+
         isSaving = true;
+
+        // Call the Tauri command to save the note
         try {
-            // Call the Tauri command to save the note
             await invoke("save_encrypted_note", {
                 title: title.trim(),
                 content: content.trim(),
@@ -52,6 +60,7 @@
     });
 
     onDestroy(() => {
+        // Clean up the event listener when the component is destroyed
         if (unlisten) {
             unlisten();
         }
