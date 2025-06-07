@@ -147,10 +147,6 @@ pub fn run() {
                 DragDropEvent::Drop { paths, .. } => {
                     if let Some(path) = paths.first() {
                         open_from_path(path, window);
-                    } else {
-                        window
-                            .emit("error", "No file dropped. Please drop a .lockd file.")
-                            .unwrap();
                     }
                 }
                 _ => {}
