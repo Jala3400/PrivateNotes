@@ -13,11 +13,12 @@
     let {
         content = $bindable(`# Hello World\n\nThis is a live preview demo.`),
     } = $props();
-    let htmlPreview = $state("");
 
+    let htmlPreview = $state("");
     const md = new MarkdownIt();
 
     function updatePreview(markdownText: string) {
+        content = markdownText;
         htmlPreview = md.render(markdownText);
     }
 

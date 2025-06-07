@@ -7,6 +7,7 @@
     let content = $state("");
     let title = $state("");
     let isSaving = $state(false);
+    let editorKey = $state(Date.now());
 
     async function saveNote() {
         // Validate title and content
@@ -57,6 +58,9 @@
             const [noteTitle, noteContent] = event.payload;
             title = noteTitle || "";
             content = noteContent || "";
+
+            // Force editor component to restart by using key
+            editorKey = Date.now();
         });
     });
 
@@ -81,7 +85,11 @@
         autocomplete="off"
     />
 
-    <Editor bind:content />
+    <div id="note-contents">
+        {#key editorKey}
+            <Editor bind:content />
+        {/key}
+    </div>
 </div>
 
 <style>
@@ -112,5 +120,10 @@
         outline: none;
 
         transition: var(--transition);
+    }
+
+    #note-contents {
+        flex: 1;
+        overflow: hidden;
     }
 </style>
