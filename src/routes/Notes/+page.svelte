@@ -2,6 +2,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
+    import Editor from "../../components/organisms/Editor/Editor.svelte";
 
     let content = $state("");
     let title = $state("");
@@ -77,16 +78,10 @@
         placeholder="Note Title"
         bind:value={title}
         disabled={isSaving}
+        autocomplete="off"
     />
 
-    <textarea
-        id="note-content"
-        class="editor-component"
-        placeholder="Start typing..."
-        bind:value={content}
-        disabled={isSaving}
-    >
-    </textarea>
+    <Editor bind:content />
 </div>
 
 <style>
@@ -117,17 +112,5 @@
         outline: none;
 
         transition: var(--transition);
-    }
-
-    #note-content {
-        width: 100%;
-        height: 100%;
-
-        padding: 15px;
-
-        border: none;
-
-        resize: none;
-        outline: none;
     }
 </style>
