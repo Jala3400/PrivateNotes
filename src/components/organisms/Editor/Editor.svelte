@@ -3,24 +3,14 @@
     import { EditorView } from "@codemirror/view";
     import { EditorState } from "@codemirror/state";
     import { markdown } from "@codemirror/lang-markdown";
-    import MarkdownIt from "markdown-it";
     import { basicSetup } from "codemirror";
+    import { createMarkdownPreviewPlugin } from "./MarkdownPreviewPlugin";
 
     let editorContainer: HTMLDivElement;
-    let previewContainer: HTMLDivElement;
     let editorView: EditorView;
-
     let {
         content = $bindable(`# Hello World\n\nThis is a live preview demo.`),
     } = $props();
-
-    let htmlPreview = $state("");
-    const md = new MarkdownIt();
-
-    function updatePreview(markdownText: string) {
-        content = markdownText;
-        htmlPreview = md.render(markdownText);
-    }
 
     onMount(() => {
         const state = EditorState.create({
@@ -28,12 +18,13 @@
             extensions: [
                 basicSetup,
                 markdown(),
+                createMarkdownPreviewPlugin(),
+                EditorView.lineWrapping,
                 EditorView.updateListener.of((update) => {
                     if (update.docChanged) {
-                        updatePreview(update.state.doc.toString());
+                        content = update.state.doc.toString();
                     }
                 }),
-                EditorView.lineWrapping,
             ],
         });
 
@@ -41,8 +32,6 @@
             state,
             parent: editorContainer,
         });
-
-        updatePreview(content);
     });
 
     onDestroy(() => {
@@ -52,23 +41,10 @@
     });
 </script>
 
-<div class="editor-wrapper">
-    <div bind:this={editorContainer} class="editor-container"></div>
-    <div bind:this={previewContainer} class="preview-container">
-        {@html htmlPreview}
-    </div>
-</div>
+<div class="editor-container" bind:this={editorContainer}></div>
 
 <style>
-    .editor-wrapper {
-        display: flex;
-        gap: 1rem;
-        width: 100%;
-        height: 100%;
-    }
-
-    .editor-container,
-    .preview-container {
+    .editor-container {
         height: 100%;
         width: 100%;
         padding: 10px;
@@ -77,5 +53,22 @@
         background: var(--background-darker);
         color: var(--text-primary);
         border: 1px solid var(--background-dark-lighter);
+    }
+
+    :global(.md-preview) {
+        all: unset;
+        display: inline;
+        color: var(--text-primary);
+        line-height: normal;
+    }
+
+    :global(.cm-widgetBuffer) {
+        display: none !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+
+    :global(.cm-editor .cm-cursor) {
+        border-left-color: var(--main-color);
     }
 </style>
