@@ -10,10 +10,9 @@
     let editorKey = $state(Date.now());
 
     async function saveNote() {
-        // Validate title and content
-        if (!title.trim() || !content.trim()) {
-            alert("Please enter both title and content");
-            return;
+        let tempTitle = title.trim();
+        if (tempTitle.length === 0) {
+            tempTitle = "Untitled Note";
         }
 
         // Prevent multiple save operations
@@ -27,7 +26,7 @@
         // Call the Tauri command to save the note
         try {
             await invoke("save_encrypted_note", {
-                title: title.trim(),
+                title: tempTitle,
                 content: content.trim(),
             });
         } catch (error) {
