@@ -4,34 +4,13 @@ import {
     type DecorationSet,
     ViewPlugin,
     ViewUpdate,
-    WidgetType,
 } from "@codemirror/view";
-import { Range } from "@codemirror/state";
-import MarkdownIt from "markdown-it";
-
-class MarkdownPreviewWidget extends WidgetType {
-    constructor(private html: string) {
-        super();
-    }
-
-    toDOM() {
-        const span = document.createElement("div");
-        span.innerHTML = this.html;
-        span.className = "md-preview";
-        return span;
-    }
-
-    eq(other: MarkdownPreviewWidget) {
-        return this.html === other.html;
-    }
-}
+import { Line, Range } from "@codemirror/state";
 
 class MarkdownPreviewPluginClass {
     decorations: DecorationSet;
-    private md: MarkdownIt;
 
     constructor(view: EditorView) {
-        this.md = new MarkdownIt();
         this.decorations = this.buildDecorations(view);
     }
 
@@ -48,28 +27,100 @@ class MarkdownPreviewPluginClass {
     buildDecorations(view: EditorView): DecorationSet {
         const decorations: Range<Decoration>[] = [];
         const doc = view.state.doc;
-        const cursorLine = view.state.doc.lineAt(
-            view.state.selection.main.head
-        ).number;
 
         for (let lineNum = 1; lineNum <= doc.lines; lineNum++) {
             const line = doc.line(lineNum);
-            const lineContent = line.text.trim();
 
-            if (lineContent.length === 0 || lineNum === cursorLine) {
+            if (line.text.length === 0) {
                 continue;
             }
 
-            const html = this.md.render(lineContent);
-            const widget = new MarkdownPreviewWidget(html);
-
-            decorations.push(
-                Decoration.replace({
-                    widget,
-                }).range(line.from, line.to)
-            );
+            // Apply styling decorations for all lines
+            this.applyMarkdownStyling(line.text, line, decorations);
         }
         return Decoration.set(decorations);
+    }
+
+    private applyMarkdownStyling(
+        content: string,
+        line: Line,
+        decorations: Range<Decoration>[]
+    ) {
+        // Headers
+        const headerMatch = content.match(/^(#{1,6})\s+(.*)$/);
+        if (headerMatch) {
+            const level = headerMatch[1].length;
+            const headerClass = `md-h${level}`;
+
+            decorations.push(
+                Decoration.line({
+                    class: `md-header ${headerClass}`,
+                }).range(line.from)
+            );
+            return;
+        }
+
+        // Blockquotes
+        if (content.startsWith(">")) {
+            decorations.push(
+                Decoration.line({
+                    class: `md-quote`,
+                }).range(line.from)
+            );
+            return;
+        }
+
+        // Lists
+        const listMatch = content.match(/^(\s*)([-*+]|\d+\.)\s+(.*)$/);
+        if (listMatch) {
+            decorations.push(
+                Decoration.line({
+                    class: `md-list-item`,
+                }).range(line.from)
+            );
+            return;
+        }
+
+        // Trim the line after processing lines that need special handling
+        content = content.trim();
+
+        // Code inline
+        this.applyInlineDecorations(
+            content,
+            line,
+            decorations,
+            /`(.*?)`/g,
+            "md-code-inline"
+        );
+
+        // Links
+        this.applyInlineDecorations(
+            content,
+            line,
+            decorations,
+            /\[([^\]]+)\]\(([^)]+)\)/g,
+            "md-link"
+        );
+    }
+
+    private applyInlineDecorations(
+        content: string,
+        line: any,
+        decorations: Range<Decoration>[],
+        regex: RegExp,
+        className: string
+    ) {
+        let match;
+        while ((match = regex.exec(content)) !== null) {
+            const start = line.from + match.index;
+            const end = start + match[0].length;
+
+            decorations.push(
+                Decoration.mark({
+                    class: className,
+                }).range(start, end)
+            );
+        }
     }
 }
 

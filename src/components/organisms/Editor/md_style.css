@@ -1,0 +1,106 @@
+/* Markdown styling for live preview */
+
+/* Headers */
+.md-header {
+    font-weight: bold;
+}
+
+.md-header.md-h1 {
+    font-size: 2em;
+    padding-bottom: 0.25em;
+}
+
+.md-header.md-h2 {
+    font-size: 1.75em;
+    padding-bottom: 0.25em;
+}
+
+.md-header.md-h3 {
+    font-size: 1.5em;
+}
+
+.md-header.md-h4 {
+    font-size: 1.25em;
+}
+
+.md-header.md-h5 {
+    font-size: 1.1em;
+}
+
+.md-header.md-h6 {
+    font-size: 1em;
+}
+
+/* Inline code */
+.md-code-inline {
+    background-color: var(--background-dark-lighter);
+    color: var(--main-color-light);
+    border-radius: var(--border-radius-small);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* Links */
+.md-link {
+    color: var(--main-color);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.md-quote {
+    border-left: 4px solid var(--main-color);
+    padding-left: 0.5em;
+    margin-left: 0.2em;
+    font-style: normal;
+}
+
+/* List items */
+.md-list-item::before {
+    content: "•";
+    color: var(--main-color);
+    margin-right: 0.5em;
+}
+
+/* General styling improvements */
+.cm-focused .cm-cursor {
+    border-left-color: var(--main-color);
+}
+
+.ͼ2 .cm-activeLine {
+    background-color: transparent;
+}
+
+.cm-scroller {
+    font-family: var(--font-family) !important;
+}
+
+/* Highlights */
+.ͼc {
+    color: var(--text-secondary) !important;
+}
+
+/* tooltip styling */
+.cm-tooltip {
+    background-color: var(--background-dark-light) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--background-dark-lighter) !important;
+    border-radius: var(--border-radius-small) !important;
+    overflow: hidden !important;
+}
+
+.cm-tooltip li[aria-selected="true"] {
+    background: var(--main-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Smooth transitions for live preview */
+/* .cm-editor .md-header,
+.cm-editor .md-bold,
+.cm-editor .md-italic,
+.cm-editor .md-code-inline,
+.cm-editor .md-link,
+.cm-editor .md-quote,
+.cm-editor .md-list-item,
+.cm-editor .md-code-fence {
+    transition: var(--transition);
+} */

@@ -5,6 +5,7 @@
     import { markdown } from "@codemirror/lang-markdown";
     import { basicSetup } from "codemirror";
     import { createMarkdownPreviewPlugin } from "./MarkdownPreviewPlugin";
+    import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
@@ -53,22 +54,5 @@
         background: var(--background-darker);
         color: var(--text-primary);
         border: 1px solid var(--background-dark-lighter);
-    }
-
-    :global(.md-preview) {
-        all: unset;
-        display: inline;
-        color: var(--text-primary);
-        line-height: normal;
-    }
-
-    :global(.cm-widgetBuffer) {
-        display: none !important;
-        height: 0 !important;
-        width: 0 !important;
-    }
-
-    :global(.cm-editor .cm-cursor) {
-        border-left-color: var(--main-color);
     }
 </style>

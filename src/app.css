@@ -22,6 +22,8 @@
     --border-radius-big: 12px;
 
     --transition: 0.15s;
+
+    --font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -31,7 +33,7 @@
 }
 
 body {
-    font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    font-family: var(--font-family);
     background-color: var(--background-dark);
     color: var(--text-primary);
     margin: 0;
