@@ -1,6 +1,12 @@
 /* Markdown styling for live preview */
 
+/** Lines */
+
 /* Headers */
+.ͼ7 {
+    text-decoration: none;
+}
+
 .md-header {
     font-weight: bold;
 }
@@ -31,6 +37,33 @@
     font-size: 1em;
 }
 
+/* Blockquotes */
+.md-quote {
+    padding-left: 0.5em;
+    margin-left: 0.2em;
+    font-style: normal;
+    border-left: 5px solid var(--main-color);
+}
+
+.cm-activeLine.md-quote {
+    padding-left: 0;
+    border: none;
+}
+
+/* List items */
+
+.md-list-item::before {
+    content: "•";
+    color: var(--main-color);
+    display: inline;
+}
+
+.cm-activeLine.md-list-item::before {
+    display: none;
+}
+
+/** Inline elements */
+
 /* Inline code */
 .md-code-inline {
     background-color: var(--background-dark-lighter);
@@ -38,6 +71,11 @@
     border-radius: var(--border-radius-small);
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 0.9em;
+    padding: 0 0.2em;
+}
+
+.cm-activeLine .md-code-inline {
+    padding: 0;
 }
 
 /* Links */
@@ -46,19 +84,13 @@
     text-decoration: underline;
 }
 
-/* Blockquotes */
-.md-quote {
-    border-left: 4px solid var(--main-color);
-    padding-left: 0.5em;
-    margin-left: 0.2em;
-    font-style: normal;
+.ͼc {
+    color: var(--text-secondary) !important;
+    display: none;
 }
 
-/* List items */
-.md-list-item::before {
-    content: "•";
-    color: var(--main-color);
-    margin-right: 0.5em;
+.cm-activeLine .ͼc {
+    display: inline;
 }
 
 /* General styling improvements */
@@ -74,9 +106,13 @@
     font-family: var(--font-family) !important;
 }
 
-/* Highlights */
-.ͼc {
-    color: var(--text-secondary) !important;
+/* Hide markdown styling elements, .ͼ5 marks the dark color characters */
+.ͼ5 {
+    display: none;
+}
+
+.cm-activeLine .ͼ5 {
+    display: inline;
 }
 
 /* tooltip styling */
