@@ -47,7 +47,7 @@ class MarkdownPreviewPluginClass {
         decorations: Range<Decoration>[]
     ) {
         // Headers
-        const headerMatch = content.match(/^(#{1,6})\s+(.*)$/);
+        const headerMatch = content.match(/^(#{1,6}\s+)(.*)$/);
         if (headerMatch) {
             const level = headerMatch[1].length;
             const headerClass = `md-h${level}`;
@@ -57,68 +57,173 @@ class MarkdownPreviewPluginClass {
                     class: `md-header ${headerClass}`,
                 }).range(line.from)
             );
+
+            // Add decoration for the header symbols and space
+            decorations.push(
+                Decoration.mark({
+                    class: "md-syntax",
+                }).range(line.from, line.from + headerMatch[1].length)
+            );
+
             return;
         }
 
         // Blockquotes
-        if (content.startsWith(">")) {
+        const quoteMatch = content.match(/^(>\s*)/);
+        if (quoteMatch) {
+            const endPos = line.from + quoteMatch[1].length;
+
             decorations.push(
                 Decoration.line({
                     class: `md-quote`,
                 }).range(line.from)
             );
+
+            decorations.push(
+                Decoration.mark({
+                    class: "md-syntax",
+                }).range(line.from, endPos)
+            );
+
             return;
         }
 
         // Lists
-        const listMatch = content.match(/^(\s*)([-*+]|\d+\.)\s+(.*)$/);
+        const listMatch = content.match(/^(\s*)([-*+]|\d+\.\s)+(.*)$/);
         if (listMatch) {
+            const indentation = listMatch[1];
+            const symbol = listMatch[2];
+            const symbolStart = line.from + indentation.length;
+            const symbolEnd = symbolStart + symbol.length;
+
             decorations.push(
                 Decoration.line({
                     class: `md-list-item`,
                 }).range(line.from)
             );
-            return;
-        }
 
-        // Trim the line after processing lines that need special handling
+            // Add decoration for the list symbol and space
+            decorations.push(
+                Decoration.mark({
+                    class: "md-syntax",
+                }).range(symbolStart, symbolEnd)
+            );
+
+            return;
+        } // Trim the line after processing lines that need special handling
         content = content.trim();
 
         // Code inline
-        this.applyInlineDecorations(
-            content,
-            line,
-            decorations,
-            /`(.*?)`/g,
-            "md-code-inline"
-        );
+        this.applyCodeDecorations(content, line, decorations);
 
         // Links
-        this.applyInlineDecorations(
-            content,
-            line,
-            decorations,
-            /\[([^\]]+)\]\(([^)]+)\)/g,
-            "md-link"
-        );
+        this.applyLinkDecorations(content, line, decorations);
     }
 
-    private applyInlineDecorations(
+    private applyCodeDecorations(
         content: string,
         line: any,
-        decorations: Range<Decoration>[],
-        regex: RegExp,
-        className: string
+        decorations: Range<Decoration>[]
     ) {
+        const regex = /(`)(.*?)(`)/g;
         let match;
+        regex.lastIndex = 0;
+
         while ((match = regex.exec(content)) !== null) {
             const start = line.from + match.index;
-            const end = start + match[0].length;
+            const openTick = match[1];
+            const codeContent = match[2];
 
+            // Mark the code content
             decorations.push(
-                Decoration.mark({
-                    class: className,
-                }).range(start, end)
+                Decoration.mark({ class: "md-code-inline" }).range(
+                    start,
+                    start + match[0].length
+                )
+            );
+
+            // Mark opening backtick
+            decorations.push(
+                Decoration.mark({ class: "md-syntax" }).range(
+                    start,
+                    start + openTick.length
+                )
+            );
+
+            // Mark closing backtick
+            decorations.push(
+                Decoration.mark({ class: "md-syntax" }).range(
+                    start + openTick.length + codeContent.length,
+                    start + match[0].length
+                )
+            );
+        }
+    }
+
+    private applyLinkDecorations(
+        content: string,
+        line: any,
+        decorations: Range<Decoration>[]
+    ) {
+        const regex = /(\[)([^\]]+)(\])(\()([^)]+)(\))/g;
+        let match;
+        regex.lastIndex = 0;
+
+        while ((match = regex.exec(content)) !== null) {
+            const start = line.from + match.index;
+            const [
+                ,
+                openBracket,
+                linkText,
+                closeBracket,
+                openParen,
+                url,
+                closeParen,
+            ] = match;
+
+            let pos = start;
+
+            // Mark opening bracket
+            decorations.push(
+                Decoration.mark({ class: "md-syntax" }).range(
+                    pos,
+                    pos + openBracket.length
+                )
+            );
+            pos += openBracket.length + linkText.length;
+
+            // Mark closing bracket
+            decorations.push(
+                Decoration.mark({ class: "md-syntax" }).range(
+                    pos,
+                    pos + closeBracket.length
+                )
+            );
+            pos += closeBracket.length;
+
+            // Mark opening parenthesis
+            decorations.push(
+                Decoration.mark({ class: "md-syntax" }).range(
+                    pos,
+                    pos + openParen.length
+                )
+            );
+            pos += openParen.length + url.length;
+
+            // Mark URL
+            decorations.push(
+                Decoration.mark({ class: "md-link-url" }).range(
+                    pos - url.length,
+                    pos
+                )
+            );
+
+            // Mark closing parenthesis
+            decorations.push(
+                Decoration.mark({ class: "md-syntax" }).range(
+                    pos,
+                    pos + closeParen.length
+                )
             );
         }
     }

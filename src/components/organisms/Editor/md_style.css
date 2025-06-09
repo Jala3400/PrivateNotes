@@ -84,6 +84,7 @@
     text-decoration: underline;
 }
 
+/* Chages the color of [](this part of the link) */
 .ͼc {
     color: var(--text-secondary) !important;
     display: none;
@@ -98,20 +99,20 @@
     border-left-color: var(--main-color);
 }
 
-.ͼ2 .cm-activeLine {
-    background-color: transparent;
+.cm-activeLine {
+    background-color: transparent !important;
 }
 
 .cm-scroller {
     font-family: var(--font-family) !important;
 }
 
-/* Hide markdown styling elements, .ͼ5 marks the dark color characters */
-.ͼ5 {
+/* Hide markdown styling elements */
+.md-syntax {
     display: none;
 }
 
-.cm-activeLine .ͼ5 {
+.cm-activeLine .md-syntax {
     display: inline;
 }
 
