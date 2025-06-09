@@ -3,38 +3,37 @@
 /** Lines */
 
 /* Headers */
-.md-header {
+.tok-heading {
     font-weight: bold;
 }
 
-.md-header.md-h1 {
+.md-h1 {
     font-size: 2em;
     padding-bottom: 0.25em;
 }
 
-.md-header.md-h2 {
+.md-h2 {
     font-size: 1.75em;
     padding-bottom: 0.25em;
 }
 
-.md-header.md-h3 {
+.md-h3 {
     font-size: 1.5em;
 }
 
-.md-header.md-h4 {
+.md-h4 {
     font-size: 1.25em;
 }
 
-.md-header.md-h5 {
+.md-h5 {
     font-size: 1.1em;
 }
 
-.md-header.md-h6 {
+.md-h6 {
     font-size: 1em;
 }
 
 /* List items */
-
 .md-list-item::before {
     content: "•";
     color: var(--main-color);
@@ -61,18 +60,22 @@
 /** Inline elements */
 
 /* Bold text */
-.md-bold {
+.tok-strong {
     font-weight: bold;
 }
 
 /* Italic text */
-.md-italic {
+.tok-emphasis {
     font-style: italic;
 }
 
+/* Strikethrough */
+.tok-deleted {
+    text-decoration: line-through;
+}
 
 /* Inline code */
-.md-code-inline {
+.tok-literal {
     background-color: var(--background-dark-lighter);
     color: var(--main-color-light);
     border-radius: var(--border-radius-small);
@@ -82,9 +85,20 @@
 }
 
 /* Links */
-.md-link {
+.tok-link {
     color: var(--main-color);
     text-decoration: underline;
+}
+
+/* URLs */
+.tok-url {
+    display: none;
+    color: var(--text-secondary);
+    text-decoration: underline;
+}
+
+.cm-activeLine .tok-url {
+    display: inline;
 }
 
 /* General styling improvements */
@@ -101,13 +115,41 @@
 }
 
 /* Hide markdown styling elements */
-.md-syntax {
+.tok-meta {
     color: var(--text-secondary);
     display: none;
 }
 
-.cm-activeLine .md-syntax {
+.cm-activeLine .tok-meta {
     display: inline;
+}
+
+/* Additional highlight classes */
+.tok-string {
+    color: var(--text-primary);
+}
+
+.tok-number {
+    color: var(--main-color);
+}
+
+.tok-comment {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.tok-keyword {
+    color: var(--main-color);
+    font-weight: bold;
+}
+
+.tok-punctuation {
+    color: var(--text-secondary);
+}
+
+.tok-invalid {
+    color: var(--danger-color);
+    text-decoration: underline;
 }
 
 /* tooltip styling */
@@ -125,13 +167,12 @@
 }
 
 /* Smooth transitions for live preview */
-/* .cm-editor .md-header,
-.cm-editor .md-bold,
-.cm-editor .md-italic,
-.cm-editor .md-code-inline,
-.cm-editor .md-link,
+/* .cm-editor .tok-heading,
+.cm-editor .tok-strong,
+.cm-editor .tok-emphasis,
+.cm-editor .tok-literal,
+.cm-editor .tok-link,
 .cm-editor .md-quote,
-.cm-editor .md-list-item,
-.cm-editor .md-code-fence {
+.cm-editor .md-list-item {
     transition: var(--transition);
 } */
