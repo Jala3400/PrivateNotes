@@ -3,10 +3,6 @@
 /** Lines */
 
 /* Headers */
-.ͼ7 {
-    text-decoration: none;
-}
-
 .md-header {
     font-weight: bold;
 }
@@ -64,6 +60,17 @@
 
 /** Inline elements */
 
+/* Bold text */
+.md-bold {
+    font-weight: bold;
+}
+
+/* Italic text */
+.md-italic {
+    font-style: italic;
+}
+
+
 /* Inline code */
 .md-code-inline {
     background-color: var(--background-dark-lighter);
@@ -74,24 +81,10 @@
     padding: 0 0.2em;
 }
 
-.cm-activeLine .md-code-inline {
-    padding: 0;
-}
-
 /* Links */
 .md-link {
     color: var(--main-color);
     text-decoration: underline;
-}
-
-/* Chages the color of [](this part of the link) */
-.ͼc {
-    color: var(--text-secondary) !important;
-    display: none;
-}
-
-.cm-activeLine .ͼc {
-    display: inline;
 }
 
 /* General styling improvements */
@@ -109,6 +102,7 @@
 
 /* Hide markdown styling elements */
 .md-syntax {
+    color: var(--text-secondary);
     display: none;
 }
 
