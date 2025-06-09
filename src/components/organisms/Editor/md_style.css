@@ -75,7 +75,7 @@
 }
 
 /* Inline code */
-.tok-literal {
+.md-code-inline {
     background-color: var(--background-dark-lighter);
     color: var(--main-color-light);
     border-radius: var(--border-radius-small);
