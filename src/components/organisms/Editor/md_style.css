@@ -157,7 +157,6 @@
     border-right: 1px solid var(--background-dark-lighter) !important;
 }
 
-/* .cm-lineNumbers  */
 .cm-gutterElement {
     display: flex;
     align-items: center;
@@ -166,6 +165,29 @@
 
 .cm-activeLineGutter {
     background-color: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+/* Text Selection */
+.cm-editor .cm-selectionBackground {
+    background-color: var(--main-color) !important;
+    opacity: 0.3;
+}
+
+.cm-editor.cm-focused .cm-selectionBackground {
+    background-color: var(--main-color) !important;
+    opacity: 0.4;
+}
+
+/* Selection Match Highlighting */
+.cm-searchMatch {
+    background-color: var(--main-color-light) !important;
+    color: var(--background-dark) !important;
+    border-radius: var(--border-radius-small);
+}
+
+.cm-searchMatch.cm-searchMatch-selected {
+    background-color: var(--main-color) !important;
     color: var(--text-primary) !important;
 }
 
