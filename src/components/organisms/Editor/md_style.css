@@ -34,14 +34,8 @@
 }
 
 /* List items */
-.md-list-item::before {
-    content: "•";
-    color: var(--main-color);
+.md-list-item.tok-meta:first-child {
     display: inline;
-}
-
-.cm-activeLine.md-list-item::before {
-    display: none;
 }
 
 /* Blockquotes */
