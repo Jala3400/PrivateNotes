@@ -150,6 +150,25 @@
     min-height: 1lh;
 }
 
+/* Gutters */
+.cm-gutters {
+    background-color: transparent !important;
+    color: var(--text-secondary) !important;
+    border-right: 1px solid var(--background-dark-lighter) !important;
+}
+
+/* .cm-lineNumbers  */
+.cm-gutterElement {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cm-activeLineGutter {
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+}
+
 /* tooltip styling */
 .cm-tooltip {
     background-color: var(--background-dark-light) !important;
