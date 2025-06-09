@@ -38,6 +38,7 @@ class MarkdownPreviewPluginClass {
             // Apply styling decorations for all lines
             this.applyMarkdownStyling(line.text, line, decorations);
         }
+
         return Decoration.set(decorations);
     }
 
@@ -69,21 +70,33 @@ class MarkdownPreviewPluginClass {
         }
 
         // Blockquotes
-        const quoteMatch = content.match(/^(>\s*)/);
+        const quoteMatch = content.match(/^(>\s*)+/);
         if (quoteMatch) {
-            const endPos = line.from + quoteMatch[1].length;
+            const quotePrefix = quoteMatch[0];
+            const nestingLevel = (quotePrefix.match(/>/g) || []).length;
 
-            decorations.push(
-                Decoration.line({
-                    class: `md-quote`,
-                }).range(line.from)
-            );
-
+            // Highlight the md-syntax for the quote symbol
             decorations.push(
                 Decoration.mark({
                     class: "md-syntax",
-                }).range(line.from, endPos)
+                }).range(line.from, line.from + quotePrefix.length)
             );
+
+            // Mark each quote symbol and space separately with quote styling
+            let pos = line.from;
+            for (let i = 0; i < nestingLevel; i++) {
+                const quoteSymbolMatch = content
+                    .substring(pos - line.from)
+                    .match(/^>\s*/);
+                if (quoteSymbolMatch) {
+                    decorations.push(
+                        Decoration.mark({
+                            class: `md-quote`,
+                        }).range(line.from, line.to)
+                    );
+                    pos += quoteSymbolMatch[0].length;
+                }
+            }
 
             return;
         }
