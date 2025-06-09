@@ -62,11 +62,9 @@
     .editor-container {
         height: 100%;
         width: 100%;
-        padding: 10px;
-        border-radius: var(--border-radius-medium);
+        background: var(--background-dark);
         overflow-y: auto;
-        background: var(--background-darker);
-        color: var(--text-primary);
+        border-radius: var(--border-radius-medium);
         border: 1px solid var(--background-dark-lighter);
     }
 </style>
