@@ -95,19 +95,6 @@
     display: inline;
 }
 
-/* General styling improvements */
-.cm-focused .cm-cursor {
-    border-left-color: var(--main-color);
-}
-
-.cm-activeLine {
-    background-color: transparent !important;
-}
-
-.cm-scroller {
-    font-family: var(--font-family) !important;
-}
-
 /* Hide markdown styling elements */
 .tok-meta {
     color: var(--text-secondary);
@@ -144,6 +131,23 @@
 .tok-invalid {
     color: var(--danger-color);
     text-decoration: underline;
+}
+
+/* General styling improvements */
+.cm-focused .cm-cursor {
+    border-left-color: var(--main-color);
+}
+
+.cm-activeLine {
+    background-color: transparent !important;
+}
+
+.cm-scroller {
+    font-family: var(--font-family) !important;
+}
+
+.cm-line {
+    min-height: 1lh;
 }
 
 /* tooltip styling */
