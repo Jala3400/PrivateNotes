@@ -10,8 +10,8 @@
     let editorKey = $state(Date.now());
 
     async function saveNote() {
-        let tempTitle = title.trim();
-        if (tempTitle.length === 0) {
+        let tempTitle = title;
+        if (title.trim().length === 0) {
             tempTitle = "Untitled Note";
         }
 
@@ -27,7 +27,7 @@
         try {
             await invoke("save_encrypted_note", {
                 title: tempTitle,
-                content: content.trim(),
+                content: content,
             });
         } catch (error) {
             console.error("Failed to save note:", error);
