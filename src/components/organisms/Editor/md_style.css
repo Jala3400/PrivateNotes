@@ -84,7 +84,6 @@
     text-decoration: underline;
 }
 
-/* URLs */
 .tok-url {
     display: none;
     color: var(--text-secondary);
