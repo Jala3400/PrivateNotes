@@ -70,7 +70,7 @@
 
 /* Inline code */
 .md-code-inline {
-    background-color: var(--background-dark-lighter);
+    background-color: color-mix(in srgb, var(--background-dark-lighter), transparent 50%);
     color: var(--main-color-light);
     border-radius: var(--border-radius-small);
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
