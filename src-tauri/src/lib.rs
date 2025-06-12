@@ -125,16 +125,30 @@ fn open_encrypted_note(
 fn open_from_path(file_path: &PathBuf, window: &Window) {
     // Check if the file path ends with .lockd
     if file_path.extension().and_then(|s| s.to_str()) == Some("lockd") {
-        let app_state = window.state::<Mutex<AppState>>();
-        match open_encrypted_note(file_path.to_str().unwrap(), app_state) {
-            // If successful, emit the content to the frontend
-            Ok(content) => {
-                let title = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
-                window.emit("note-opened", (title, content)).unwrap();
-            }
-            // If an error occurs, emit the error message
-            Err(err) => {
+        // Check if there's another extension before .lockd (e.g., .txt.lockd)
+        let file_stem = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+        if PathBuf::from(file_stem).extension().is_some() {
+            // File has format like "name.txt.lockd" - call another function
+            if let Err(err) = decrypt_file(
+                file_path,
+                window.state::<Mutex<AppState>>(),
+                window.app_handle(),
+            ) {
                 window.emit("error", err).unwrap();
+            }
+        } else {
+            // File has format like "name.lockd" - open as encrypted note
+            let app_state = window.state::<Mutex<AppState>>();
+            match open_encrypted_note(file_path.to_str().unwrap(), app_state) {
+                // If successful, emit the content to the frontend
+                Ok(content) => {
+                    let title = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                    window.emit("note-opened", (title, content)).unwrap();
+                }
+                // If an error occurs, emit the error message
+                Err(err) => {
+                    window.emit("error", err).unwrap();
+                }
             }
         }
     } else {
@@ -186,7 +200,7 @@ fn encrypt_file(
         .and_then(|s| s.to_str())
         .unwrap_or("encrypted_file");
 
-    let file_path= app_handle
+    let file_path = app_handle
         .dialog()
         .file()
         .add_filter(title, &["lockd"])
@@ -198,8 +212,63 @@ fn encrypt_file(
     if let Some(path) = file_path {
         std::fs::write(path.as_path().unwrap(), file_data)
             .map_err(|e| format!("Failed to write file: {}", e))?;
-    } else {
-        return Err("Save cancelled".to_string());
+    }
+
+    Ok(())
+}
+
+fn decrypt_file(
+    file_path: &PathBuf,
+    app_state: State<Mutex<AppState>>,
+    app_handle: &tauri::AppHandle,
+) -> Result<(), String> {
+    let app_state = app_state.lock().unwrap();
+
+    // Ensure the encryption key is set
+    let Some(key) = &app_state.key else {
+        return Err("Log in first".to_string());
+    };
+
+    // Read the file content
+    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+    // Extract nonce and encrypted content
+    if file_data.len() < 12 {
+        return Err("File is too short".to_string());
+    }
+    let nonce_bytes = &file_data[..12];
+    let encrypted_content = &file_data[12..];
+
+    // Create nonce from bytes
+    let nonce = Nonce::from_slice(nonce_bytes);
+
+    // Create cipher instance
+    let cipher =
+        Aes256Gcm::new_from_slice(key).map_err(|e| format!("Failed to create cipher: {}", e))?;
+
+    // Decrypt the content
+    let decrypted_content = cipher
+        .decrypt(nonce, encrypted_content)
+        .map_err(|e| format!("Decryption failed: {}", e))?;
+
+    // Get the original filename without .lockd extension
+    let original_filename = file_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("decrypted_file");
+
+    // Show save dialog
+    let save_path = app_handle
+        .dialog()
+        .file()
+        .set_file_name(original_filename)
+        .set_directory(file_path.parent().unwrap_or(file_path.as_path()))
+        .blocking_save_file();
+
+    // Write the decrypted data to the chosen location
+    if let Some(path) = save_path {
+        std::fs::write(path.as_path().unwrap(), decrypted_content)
+            .map_err(|e| format!("Failed to write file: {}", e))?;
     }
 
     Ok(())
