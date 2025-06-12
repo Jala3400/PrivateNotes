@@ -138,11 +138,71 @@ fn open_from_path(file_path: &PathBuf, window: &Window) {
             }
         }
     } else {
-        // If the file type is not .lockd, emit an error message
-        window
-            .emit("error", "Invalid file type. Please select a .lockd file.")
-            .unwrap();
+        // If the file type is not .lockd, encrypt the file
+        let app_state = window.state::<Mutex<AppState>>();
+        let app_handle = window.app_handle();
+        if let Err(err) = encrypt_file(file_path, app_state, app_handle) {
+            window.emit("error", err).unwrap();
+        }
     }
+}
+
+fn encrypt_file(
+    file_path: &PathBuf,
+    app_state: State<Mutex<AppState>>,
+    app_handle: &tauri::AppHandle,
+) -> Result<(), String> {
+    let app_state = app_state.lock().unwrap();
+
+    // Ensure the encryption key is set
+    let Some(key) = &app_state.key else {
+        return Err("Log in first".to_string());
+    };
+
+    // Read the file content
+    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+    // Generate a random nonce for this encryption
+    let nonce_bytes: [u8; 12] = rand::random();
+    let nonce = Nonce::from_slice(&nonce_bytes);
+
+    // Create cipher instance
+    let cipher =
+        Aes256Gcm::new_from_slice(key).map_err(|e| format!("Failed to create cipher: {}", e))?;
+
+    // Encrypt the content
+    let encrypted_content = cipher
+        .encrypt(nonce, file_data.as_slice())
+        .map_err(|e| format!("Encryption failed: {}", e))?;
+
+    // Create the data to save (nonce + encrypted content)
+    let mut file_data = Vec::new();
+    file_data.extend_from_slice(&nonce_bytes);
+    file_data.extend_from_slice(&encrypted_content);
+
+    // Show save dialog
+    let title = file_path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("encrypted_file");
+
+    let file_path= app_handle
+        .dialog()
+        .file()
+        .add_filter(title, &["lockd"])
+        .set_file_name(&format!("{}.lockd", title))
+        .set_directory(file_path.parent().unwrap_or(file_path.as_path()))
+        .blocking_save_file();
+
+    // Write the encrypted data back to the file
+    if let Some(path) = file_path {
+        std::fs::write(path.as_path().unwrap(), file_data)
+            .map_err(|e| format!("Failed to write file: {}", e))?;
+    } else {
+        return Err("Save cancelled".to_string());
+    }
+
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
