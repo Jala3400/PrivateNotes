@@ -6,7 +6,7 @@ use tauri_plugin_dialog::DialogExt;
 
 #[derive(Default)]
 struct AppState {
-    key: [u8; 32],
+    key: Option<[u8; 32]>,
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -25,13 +25,12 @@ fn derive_encryption_key(
     }
 
     // Derive a 32-byte key using Argon2
+    let mut key = [0u8; 32];
     Argon2::default()
-        .hash_password_into(
-            password.as_bytes(),
-            username_bytes.as_slice(),
-            &mut app_state.key,
-        )
+        .hash_password_into(password.as_bytes(), username_bytes.as_slice(), &mut key)
         .unwrap();
+
+    app_state.key = Some(key);
 
     Ok(())
 }
@@ -45,13 +44,18 @@ fn save_encrypted_note(
 ) -> Result<(), String> {
     let app_state = app_state.lock().unwrap();
 
+    // Ensure the encryption key is set
+    let Some(key) = &app_state.key else {
+        return Err("Log in first".to_string());
+    };
+
     // Generate a random nonce for this encryption
     let nonce_bytes: [u8; 12] = rand::random();
     let nonce = Nonce::from_slice(&nonce_bytes);
 
     // Create cipher instance
-    let cipher = Aes256Gcm::new_from_slice(&app_state.key)
-        .map_err(|e| format!("Failed to create cipher: {}", e))?;
+    let cipher =
+        Aes256Gcm::new_from_slice(key).map_err(|e| format!("Failed to create cipher: {}", e))?;
 
     // Encrypt the content
     let encrypted_content = cipher
@@ -88,6 +92,11 @@ fn open_encrypted_note(
 ) -> Result<String, String> {
     let app_state = app_state.lock().unwrap();
 
+    // Ensure the encryption key is set
+    let Some(key) = &app_state.key else {
+        return Err("Log in first".to_string());
+    };
+
     // Read the file content
     let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
 
@@ -102,8 +111,8 @@ fn open_encrypted_note(
     let nonce = Nonce::from_slice(nonce_bytes);
 
     // Create cipher instance
-    let cipher = Aes256Gcm::new_from_slice(&app_state.key)
-        .map_err(|e| format!("Failed to create cipher: {}", e))?;
+    let cipher =
+        Aes256Gcm::new_from_slice(key).map_err(|e| format!("Failed to create cipher: {}", e))?;
 
     // Decrypt the content
     let decrypted_content = cipher
