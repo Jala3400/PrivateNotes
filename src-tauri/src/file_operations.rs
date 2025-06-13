@@ -1,15 +1,27 @@
-use std::{path::PathBuf, sync::Mutex};
-use tauri::{Emitter, Manager, State, Window};
-use tauri_plugin_dialog::DialogExt;
-
 use crate::{
     encryption::{decrypt_data, encrypt_data},
     notes::open_encrypted_note,
     state::AppState,
 };
+use std::{path::PathBuf, sync::Mutex};
+use tauri::{Emitter, Manager, State, Window};
+use tauri_plugin_dialog::DialogExt;
+
+pub fn drop_handler(window: &Window, event: &tauri::DragDropEvent) -> Result<(), String> {
+    match event {
+        // Handle file drops
+        tauri::DragDropEvent::Drop { paths, .. } => {
+            if let Some(path) = paths.first() {
+                open_from_path(path, window)?;
+            }
+        }
+        _ => {}
+    }
+    Ok(())
+}
 
 /// Opens a file from the given path, handling both encrypted and non-encrypted files.
-pub fn open_from_path(file_path: &PathBuf, window: &Window) {
+pub fn open_from_path(file_path: &PathBuf, window: &Window) -> Result<(), String> {
     // Check if the file path ends with .lockd
     if file_path.extension().and_then(|s| s.to_str()) == Some("lockd") {
         // Check if there's another extension before .lockd (e.g., .txt.lockd)
@@ -17,39 +29,30 @@ pub fn open_from_path(file_path: &PathBuf, window: &Window) {
 
         if PathBuf::from(file_stem).extension().is_some() {
             // File has format like "name.txt.lockd" - decrypt the file
-            if let Err(err) = decrypt_file(
+            decrypt_file(
                 file_path,
                 window.state::<Mutex<AppState>>(),
                 window.app_handle(),
-            ) {
-                window.emit("error", err).unwrap();
-            }
+            )?;
         } else {
             // File has format like "name.lockd" - open as encrypted note
             let app_state = window.state::<Mutex<AppState>>();
 
-            match open_encrypted_note(file_path.to_str().unwrap(), app_state) {
-                // If successful, emit the content to the frontend
-                Ok(content) => {
-                    let title = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
-                    window.emit("note-opened", (title, content)).unwrap();
-                }
-
-                // If an error occurs, emit the error message
-                Err(err) => {
-                    window.emit("error", err).unwrap();
-                }
-            }
+            let content = open_encrypted_note(file_path.to_str().unwrap(), app_state)?;
+            let title = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+            window
+                .emit("note-opened", (title, content))
+                .map_err(|e| format!("Failed to emit event: {}", e))?;
         }
     } else {
         // If the file type is not .lockd, encrypt the file
         let app_state = window.state::<Mutex<AppState>>();
         let app_handle = window.app_handle();
 
-        if let Err(err) = encrypt_file(file_path, app_state, app_handle) {
-            window.emit("error", err).unwrap();
-        }
+        encrypt_file(file_path, app_state, app_handle)?;
     }
+
+    Ok(())
 }
 
 /// Encrypts a file at the given path and saves it with a .lockd extension.
