@@ -1,6 +1,7 @@
 #[derive(Default)]
 pub struct AppState {
     key: Option<[u8; 32]>,
+    path: Option<String>,
 }
 
 impl AppState {
@@ -18,5 +19,13 @@ impl AppState {
 
     pub fn get_encryption_key(&self) -> Result<[u8; 32], &'static str> {
         self.key.ok_or("Log in first")
+    }
+
+    pub fn set_path(&mut self, path: String) {
+        self.path = Some(path);
+    }
+
+    pub fn get_path(&self) -> Option<String> {
+        self.path.clone()
     }
 }

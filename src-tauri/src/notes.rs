@@ -20,13 +20,22 @@ pub fn save_encrypted_note(
     // Encrypt the content
     let file_data = encrypt_data(&key, content.as_bytes())?;
 
-    // Show save dialog
-    let file_path = app_handle
+    // Configure the file dialog
+    let mut dialog = app_handle
         .dialog()
         .file()
         .add_filter(title, &["lockd"])
-        .set_file_name(&format!("{}.lockd", title))
-        .blocking_save_file();
+        .set_file_name(&format!("{}.lockd", title));
+
+    // Set the initial directory to the last saved path if available
+    let file_path = app_state.lock().unwrap().get_path();
+    if let Some(path) = &file_path {
+        let path_buf = std::path::Path::new(path);
+        dialog = dialog.set_directory(path_buf.parent().unwrap_or(path_buf));
+    }
+
+    // Open the save file dialog
+    let file_path = dialog.blocking_save_file();
 
     // If the user selected a file, write the encrypted data to it
     if let Some(path) = file_path {
@@ -52,6 +61,9 @@ pub fn open_encrypted_note(
 
     // Decrypt the content
     let decrypted_content = decrypt_data(&key, &file_data)?;
+
+    // Save the fiel path
+    app_state.lock().unwrap().set_path(file_path.to_string());
 
     Ok(String::from_utf8(decrypted_content).unwrap_or_default())
 }
