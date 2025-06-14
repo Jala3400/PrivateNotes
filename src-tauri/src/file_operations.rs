@@ -108,6 +108,7 @@ pub fn encrypt_file(
     let save_path = app_handle
         .dialog()
         .file()
+        .set_title(&format!("Save encrypted file: {}", title))
         .add_filter(title, &["lockd"])
         .set_file_name(&format!("{}.lockd", title))
         .set_directory(file_path.parent().unwrap_or(file_path.as_path()))
@@ -146,6 +147,7 @@ pub fn decrypt_file(
     let save_path = app_handle
         .dialog()
         .file()
+        .set_title(&format!("Save decrypted file: {}", original_filename))
         .set_file_name(original_filename)
         .set_directory(file_path.parent().unwrap_or(file_path.as_path()))
         .blocking_save_file();
@@ -168,11 +170,20 @@ pub fn encrypt_folder(
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
 
+    // Get folder name for the dialog title
+    let folder_name = folder_path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("folder");
+
     // Show directory dialog for output location
     let output_dir = app_handle
         .dialog()
         .file()
-        .set_title("Select output directory for encrypted folder")
+        .set_title(&format!(
+            "Select destination for encrypted folder: {}",
+            folder_name
+        ))
         .blocking_pick_folder();
 
     let Some(output_path) = output_dir else {
@@ -181,16 +192,10 @@ pub fn encrypt_folder(
     };
 
     // Create output folder name based on the original folder name
-    let folder_name = folder_path
-        .file_name()
-        .and_then(|s| s.to_str())
-        .unwrap_or("encrypted_folder");
+    let output_folder_name = format!("{}.lockd", folder_name);
 
     // Create the output folder path
-    let output_folder = output_path
-        .as_path()
-        .unwrap()
-        .join(format!("{}.lockd", folder_name));
+    let output_folder = output_path.as_path().unwrap().join(&output_folder_name);
 
     std::fs::create_dir_all(&output_folder)
         .map_err(|e| format!("Failed to create output directory: {}", e))?;
@@ -261,24 +266,27 @@ pub fn decrypt_folder(
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
 
-    // Show directory dialog for output location
-    let output_dir = app_handle
-        .dialog()
-        .file()
-        .set_title("Select output directory for decrypted folder")
-        .blocking_pick_folder();
-
-    let Some(output_path) = output_dir else {
-        // It is ok to cancel the dialog
-        return Ok(());
-    };
-
     // Create output folder name based on the original folder name
     // Remove .lockd extension if present
     let folder_name = folder_path
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or("decrypted_folder");
+
+    // Show directory dialog for output location
+    let output_dir = app_handle
+        .dialog()
+        .file()
+        .set_title(&format!(
+            "Select destination for decrypted folder: {}",
+            folder_name
+        ))
+        .blocking_pick_folder();
+
+    let Some(output_path) = output_dir else {
+        // It is ok to cancel the dialog
+        return Ok(());
+    };
 
     // Create the output folder path
     let output_folder = output_path.as_path().unwrap().join(folder_name);
