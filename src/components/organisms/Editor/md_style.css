@@ -190,7 +190,42 @@
     color: var(--text-primary) !important;
 }
 
-/* tooltip styling */
+/* Panels */
+.cm-panels {
+    background-color: var(--background-dark) !important;
+    color: var(--text-primary) !important;
+}
+
+.cm-panels-bottom {
+    border-top: 1px solid var(--background-dark-lighter) !important;
+}
+
+.cm-panel {
+    padding: 0.5em !important;
+}
+
+.cm-textfield {
+    background-color: var(--background-dark-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-small) !important;
+    border: 1px solid var(--background-dark-lighter) !important;
+}
+
+.cm-button {
+    background-color: var(--background-dark-light) !important;
+    background-image: none !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--background-dark-lighter) !important;
+    border-radius: var(--border-radius-small) !important;
+    padding: 0.25em 0.5em !important;
+    transition: background var(--transition) !important;
+}
+
+.cm-button:hover {
+    background-color: var(--background-dark-lighter) !important;
+}
+
+/* Tooltip styling */
 .cm-tooltip {
     background-color: var(--background-dark-light) !important;
     color: var(--text-primary) !important;
