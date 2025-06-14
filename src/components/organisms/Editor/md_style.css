@@ -180,14 +180,14 @@
 
 /* Selection Match Highlighting */
 .cm-searchMatch {
-    background-color: var(--main-color-light) !important;
+    background-color: var(--main-color-dark) !important;
     color: var(--background-dark) !important;
     border-radius: var(--border-radius-small);
+    display: inline-block;
 }
 
 .cm-searchMatch.cm-searchMatch-selected {
-    background-color: var(--main-color) !important;
-    color: var(--text-primary) !important;
+    background-color: var(--main-color-light) !important;
 }
 
 /* Panels */
