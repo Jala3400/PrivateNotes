@@ -45,7 +45,8 @@
     border-left: 4px solid var(--main-color);
 }
 
-.cm-activeLine .md-quote {
+.cm-activeLine .md-quote,
+.cm-selected-line .md-quote {
     padding-left: 0;
     margin-left: 0;
     border: none;
@@ -84,23 +85,17 @@
     text-decoration: underline;
 }
 
-.tok-url {
-    display: none;
-    color: var(--text-secondary);
-    text-decoration: underline;
-}
-
-.cm-activeLine .tok-url {
-    display: inline;
-}
-
 /* Hide markdown styling elements */
-.tok-meta {
+.tok-meta,
+.tok-url {
     color: var(--text-secondary);
     display: none;
 }
 
-.cm-activeLine .tok-meta {
+.cm-activeLine .tok-meta,
+.cm-activeLine .tok-url,
+.cm-selected-line .tok-meta,
+.cm-selected-line .tok-url {
     display: inline;
 }
 

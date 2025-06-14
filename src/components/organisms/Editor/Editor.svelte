@@ -6,6 +6,7 @@
     import { basicSetup } from "codemirror";
     import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
     import { classHighlighter, tags } from "@lezer/highlight";
+    import { selectedLinePlugin } from "./SelectedLinePlugin";
     import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
@@ -34,6 +35,7 @@
                 markdown(),
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
+                selectedLinePlugin(),
                 EditorView.lineWrapping,
                 EditorView.updateListener.of((update) => {
                     if (update.docChanged) {
