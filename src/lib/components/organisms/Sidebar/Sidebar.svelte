@@ -81,12 +81,14 @@
 
         padding: 1em;
         background-color: var(--background-dark-light);
+        overflow: hidden;
     }
 
     .sidebar-content {
         display: flex;
         flex-direction: column;
         gap: 0.8em;
+        overflow: auto;
     }
 
     .empty-state {
