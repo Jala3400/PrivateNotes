@@ -2,6 +2,20 @@
 pub struct AppState {
     key: Option<[u8; 32]>,
     path: Option<String>,
+    opened_folders: Vec<OpenedFolder>,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct OpenedFolder {
+    pub name: String,
+    pub path: String,
+    pub notes: Vec<NoteInfo>,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct NoteInfo {
+    pub name: String,
+    pub path: String,
 }
 
 impl AppState {
@@ -28,4 +42,22 @@ impl AppState {
     pub fn get_path(&self) -> Option<String> {
         self.path.clone()
     }
+
+    pub fn add_opened_folder(&mut self, folder: OpenedFolder) {
+        // Remove if already exists to avoid duplicates
+        self.opened_folders.retain(|f| f.path != folder.path);
+        self.opened_folders.push(folder);
+    }
+
+    pub fn remove_opened_folder(&mut self, folder_path: &str) {
+        self.opened_folders.retain(|f| f.path != folder_path);
+    }
+
+    pub fn get_opened_folders(&self) -> Vec<OpenedFolder> {
+        self.opened_folders.clone()
+    }
+
+    // pub fn clear_opened_folders(&mut self) {
+    //     self.opened_folders.clear();
+    // }
 }

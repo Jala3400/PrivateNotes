@@ -7,9 +7,9 @@ mod notes;
 mod state;
 
 use encryption::derive_encryption_key;
+use file_operations::{close_folder, drop_handler, get_opened_folders, open_note_from_folder};
+use notes::save_encrypted_note;
 use state::AppState;
-
-use crate::{file_operations::drop_handler, notes::save_encrypted_note};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -31,7 +31,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             derive_encryption_key,
-            save_encrypted_note
+            save_encrypted_note,
+            get_opened_folders,
+            close_folder,
+            open_note_from_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

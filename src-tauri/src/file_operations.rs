@@ -1,7 +1,7 @@
 use crate::{
     encryption::{decrypt_data, encrypt_data},
     notes::open_encrypted_note,
-    state::AppState,
+    state::{AppState, NoteInfo, OpenedFolder},
 };
 use std::{path::PathBuf, sync::Mutex};
 use tauri::{Emitter, Manager, State, Window};
@@ -12,7 +12,12 @@ pub fn drop_handler(window: &Window, event: &tauri::DragDropEvent) -> Result<(),
         // Handle file drops
         tauri::DragDropEvent::Drop { paths, .. } => {
             for path in paths {
-                open_from_path(path, window)?;
+                // Check if it's a folder that can be opened
+                if path.is_dir() && can_open_folder(path) {
+                    open_folder(path, window)?;
+                } else {
+                    open_from_path(path, window)?;
+                }
             }
         }
         _ => {}
@@ -349,4 +354,121 @@ pub fn decrypt_folder_recursive(
     }
 
     Ok(())
+}
+
+/// Checks if a folder can be opened (contains a .lockd folder)
+pub fn can_open_folder(folder_path: &PathBuf) -> bool {
+    let lockd_folder = folder_path.join(".lockd");
+    lockd_folder.exists() && lockd_folder.is_dir()
+}
+
+/// Opens a folder and loads its notes into the sidebar
+pub fn open_folder(folder_path: &PathBuf, window: &Window) -> Result<(), String> {
+    let app_state = window.state::<Mutex<AppState>>();
+
+    // Get folder name
+    let folder_name = folder_path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("Unknown Folder")
+        .to_string();
+
+    let folder_path_str = folder_path
+        .to_str()
+        .ok_or("Invalid folder path encoding")?
+        .to_string();
+
+    // Scan for notes in the folder
+    let notes = scan_folder_for_notes(folder_path)?;
+
+    let opened_folder = OpenedFolder {
+        name: folder_name,
+        path: folder_path_str,
+        notes,
+    };
+
+    // Add to app state
+    app_state
+        .lock()
+        .unwrap()
+        .add_opened_folder(opened_folder.clone());
+
+    // Emit event to frontend
+    window
+        .emit("folder-opened", opened_folder)
+        .map_err(|e| format!("Failed to emit folder-opened event: {}", e))?;
+
+    Ok(())
+}
+
+/// Scans a folder for .lockd note files
+fn scan_folder_for_notes(folder_path: &PathBuf) -> Result<Vec<NoteInfo>, String> {
+    let mut notes = Vec::new();
+
+    let entries = std::fs::read_dir(folder_path)
+        .map_err(|e| format!("Failed to read directory {}: {}", folder_path.display(), e))?;
+
+    for entry in entries {
+        let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
+        let path = entry.path();
+
+        // Check if it's a .lockd file (note)
+        if path.is_file() {
+            if let Some(extension) = path.extension() {
+                if extension == "lockd" {
+                    // Check if it's a note (single extension, not double like file.txt.lockd)
+                    let file_stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                    if !PathBuf::from(file_stem).extension().is_some() {
+                        let note_name = file_stem.to_string();
+                        let note_path = path.to_str().unwrap_or("").to_string();
+
+                        notes.push(NoteInfo {
+                            name: note_name,
+                            path: note_path,
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    // Sort notes by name
+    notes.sort_by(|a, b| a.name.cmp(&b.name));
+
+    Ok(notes)
+}
+
+/// Tauri command to get opened folders
+#[tauri::command]
+pub fn get_opened_folders(app_state: State<Mutex<AppState>>) -> Result<Vec<OpenedFolder>, String> {
+    let state = app_state.lock().unwrap();
+    Ok(state.get_opened_folders())
+}
+
+/// Tauri command to close a folder
+#[tauri::command]
+pub fn close_folder(
+    folder_path: String,
+    app_state: State<Mutex<AppState>>,
+    window: Window,
+) -> Result<(), String> {
+    app_state.lock().unwrap().remove_opened_folder(&folder_path);
+
+    // Emit event to frontend
+    window
+        .emit("folder-closed", folder_path)
+        .map_err(|e| format!("Failed to emit folder-closed event: {}", e))?;
+
+    Ok(())
+}
+
+/// Tauri command to open a note from a folder
+#[tauri::command]
+pub fn open_note_from_folder(
+    note_path: String,
+    app_state: State<Mutex<AppState>>,
+    window: Window,
+) -> Result<(), String> {
+    let path = PathBuf::from(&note_path);
+    open_encrypted_note_and_emit(&path, &window, app_state)
 }
