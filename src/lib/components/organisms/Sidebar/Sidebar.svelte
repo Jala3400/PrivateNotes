@@ -4,6 +4,7 @@
     import { listen, type UnlistenFn } from "@tauri-apps/api/event";
     import type { FileSystemItem } from "$lib/types";
     import Folder from "$lib/components/molecules/Folder.svelte";
+    import { throwCustomError } from "$lib/error";
 
     let openedFolders: FileSystemItem[] = [];
     let unlistenFolderOpened: UnlistenFn;
@@ -14,7 +15,10 @@
         try {
             openedFolders = await invoke("get_opened_folders");
         } catch (error) {
-            console.error("Failed to load opened folders:", error);
+            throwCustomError(
+                "Failed to load opened folders" + String(error),
+                "An error occurred while trying to load the opened folders."
+            );
         }
 
         // Listen for folder events
@@ -41,7 +45,10 @@
         try {
             await invoke("close_folder", { folderPath });
         } catch (error) {
-            console.error("Failed to close folder:", error);
+            throwCustomError(
+                "Failed to close folder" + String(error),
+                "An error occurred while trying to close the folder."
+            );
         }
     }
 
@@ -49,7 +56,10 @@
         try {
             await invoke("open_note_from_folder", { notePath });
         } catch (error) {
-            console.error("Failed to open note:", error);
+            throwCustomError(
+                "Failed to open note" + String(error),
+                "An error occurred while trying to open the note."
+            );
         }
     }
 </script>

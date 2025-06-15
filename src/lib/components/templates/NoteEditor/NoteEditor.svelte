@@ -3,6 +3,7 @@
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
+    import { throwCustomError } from "$lib/error";
 
     let content = $state("");
     let title = $state("");
@@ -29,7 +30,10 @@
                 content: content,
             });
         } catch (error) {
-            console.error("Failed to save note:", error);
+            throwCustomError(
+                "Failed to save note: " + String(error),
+                "An error occurred while trying to save the note."
+            );
         } finally {
             isSaving = false;
         }
@@ -56,7 +60,10 @@
                 content: content,
             });
         } catch (error) {
-            console.error("Failed to save note:", error);
+            throwCustomError(
+                "Failed to save note: " + String(error),
+                "An error occurred while trying to save the note."
+            );
         } finally {
             isSaving = false;
         }
