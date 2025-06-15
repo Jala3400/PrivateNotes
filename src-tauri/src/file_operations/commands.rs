@@ -1,14 +1,16 @@
+use crate::file_operations::note_ops::open_encrypted_note_and_emit;
+use crate::state::FileSystemItem;
 use crate::{encryption::encrypt_data, state::AppState};
-use crate::{file_operations::note_ops::open_encrypted_note_and_emit, state::OpenedFolder};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::State;
-use tauri::{Emitter, Window};
+use tauri::{Emitter, State, Window};
 use tauri_plugin_dialog::DialogExt;
 
 /// Tauri command to get opened folders
 #[tauri::command]
-pub fn get_opened_folders(app_state: State<Mutex<AppState>>) -> Result<Vec<OpenedFolder>, String> {
+pub fn get_opened_folders(
+    app_state: State<Mutex<AppState>>,
+) -> Result<Vec<FileSystemItem>, String> {
     let state = app_state.lock().unwrap();
     Ok(state.get_opened_folders())
 }
@@ -63,7 +65,7 @@ pub fn save_encrypted_note(
         .set_file_name(&format!("{}.lockd", title));
 
     // Set the initial directory to the last saved path if available
-    let file_path = app_state.lock().unwrap().get_path();
+    let file_path = app_state.lock().unwrap().get_last_path();
     if let Some(path) = &file_path {
         let path_buf = std::path::Path::new(path);
         dialog = dialog.set_directory(path_buf.parent().unwrap_or(path_buf));

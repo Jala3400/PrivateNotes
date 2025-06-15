@@ -87,7 +87,7 @@ pub fn open_encrypted_note(
     let decrypted_content = decrypt_data(&key, &file_data)?;
 
     // Save the fiel path
-    app_state.lock().unwrap().set_path(file_path.to_string());
+    app_state.lock().unwrap().set_last_path(file_path.to_string());
 
     Ok(String::from_utf8(decrypted_content).unwrap_or_default())
 }

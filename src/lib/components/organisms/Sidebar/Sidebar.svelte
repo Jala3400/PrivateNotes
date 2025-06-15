@@ -2,10 +2,10 @@
     import { onMount, onDestroy } from "svelte";
     import { invoke } from "@tauri-apps/api/core";
     import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-    import type { OpenedFolder } from "$lib/types";
+    import type { FileSystemItem } from "$lib/types";
     import Folder from "$lib/components/molecules/Folder.svelte";
 
-    let openedFolders: OpenedFolder[] = [];
+    let openedFolders: FileSystemItem[] = [];
     let unlistenFolderOpened: UnlistenFn;
     let unlistenFolderClosed: UnlistenFn;
 
@@ -19,7 +19,7 @@
 
         // Listen for folder events
         unlistenFolderOpened = await listen("folder-opened", (event) => {
-            const folder = event.payload as OpenedFolder;
+            const folder = event.payload as FileSystemItem;
             // Remove existing folder with same path and add new one
             openedFolders = openedFolders.filter((f) => f.path !== folder.path);
             openedFolders.push(folder);

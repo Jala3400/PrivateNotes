@@ -1,14 +1,3 @@
-export interface OpenedFolder {
-    name: string;
-    path: string;
-    file_structure: FileSystemItem[];
-}
-
-export interface NoteInfo {
-    name: string;
-    path: string;
-}
-
 export interface FileSystemItem {
     name: string;
     path: string;

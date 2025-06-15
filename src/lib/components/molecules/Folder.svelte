@@ -1,9 +1,9 @@
 <script lang="ts">
-    import type { OpenedFolder } from "$lib/types";
+    import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
 
     interface Props {
-        folder: OpenedFolder;
+        folder: FileSystemItem;
         closeFolder: (path: string) => void;
         openNote: (path: string) => void;
     }
@@ -31,10 +31,10 @@
 
     {#if !collapsed}
         <div class="file-tree">
-            {#if folder.file_structure.length === 0}
+            {#if !folder.children || folder.children.length === 0}
                 <div class="no-items">No files</div>
             {:else}
-                <DirContents items={folder.file_structure} {openNote} />
+                <DirContents items={folder.children} {openNote} />
             {/if}
         </div>
     {/if}

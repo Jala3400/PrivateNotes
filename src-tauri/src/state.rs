@@ -1,15 +1,8 @@
 #[derive(Default)]
 pub struct AppState {
     key: Option<[u8; 32]>,
-    path: Option<String>,
-    opened_folders: Vec<OpenedFolder>,
-}
-
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-pub struct OpenedFolder {
-    pub name: String,
-    pub path: String,
-    pub file_structure: Vec<FileSystemItem>,
+    last_path: Option<String>,
+    opened_folders: Vec<FileSystemItem>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -44,15 +37,15 @@ impl AppState {
         self.key.ok_or("Log in first")
     }
 
-    pub fn set_path(&mut self, path: String) {
-        self.path = Some(path);
+    pub fn set_last_path(&mut self, path: String) {
+        self.last_path = Some(path);
     }
 
-    pub fn get_path(&self) -> Option<String> {
-        self.path.clone()
+    pub fn get_last_path(&self) -> Option<String> {
+        self.last_path.clone()
     }
 
-    pub fn add_opened_folder(&mut self, folder: OpenedFolder) {
+    pub fn add_opened_folder(&mut self, folder: FileSystemItem) {
         // Remove if already exists to avoid duplicates
         self.opened_folders.retain(|f| f.path != folder.path);
         self.opened_folders.push(folder);
@@ -62,7 +55,7 @@ impl AppState {
         self.opened_folders.retain(|f| f.path != folder_path);
     }
 
-    pub fn get_opened_folders(&self) -> Vec<OpenedFolder> {
+    pub fn get_opened_folders(&self) -> Vec<FileSystemItem> {
         self.opened_folders.clone()
     }
 

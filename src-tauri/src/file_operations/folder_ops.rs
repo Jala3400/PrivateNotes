@@ -1,4 +1,4 @@
-use crate::state::{AppState, FileSystemItem, OpenedFolder};
+use crate::state::{AppState, FileSystemItem};
 use std::{path::PathBuf, sync::Mutex};
 use tauri::{Emitter, Manager, Window};
 
@@ -27,10 +27,12 @@ pub fn open_folder(folder_path: &PathBuf, window: &Window) -> Result<(), String>
     // Scan for complete file structure
     let file_structure = scan_directory_structure(folder_path)?;
 
-    let opened_folder = OpenedFolder {
+    let opened_folder = FileSystemItem {
         name: folder_name,
         path: folder_path_str,
-        file_structure,
+        is_directory: true,
+        is_note: false,
+        children: Some(file_structure),
     };
 
     // Add to app state
