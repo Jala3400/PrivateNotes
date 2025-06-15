@@ -45,14 +45,14 @@ impl AppState {
         self.path.clone()
     }
 
-    pub fn add_opened_folder(&mut self, folder: FileSystemItem) {
+    pub fn add_opened_item(&mut self, item: FileSystemItem) {
         // Remove if already exists to avoid duplicates
-        self.opened_folders.retain(|f| f.path != folder.path);
-        self.opened_folders.push(folder);
+        self.opened_folders.retain(|f| f.path != item.path);
+        self.opened_folders.push(item);
     }
 
-    pub fn remove_opened_folder(&mut self, folder_path: &str) {
-        self.opened_folders.retain(|f| f.path != folder_path);
+    pub fn remove_opened_item(&mut self, item_path: &str) {
+        self.opened_folders.retain(|f| f.path != item_path);
     }
 
     pub fn get_opened_folders(&self) -> Vec<FileSystemItem> {

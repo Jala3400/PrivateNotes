@@ -6,14 +6,14 @@
     import Folder from "$lib/components/molecules/Folder.svelte";
     import { throwCustomError } from "$lib/error";
 
-    let openedFolders: FileSystemItem[] = [];
+    let openedItems: FileSystemItem[] = [];
     let unlistenFolderOpened: UnlistenFn;
     let unlistenFolderClosed: UnlistenFn;
 
     onMount(async () => {
         // Load initial opened folders
         try {
-            openedFolders = await invoke("get_opened_folders");
+            openedItems = await invoke("get_opened_folders");
         } catch (error) {
             throwCustomError(
                 "Failed to load opened folders" + String(error),
@@ -22,17 +22,17 @@
         }
 
         // Listen for folder events
-        unlistenFolderOpened = await listen("folder-opened", (event) => {
+        unlistenFolderOpened = await listen("item-opened", (event) => {
             const folder = event.payload as FileSystemItem;
             // Remove existing folder with same path and add new one
-            openedFolders = openedFolders.filter((f) => f.path !== folder.path);
-            openedFolders.push(folder);
-            openedFolders.sort((a, b) => a.name.localeCompare(b.name));
+            openedItems = openedItems.filter((f) => f.path !== folder.path);
+            openedItems.push(folder);
+            openedItems.sort((a, b) => a.name.localeCompare(b.name));
         });
 
         unlistenFolderClosed = await listen("folder-closed", (event) => {
             const folderPath = event.payload;
-            openedFolders = openedFolders.filter((f) => f.path !== folderPath);
+            openedItems = openedItems.filter((f) => f.path !== folderPath);
         });
     });
 
@@ -70,13 +70,13 @@
     </div>
 
     <div class="sidebar-content">
-        {#if openedFolders.length === 0}
+        {#if openedItems.length === 0}
             <div class="empty-state">
                 <p>No folders opened</p>
                 <small>Drop a folder with a .lockd directory to open it</small>
             </div>
         {:else}
-            {#each openedFolders as folder}
+            {#each openedItems as folder}
                 <Folder {folder} {closeFolder} {openNote} />
             {/each}
         {/if}

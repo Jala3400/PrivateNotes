@@ -1,4 +1,4 @@
-use crate::file_operations::note_ops::open_encrypted_note_and_emit;
+use crate::file_operations::note_ops::open_note_and_emit;
 use crate::state::FileSystemItem;
 use crate::{encryption::encrypt_data, state::AppState};
 use std::path::PathBuf;
@@ -22,7 +22,7 @@ pub fn close_folder(
     app_state: State<Mutex<AppState>>,
     window: Window,
 ) -> Result<(), String> {
-    app_state.lock().unwrap().remove_opened_folder(&folder_path);
+    app_state.lock().unwrap().remove_opened_item(&folder_path);
 
     // Emit event to frontend
     window
@@ -40,7 +40,7 @@ pub fn open_note_from_folder(
     window: Window,
 ) -> Result<(), String> {
     let path = PathBuf::from(&note_path);
-    open_encrypted_note_and_emit(&path, &window, app_state)
+    open_note_and_emit(&path, &window, &app_state)
 }
 
 #[tauri::command]

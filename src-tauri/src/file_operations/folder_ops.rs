@@ -33,12 +33,12 @@ pub fn open_folder(folder_path: &PathBuf, window: &Window) -> Result<(), String>
     app_state
         .lock()
         .unwrap()
-        .add_opened_folder(opened_folder.clone());
+        .add_opened_item(opened_folder.clone());
 
     // Emit event to frontend
     window
-        .emit("folder-opened", opened_folder)
-        .map_err(|e| format!("Failed to emit folder-opened event: {}", e))?;
+        .emit("item-opened", opened_folder)
+        .map_err(|e| format!("Failed to emit item-opened event: {}", e))?;
 
     Ok(())
 }

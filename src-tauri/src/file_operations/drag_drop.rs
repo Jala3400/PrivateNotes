@@ -1,7 +1,7 @@
 use crate::{
     file_operations::{
         encryption_ops::handle_path, folder_ops::open_folder,
-        note_ops::open_encrypted_note_and_emit,
+        note_ops::open_dropped_note,
     },
     state::AppState,
 };
@@ -58,7 +58,7 @@ pub fn open_from_path(path: &PathBuf, window: &Window) -> Result<(), String> {
         open_folder(path, window)
     } else if path.is_file() {
         // If it's a file, check if it's a .lockd file
-        open_encrypted_note_and_emit(path, window, window.state::<Mutex<AppState>>())
+        open_dropped_note(path, window, window.state::<Mutex<AppState>>())
     } else {
         Err("Invalid path".to_string())
     }

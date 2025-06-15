@@ -1,22 +1,59 @@
-use crate::{encryption::decrypt_data, state::AppState};
+use crate::{
+    encryption::decrypt_data,
+    state::{AppState, FileSystemItem},
+};
 use std::{path::PathBuf, sync::Mutex};
 use tauri::{Emitter, State, Window};
 
 /// Opens an encrypted note and emits the content to the frontend
-pub fn open_encrypted_note_and_emit(
+pub fn open_dropped_note(
     file_path: &PathBuf,
     window: &Window,
     app_state: State<Mutex<AppState>>,
 ) -> Result<(), String> {
+    // Open the note and emit its content
+    open_note_and_emit(file_path, window, &app_state)?;
+
+    // Create a FileSystemItem for the current note
+    let current_note = FileSystemItem {
+        name: file_path
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("Unknown Note")
+            .to_string(),
+        path: file_path.to_string_lossy().to_string(),
+        is_directory: false,
+        is_note: true,
+        children: None,
+    };
+
+    // Add the opened note to the app state
+    app_state
+        .lock()
+        .unwrap()
+        .add_opened_item(current_note.clone());
+
+    window
+        .emit("item-opened", current_note)
+        .map_err(|e| format!("Failed to emit event: {}", e))
+}
+
+/// Opens a note without adding items
+pub fn open_note_and_emit(
+    file_path: &PathBuf,
+    window: &Window,
+    app_state: &State<Mutex<AppState>>,
+) -> Result<(), String> {
     let file_path_str = file_path.to_str().ok_or("Invalid file path encoding")?;
 
-    // Save the fiel path
+    // Save the file path
     app_state
         .lock()
         .unwrap()
         .set_path(file_path_str.to_string());
 
-    let content = open_encrypted_note(file_path_str, app_state)?;
+    // Decrypt the note
+    let content = open_encrypted_note(file_path_str, &app_state)?;
 
     let title = file_path
         .file_stem()
@@ -25,13 +62,15 @@ pub fn open_encrypted_note_and_emit(
 
     window
         .emit("note-opened", (title, content))
-        .map_err(|e| format!("Failed to emit event: {}", e))
+        .map_err(|e| format!("Failed to emit event: {}", e))?;
+
+    Ok(())
 }
 
 /// Opens an encrypted note from the specified file path and returns its decrypted content.
 pub fn open_encrypted_note(
     file_path: &str,
-    app_state: State<Mutex<AppState>>,
+    app_state: &State<Mutex<AppState>>,
 ) -> Result<String, String> {
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
