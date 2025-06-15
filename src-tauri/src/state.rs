@@ -1,7 +1,7 @@
 #[derive(Default)]
 pub struct AppState {
     key: Option<[u8; 32]>,
-    last_path: Option<String>,
+    path: Option<String>,
     opened_folders: Vec<FileSystemItem>,
 }
 
@@ -37,12 +37,12 @@ impl AppState {
         self.key.ok_or("Log in first")
     }
 
-    pub fn set_last_path(&mut self, path: String) {
-        self.last_path = Some(path);
+    pub fn set_path(&mut self, path: String) {
+        self.path = Some(path);
     }
 
-    pub fn get_last_path(&self) -> Option<String> {
-        self.last_path.clone()
+    pub fn get_path(&self) -> Option<String> {
+        self.path.clone()
     }
 
     pub fn add_opened_folder(&mut self, folder: FileSystemItem) {

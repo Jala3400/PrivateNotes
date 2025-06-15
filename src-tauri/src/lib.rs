@@ -6,7 +6,7 @@ mod file_operations;
 mod state;
 
 use crate::file_operations::{
-    commands::{close_folder, get_opened_folders, open_note_from_folder, save_encrypted_note},
+    commands::{close_folder, get_opened_folders, open_note_from_folder, save_note, save_note_as},
     drag_drop::drop_handler,
 };
 use encryption::derive_encryption_key;
@@ -32,7 +32,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             derive_encryption_key,
-            save_encrypted_note,
+            save_note,
+            save_note_as,
             get_opened_folders,
             close_folder,
             open_note_from_folder

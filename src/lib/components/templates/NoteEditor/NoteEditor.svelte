@@ -25,7 +25,33 @@
 
         // Call the Tauri command to save the note
         try {
-            await invoke("save_encrypted_note", {
+            await invoke("save_note", {
+                content: content,
+            });
+        } catch (error) {
+            console.error("Failed to save note:", error);
+        } finally {
+            isSaving = false;
+        }
+    }
+
+    async function saveNoteAs() {
+        let tempTitle = title;
+        if (title.trim().length === 0) {
+            tempTitle = "Untitled Note";
+        }
+
+        // Prevent multiple save operations
+        if (isSaving) {
+            console.warn("Save operation already in progress");
+            return;
+        }
+
+        isSaving = true;
+
+        // Call the Tauri command to save the note
+        try {
+            await invoke("save_note_as", {
                 title: tempTitle,
                 content: content,
             });
@@ -41,6 +67,9 @@
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
             saveNote();
+        } else if (event.ctrlKey && event.key === "g") {
+            event.preventDefault();
+            saveNoteAs();
         }
     }
 
