@@ -1,7 +1,6 @@
 use crate::{
     file_operations::{
-        encryption_ops::handle_path, folder_ops::open_folder,
-        note_ops::open_dropped_note,
+        encryption_ops::handle_path, folder_ops::open_folder, note_ops::open_dropped_note,
     },
     state::AppState,
 };
@@ -49,6 +48,7 @@ pub fn can_open_file(file_path: &PathBuf) -> bool {
 
     // Check if file has double extension (e.g., "document.txt.lockd")
     PathBuf::from(file_stem).extension().is_none()
+        && file_path.extension() == Some("lockd".as_ref())
 }
 
 /// Opens a file or folder based on its path
