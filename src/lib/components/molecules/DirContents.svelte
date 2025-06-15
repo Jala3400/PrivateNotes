@@ -10,7 +10,7 @@
 </script>
 
 {#each items || [] as child}
-    <div class="tree-item" >
+    <div class="tree-item">
         {#if child.is_directory}
             <Directory item={child} {openNote} />
         {:else}
@@ -36,11 +36,12 @@
         display: flex;
         align-items: center;
         gap: 0.3em;
-        padding: 0.2em 0.3em;
+        padding: var(--file-item-padding);
         border-radius: var(--border-radius-small);
         font-size: 0.85em;
         color: var(--text-secondary);
         width: 100%;
+        padding-left: var(--folder-indicator-width);
         text-align: left;
         background: none;
         border: none;

@@ -9,17 +9,17 @@
 
     let { item, openNote }: Props = $props();
 
-    let isOpen = $state(false);
+    let collapsed = $state(true);
 </script>
 
 <div class="directory">
-    <button class="directory-toggle" onclick={() => (isOpen = !isOpen)}>
+    <button class="directory-toggle" onclick={() => (collapsed = !collapsed)}>
         <span class="expand-icon">
-            {isOpen ? "▼" : "▶"}
+            {collapsed ? "▶" : "▼"}
         </span>
         <span class="item-name">{item.name}</span>
     </button>
-    {#if isOpen}
+    {#if !collapsed}
         <div class="dir-contents">
             <DirContents items={item.children || []} {openNote} />
         </div>
@@ -29,7 +29,7 @@
 <style>
     .expand-icon {
         font-size: 0.7em;
-        width: 12px;
+        width: var(--folder-indicator-width);
         text-align: center;
     }
 
@@ -51,8 +51,6 @@
     }
 
     .dir-contents {
-        padding-left: 0.5em;
         margin-left: 0.5em;
-        border-left: 1px solid var(--background-dark-lighter);
     }
 </style>

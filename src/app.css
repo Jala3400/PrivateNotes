@@ -24,6 +24,9 @@
     --transition: 0.15s;
 
     --font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+
+    --folder-indicator-width: 12px;
+    --file-item-padding: 0.2em 0.3em;
 }
 
 * {
