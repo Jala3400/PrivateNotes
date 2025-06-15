@@ -1,9 +1,35 @@
 use crate::encryption::{decrypt_data, encrypt_data};
-use std::path::PathBuf;
-use tauri::State;
-use tauri_plugin_dialog::DialogExt;
 use crate::state::AppState;
+use std::path::PathBuf;
 use std::sync::Mutex;
+use tauri::{Manager, State, Window};
+use tauri_plugin_dialog::DialogExt;
+
+/// Opens a file from the given path, handling both encrypted and non-encrypted files.
+pub fn handle_path(file_path: &PathBuf, window: &Window) -> Result<(), String> {
+    let app_state = window.state::<Mutex<AppState>>();
+    let app_handle = window.app_handle();
+
+    // Cache the extension check
+    let is_lockd = file_path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map_or(false, |ext| ext == "lockd");
+
+    match (is_lockd, file_path.is_dir()) {
+        // .lockd directory - decrypt folder
+        (true, true) => decrypt_folder(file_path, app_state, app_handle),
+
+        // .lockd file - decrypt
+        (true, false) => decrypt_file(file_path, app_state, app_handle),
+
+        // Regular directory - encrypt folder
+        (false, true) => encrypt_folder(file_path, app_state, app_handle),
+
+        // Regular file - encrypt file
+        (false, false) => encrypt_file(file_path, app_state, app_handle),
+    }
+}
 
 /// Encrypts a file at the given path and saves it with a .lockd extension.
 pub fn encrypt_file(

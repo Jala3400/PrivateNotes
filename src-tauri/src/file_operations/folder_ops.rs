@@ -2,12 +2,6 @@ use crate::state::{AppState, FileSystemItem};
 use std::{path::PathBuf, sync::Mutex};
 use tauri::{Emitter, Manager, Window};
 
-/// Checks if a folder can be opened (contains a .lockd folder)
-pub fn can_open_folder(folder_path: &PathBuf) -> bool {
-    let lockd_folder = folder_path.join(".lockd");
-    lockd_folder.exists() && lockd_folder.is_dir()
-}
-
 /// Opens a folder and loads its file structure into the sidebar
 pub fn open_folder(folder_path: &PathBuf, window: &Window) -> Result<(), String> {
     let app_state = window.state::<Mutex<AppState>>();
