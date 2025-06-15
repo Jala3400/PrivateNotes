@@ -10,20 +10,23 @@
 </script>
 
 {#each items || [] as child}
-    <div class="tree-item">
-        {#if child.is_directory}
-            <Directory item={child} {openNote} />
-        {:else}
-            <button
-                class="file-item"
-                class:note-file={child.is_note}
-                onclick={() => (child.is_note ? openNote(child.path) : null)}
-                disabled={!child.is_note}
-            >
-                <span class="item-name">{child.name}</span>
-            </button>
-        {/if}
-    </div>
+    {#if !(child.is_directory && child.name.startsWith("."))}
+        <div class="tree-item">
+            {#if child.is_directory}
+                <Directory item={child} {openNote} />
+            {:else}
+                <button
+                    class="file-item"
+                    class:note-file={child.is_note}
+                    onclick={() =>
+                        child.is_note ? openNote(child.path) : null}
+                    disabled={!child.is_note}
+                >
+                    <span class="item-name">{child.name}</span>
+                </button>
+            {/if}
+        </div>
+    {/if}
 {/each}
 
 <style>
