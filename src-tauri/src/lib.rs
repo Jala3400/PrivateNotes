@@ -3,12 +3,13 @@ use tauri::{Emitter, Manager, WindowEvent};
 
 mod encryption;
 mod file_operations;
-mod notes;
 mod state;
 
+use crate::file_operations::{
+    commands::{close_folder, get_opened_folders, open_note_from_folder, save_encrypted_note},
+    drag_drop::drop_handler,
+};
 use encryption::derive_encryption_key;
-use file_operations::{close_folder, drop_handler, get_opened_folders, open_note_from_folder};
-use notes::save_encrypted_note;
 use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

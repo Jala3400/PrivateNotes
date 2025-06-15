@@ -1,10 +1,45 @@
-use crate::{
-    encryption::{decrypt_data, encrypt_data},
-    state::AppState,
-};
+use crate::{encryption::encrypt_data, state::AppState};
+use crate::{file_operations::note_ops::open_encrypted_note_and_emit, state::OpenedFolder};
+use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
+use tauri::{Emitter, Window};
 use tauri_plugin_dialog::DialogExt;
+
+/// Tauri command to get opened folders
+#[tauri::command]
+pub fn get_opened_folders(app_state: State<Mutex<AppState>>) -> Result<Vec<OpenedFolder>, String> {
+    let state = app_state.lock().unwrap();
+    Ok(state.get_opened_folders())
+}
+
+/// Tauri command to close a folder
+#[tauri::command]
+pub fn close_folder(
+    folder_path: String,
+    app_state: State<Mutex<AppState>>,
+    window: Window,
+) -> Result<(), String> {
+    app_state.lock().unwrap().remove_opened_folder(&folder_path);
+
+    // Emit event to frontend
+    window
+        .emit("folder-closed", folder_path)
+        .map_err(|e| format!("Failed to emit folder-closed event: {}", e))?;
+
+    Ok(())
+}
+
+/// Tauri command to open a note from a folder
+#[tauri::command]
+pub fn open_note_from_folder(
+    note_path: String,
+    app_state: State<Mutex<AppState>>,
+    window: Window,
+) -> Result<(), String> {
+    let path = PathBuf::from(&note_path);
+    open_encrypted_note_and_emit(&path, &window, app_state)
+}
 
 #[tauri::command]
 /// Encrypts a note and saves it to a file with the specified title.
@@ -46,24 +81,4 @@ pub fn save_encrypted_note(
     }
 
     Ok(())
-}
-
-/// Opens an encrypted note from the specified file path and returns its decrypted content.
-pub fn open_encrypted_note(
-    file_path: &str,
-    app_state: State<Mutex<AppState>>,
-) -> Result<String, String> {
-    // Get the encryption key
-    let key = app_state.lock().unwrap().get_encryption_key()?;
-
-    // Read the file content
-    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
-
-    // Decrypt the content
-    let decrypted_content = decrypt_data(&key, &file_data)?;
-
-    // Save the fiel path
-    app_state.lock().unwrap().set_path(file_path.to_string());
-
-    Ok(String::from_utf8(decrypted_content).unwrap_or_default())
 }
