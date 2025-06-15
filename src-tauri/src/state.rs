@@ -9,13 +9,22 @@ pub struct AppState {
 pub struct OpenedFolder {
     pub name: String,
     pub path: String,
-    pub notes: Vec<NoteInfo>,
+    pub file_structure: Vec<FileSystemItem>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct NoteInfo {
     pub name: String,
     pub path: String,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct FileSystemItem {
+    pub name: String,
+    pub path: String,
+    pub is_directory: bool,
+    pub is_note: bool,
+    pub children: Option<Vec<FileSystemItem>>,
 }
 
 impl AppState {

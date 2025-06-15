@@ -3,6 +3,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import { listen, type UnlistenFn } from "@tauri-apps/api/event";
     import type { OpenedFolder } from "$lib/types";
+    import Folder from "$lib/components/molecules/Folder.svelte";
 
     let openedFolders: OpenedFolder[] = [];
     let unlistenFolderOpened: UnlistenFn;
@@ -66,37 +67,7 @@
             </div>
         {:else}
             {#each openedFolders as folder}
-                <div class="folder-item">
-                    <div class="folder-header">
-                        <div class="folder-info">
-                            <span class="folder-icon">></span>
-                            <span class="folder-name">{folder.name}</span>
-                        </div>
-                        <button
-                            class="close-btn"
-                            on:click={() => closeFolder(folder.path)}
-                            title="Close folder"
-                        >
-                            ✕
-                        </button>
-                    </div>
-
-                    <div class="notes-list">
-                        {#if folder.notes.length === 0}
-                            <div class="no-notes">---</div>
-                        {:else}
-                            {#each folder.notes as note}
-                                <button
-                                    class="note-item"
-                                    on:click={() => openNote(note.path)}
-                                    title="Open note: {note.name}"
-                                >
-                                    <span class="note-name">{note.name}</span>
-                                </button>
-                            {/each}
-                        {/if}
-                    </div>
-                </div>
+                <Folder {folder} {closeFolder} {openNote} />
             {/each}
         {/if}
     </div>
@@ -112,16 +83,6 @@
         background-color: var(--background-dark-light);
     }
 
-    .folder-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5em;
-
-        padding: 0.5em;
-        border-radius: var(--border-radius-medium);
-        background-color: var(--background-dark);
-    }
-
     .sidebar-content {
         display: flex;
         flex-direction: column;
@@ -129,62 +90,6 @@
     }
 
     .empty-state {
-        color: var(--text-secondary);
-    }
-
-    .folder-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .folder-info {
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-    }
-
-    .folder-name {
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-
-    .close-btn {
-        background: none;
-        border: none;
-        color: var(--text-secondary);
-        cursor: pointer;
-        padding: 0.2em;
-    }
-
-    .close-btn:hover {
-        color: var(--text-primary);
-    }
-
-    .notes-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2em;
-        margin-top: 0.5em;
-    }
-
-    .note-item {
-        text-align: left;
-        background: none;
-        border: none;
-        padding: 0.4em 0.6em;
-        border-radius: var(--border-radius-small);
-        cursor: pointer;
-        color: var(--text-secondary);
-    }
-
-    .note-item:hover {
-        background-color: var(--background-dark-lighter);
-        color: var(--text-primary);
-    }
-
-    .no-notes {
-        text-align: center;
         color: var(--text-secondary);
     }
 </style>
