@@ -132,6 +132,7 @@ pub fn encrypt_folder(
             "Select destination for encrypted folder: {}",
             folder_name
         ))
+        .set_directory(folder_path.parent().unwrap_or(folder_path.as_path()))
         .blocking_pick_folder();
 
     let Some(output_path) = output_dir else {
@@ -229,6 +230,7 @@ pub fn decrypt_folder(
             "Select destination for decrypted folder: {}",
             folder_name
         ))
+        .set_directory(folder_path.parent().unwrap_or(folder_path.as_path()))
         .blocking_pick_folder();
 
     let Some(output_path) = output_dir else {
