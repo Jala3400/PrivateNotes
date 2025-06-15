@@ -18,7 +18,7 @@
 
     // It only gives the initial value once
     // svelte-ignore state_referenced_locally
-    let collapsed = $state(children.length > 0);
+    let collapsed = $state(children.length == 0);
 </script>
 
 {#if folder.is_note}
