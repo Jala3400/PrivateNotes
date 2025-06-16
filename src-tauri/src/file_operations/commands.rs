@@ -48,7 +48,7 @@ pub fn save_note_as(
     content: &str,
     app_state: State<Mutex<AppState>>,
     app_handle: tauri::AppHandle,
-) -> Result<(), String> {
+) -> Result<bool, String> {
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
 
@@ -77,9 +77,11 @@ pub fn save_note_as(
     if let Some(path) = file_path {
         std::fs::write(path.as_path().unwrap(), file_data)
             .map_err(|e| format!("Failed to write file: {}", e))?;
+    } else {
+        return Ok(false);
     }
 
-    Ok(())
+    Ok(true)
 }
 
 #[tauri::command]

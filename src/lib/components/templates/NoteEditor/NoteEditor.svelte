@@ -9,6 +9,14 @@
     let title = $state("");
     let isSaving = $state(false);
     let editorKey = $state(Date.now());
+    let showNotification = $state(false);
+
+    function showSaveNotification() {
+        showNotification = true;
+        setTimeout(() => {
+            showNotification = false;
+        }, 2000);
+    }
 
     async function saveNote() {
         let tempTitle = title;
@@ -29,6 +37,9 @@
             await invoke("save_note", {
                 content: content,
             });
+
+            // It always saves the note unless an error occurs
+            showSaveNotification();
         } catch (error) {
             throwCustomError(
                 "Failed to save note: " + String(error),
@@ -55,10 +66,15 @@
 
         // Call the Tauri command to save the note
         try {
-            await invoke("save_note_as", {
-                title: tempTitle,
-                content: content,
-            });
+            if (
+                await invoke("save_note_as", {
+                    title: tempTitle,
+                    content: content,
+                })
+            ) {
+                // The user can cancel the save operation
+                showSaveNotification();
+            }
         } catch (error) {
             throwCustomError(
                 "Failed to save note: " + String(error),
@@ -127,6 +143,10 @@
     </div>
 </div>
 
+{#if showNotification}
+    <div class="notification">Note saved</div>
+{/if}
+
 <style>
     .editor-container {
         display: flex;
@@ -160,5 +180,15 @@
     #note-contents {
         flex: 1;
         overflow: hidden;
+    }
+
+    .notification {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        padding: 4px 8px;
+        background: var(--background-dark-light);
+        border-top-left-radius: var(--border-radius-small);
+        z-index: 1000;
     }
 </style>
