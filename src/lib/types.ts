@@ -1,6 +1,6 @@
 export interface FileSystemItem {
+    id: string;
     name: string;
-    path: string;
     is_directory: boolean;
     is_note: boolean;
     children?: FileSystemItem[];

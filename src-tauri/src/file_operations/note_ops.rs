@@ -14,27 +14,40 @@ pub fn open_dropped_note(
     // Open the note and emit its content
     open_note_and_emit(file_path, window, &app_state)?;
 
+    let file_path_str = file_path
+        .to_str()
+        .ok_or("Invalid file path encoding")?
+        .to_string();
+
+    let id = app_state
+        .lock()
+        .unwrap()
+        .add_path_mapping(file_path_str.clone());
+
     // Create a FileSystemItem for the current note
     let current_note = FileSystemItem {
+        id,
+        parent_id: None, // No parent for single notes
         name: file_path
             .file_name()
             .and_then(|s| s.to_str())
             .unwrap_or("Unknown Note")
             .to_string(),
-        path: file_path.to_string_lossy().to_string(),
+        path: file_path_str,
         is_directory: false,
         is_note: true,
         children: None,
     };
 
-    // Add the opened note to the app state
-    app_state
-        .lock()
-        .unwrap()
-        .add_opened_item(current_note.clone());
+    // Add the opened note to the app state and get frontend version
+    let frontend_note = {
+        let mut state = app_state.lock().unwrap();
+        state.add_opened_item(current_note.clone());
+        state.to_frontend_item(&current_note)
+    };
 
     window
-        .emit("item-opened", current_note)
+        .emit("item-opened", frontend_note)
         .map_err(|e| format!("Failed to emit event: {}", e))
 }
 

@@ -3,6 +3,8 @@ pub struct AppState {
     key: Option<[u8; 32]>,
     path: Option<String>,
     opened_items: Vec<FileSystemItem>,
+    id_to_path_map: std::collections::HashMap<String, String>,
+    next_id: u32,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -12,9 +14,20 @@ pub struct NoteInfo {
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-pub struct FileSystemItem {
+pub struct FileSystemItemFrontend {
+    pub id: String,
     pub name: String,
-    pub path: String,
+    pub is_directory: bool,
+    pub is_note: bool,
+    pub children: Option<Vec<FileSystemItemFrontend>>,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct FileSystemItem {
+    pub id: String,
+    pub parent_id: Option<String>,
+    pub name: String,
+    pub path: String, // Only used internally, not serialized to frontend
     pub is_directory: bool,
     pub is_note: bool,
     pub children: Option<Vec<FileSystemItem>>,
@@ -51,15 +64,65 @@ impl AppState {
         self.opened_items.push(item);
     }
 
-    pub fn remove_opened_item(&mut self, item_path: &str) {
-        self.opened_items.retain(|f| f.path != item_path);
+    pub fn remove_opened_item(&mut self, item_id: &str) {
+        // Remove from opened items and get the index
+        if let Some(index) = self.opened_items.iter().position(|f| f.id == item_id) {
+            // Remove the item from opened items
+            let item = self.opened_items.remove(index);
+
+            // Remove from ID mapping
+            self.remove_from_id_mapping(item_id);
+
+            // If the item has children, remove them from ID mapping as well
+            if let Some(children) = &item.children {
+                for child in children {
+                    self.remove_from_id_mapping(&child.id);
+                }
+            }
+        }
+        println!("Current opened items: {:?}", self.opened_items);
+        println!("Current ID to path mapping: {:?}", self.id_to_path_map);
     }
 
-    pub fn get_opened_items(&self) -> Vec<FileSystemItem> {
-        self.opened_items.clone()
+    pub fn get_opened_items(&self) -> Vec<FileSystemItemFrontend> {
+        self.opened_items
+            .iter()
+            .map(|item| self.to_frontend_item(item))
+            .collect()
     }
 
-    // pub fn clear_opened_items(&mut self) {
-    //     self.opened_items.clear();
-    // }
+    fn generate_id(&mut self) -> String {
+        let id = format!("item_{}", self.next_id);
+        self.next_id += 1;
+        id
+    }
+
+    pub fn add_path_mapping(&mut self, path: String) -> String {
+        let id = self.generate_id();
+        self.id_to_path_map.insert(id.clone(), path);
+        id
+    }
+
+    pub fn get_path_from_id(&self, id: &str) -> Option<String> {
+        self.id_to_path_map.get(id).cloned()
+    }
+
+    pub fn remove_from_id_mapping(&mut self, id: &str) {
+        self.id_to_path_map.remove(id);
+    }
+
+    pub fn to_frontend_item(&self, item: &FileSystemItem) -> FileSystemItemFrontend {
+        FileSystemItemFrontend {
+            id: item.id.clone(),
+            name: item.name.clone(),
+            is_directory: item.is_directory,
+            is_note: item.is_note,
+            children: item.children.as_ref().map(|children| {
+                children
+                    .iter()
+                    .map(|child| self.to_frontend_item(child))
+                    .collect()
+            }),
+        }
+    }
 }

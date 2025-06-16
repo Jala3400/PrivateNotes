@@ -1,19 +1,18 @@
 <script lang="ts">
-    import { currentNotePath } from "$lib/stores/currentNotePath";
+    import { currentNoteId } from "$lib/stores/currentNoteId";
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
 
     interface Props {
         item: FileSystemItem;
-        closeItem: (path: string) => void;
-        openNote: (path: string) => void;
+        closeItem: (id: string) => void;
+        openNote: (id: string) => void;
     }
 
     let { item, closeItem, openNote }: Props = $props();
-
     let children = $derived(
         item.children?.filter((child) => {
-            return !(child.is_directory && child.path.endsWith(".lockd"));
+            return !(child.is_directory && child.name == ".lockd");
         }) || []
     );
 
@@ -24,14 +23,11 @@
 </script>
 
 {#if item.is_note}
-    <div
-        class="item note-file"
-        class:current-note={$currentNotePath === item.path}
-    >
+    <div class="item note-file" class:current-note={$currentNoteId === item.id}>
         <div class="item-header">
             <button
                 class="item-title"
-                onclick={() => openNote(item.path)}
+                onclick={() => openNote(item.id)}
                 title="Open note"
             >
                 <span class="item-name">{item.name}</span>
@@ -40,7 +36,7 @@
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeItem(item.path);
+                    closeItem(item.id);
                 }}
                 title="Close item"
             >
@@ -51,17 +47,14 @@
 {:else}
     <div class="item" class:collapsed>
         <div class="item-header">
-            <button
-                class="item-title"
-                onclick={() => (collapsed = !collapsed)}
-            >
+            <button class="item-title" onclick={() => (collapsed = !collapsed)}>
                 <span class="item-name">{item.name}</span>
             </button>
             <button
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeItem(item.path);
+                    closeItem(item.id);
                 }}
                 title="Close item"
             >

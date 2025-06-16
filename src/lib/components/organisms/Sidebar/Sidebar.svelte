@@ -5,7 +5,7 @@
     import type { FileSystemItem } from "$lib/types";
     import Item from "$lib/components/molecules/Item.svelte";
     import { throwCustomError } from "$lib/error";
-    import { currentNotePath } from "$lib/stores/currentNotePath";
+    import { currentNoteId } from "$lib/stores/currentNoteId";
 
     let openedItems: FileSystemItem[] = [];
     let unlistenItemOpened: UnlistenFn;
@@ -15,6 +15,7 @@
         // Load initial opened items
         try {
             openedItems = await invoke("get_opened_items");
+            console.log("Opened items loaded:", openedItems);
 
             // Sort items: directories first, then files, both sorted alphabetically
             openedItems.sort((a, b) => {
@@ -34,11 +35,11 @@
             const item = event.payload as FileSystemItem;
 
             if (item.is_note) {
-                $currentNotePath = item.path; // Update the current note path store
+                $currentNoteId = item.id; // Update the current note ID store
             }
 
-            // Remove existing item with same path and add new one
-            openedItems = openedItems.filter((f) => f.path !== item.path);
+            // Remove existing item with same ID and add new one
+            openedItems = openedItems.filter((f) => f.id !== item.id);
             openedItems.push(item);
 
             // Sort items: directories first, then files, both sorted alphabetically
@@ -50,8 +51,8 @@
         });
 
         unlistenItemClosed = await listen("item-closed", (event) => {
-            const itemPath = event.payload;
-            openedItems = openedItems.filter((f) => f.path !== itemPath);
+            const itemId = event.payload;
+            openedItems = openedItems.filter((f) => f.id !== itemId);
         });
     });
 
@@ -60,9 +61,9 @@
         if (unlistenItemClosed) unlistenItemClosed();
     });
 
-    async function closeItem(itemPath: string) {
+    async function closeItem(itemId: string) {
         try {
-            await invoke("close_item", { itemPath: itemPath });
+            await invoke("close_item", { itemId: itemId });
         } catch (error) {
             throwCustomError(
                 "Failed to close item" + String(error),
@@ -71,10 +72,10 @@
         }
     }
 
-    async function openNote(notePath: string) {
+    async function openNote(noteId: string) {
         try {
-            await invoke("open_note_from_path", { notePath });
-            $currentNotePath = notePath; // Update the current note path store
+            await invoke("open_note_from_id", { noteId });
+            $currentNoteId = noteId; // Update the current note ID store
         } catch (error) {
             throwCustomError(
                 "Failed to open note" + String(error),

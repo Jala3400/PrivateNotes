@@ -4,7 +4,7 @@
 
     interface Props {
         item: FileSystemItem;
-        openNote: (path: string) => void;
+        openNote: (id: string) => void;
     }
 
     let { item, openNote }: Props = $props();

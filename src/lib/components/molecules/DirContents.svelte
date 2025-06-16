@@ -1,13 +1,14 @@
 <script lang="ts">
     import Directory from "./Directory.svelte";
     import type { FileSystemItem } from "$lib/types";
-    import { currentNotePath } from "$lib/stores/currentNotePath";
+    import { currentNoteId } from "$lib/stores/currentNoteId";
 
     interface Props {
         items: FileSystemItem[];
-        openNote: (path: string) => void;
+        openNote: (id: string) => void;
     }
     let { items, openNote }: Props = $props();
+    console.log("DirContents items:", items);
 </script>
 
 {#each items || [] as child}
@@ -18,8 +19,8 @@
             <button
                 class="file-item"
                 class:note-file={child.is_note}
-                class:current-note={$currentNotePath === child.path}
-                onclick={() => (child.is_note ? openNote(child.path) : null)}
+                class:current-note={$currentNoteId === child.id}
+                onclick={() => (child.is_note ? openNote(child.id) : null)}
                 disabled={!child.is_note}
             >
                 <span class="item-name">{child.name}</span>

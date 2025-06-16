@@ -1,6 +1,6 @@
+use crate::encryption::encrypt_data;
 use crate::file_operations::note_ops::open_note_and_emit;
-use crate::state::FileSystemItem;
-use crate::{encryption::encrypt_data, state::AppState};
+use crate::state::{AppState, FileSystemItemFrontend};
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{Emitter, State, Window};
@@ -8,7 +8,9 @@ use tauri_plugin_dialog::DialogExt;
 
 /// Tauri command to get opened items
 #[tauri::command]
-pub fn get_opened_items(app_state: State<Mutex<AppState>>) -> Result<Vec<FileSystemItem>, String> {
+pub fn get_opened_items(
+    app_state: State<Mutex<AppState>>,
+) -> Result<Vec<FileSystemItemFrontend>, String> {
     let state = app_state.lock().unwrap();
     Ok(state.get_opened_items())
 }
@@ -16,15 +18,15 @@ pub fn get_opened_items(app_state: State<Mutex<AppState>>) -> Result<Vec<FileSys
 /// Tauri command to close a item
 #[tauri::command]
 pub fn close_item(
-    item_path: String,
+    item_id: String,
     app_state: State<Mutex<AppState>>,
     window: Window,
 ) -> Result<(), String> {
-    app_state.lock().unwrap().remove_opened_item(&item_path);
+    app_state.lock().unwrap().remove_opened_item(&item_id);
 
     // Emit event to frontend
     window
-        .emit("item-closed", item_path)
+        .emit("item-closed", item_id)
         .map_err(|e| format!("Failed to emit item-closed event: {}", e))?;
 
     Ok(())
@@ -32,11 +34,17 @@ pub fn close_item(
 
 /// Tauri command to open a note from a item
 #[tauri::command]
-pub fn open_note_from_path(
-    note_path: String,
+pub fn open_note_from_id(
+    note_id: String,
     app_state: State<Mutex<AppState>>,
     window: Window,
 ) -> Result<(), String> {
+    // Get the actual file path from the ID
+    let note_path = {
+        let state = app_state.lock().unwrap();
+        state.get_path_from_id(&note_id).ok_or("Note not found")?
+    };
+
     let path = PathBuf::from(&note_path);
     open_note_and_emit(&path, &window, &app_state)
 }
