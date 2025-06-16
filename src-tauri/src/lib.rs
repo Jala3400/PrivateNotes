@@ -6,7 +6,7 @@ mod file_operations;
 mod state;
 
 use crate::file_operations::{
-    commands::{close_folder, get_opened_folders, open_note_from_folder, save_note, save_note_as},
+    commands::{close_folder, get_opened_items, open_note_from_folder, save_note, save_note_as},
     drag_drop::drop_handler,
 };
 use encryption::derive_encryption_key;
@@ -34,7 +34,7 @@ pub fn run() {
             derive_encryption_key,
             save_note,
             save_note_as,
-            get_opened_folders,
+            get_opened_items,
             close_folder,
             open_note_from_folder
         ])

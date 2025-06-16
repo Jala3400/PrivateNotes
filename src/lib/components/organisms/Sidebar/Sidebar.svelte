@@ -14,7 +14,14 @@
     onMount(async () => {
         // Load initial opened folders
         try {
-            openedItems = await invoke("get_opened_folders");
+            openedItems = await invoke("get_opened_items");
+
+            // Sort items: directories first, then files, both sorted alphabetically
+            openedItems.sort((a, b) => {
+                if (a.is_directory && !b.is_directory) return -1;
+                if (!a.is_directory && b.is_directory) return 1;
+                return a.name.localeCompare(b.name);
+            });
         } catch (error) {
             throwCustomError(
                 "Failed to load opened folders" + String(error),

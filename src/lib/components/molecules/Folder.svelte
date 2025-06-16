@@ -17,9 +17,10 @@
         }) || []
     );
 
-    // It only gives the initial value once
-    // svelte-ignore state_referenced_locally
-    let collapsed = $state(children.length == 0);
+    // It should be collapsed if there are no children
+    // For some reason the derived store doesn't work correctly and
+    // it allows to change the collapsed value
+    let collapsed = $derived(children.length == 0);
 </script>
 
 {#if item.is_note}

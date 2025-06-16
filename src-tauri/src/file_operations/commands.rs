@@ -6,13 +6,11 @@ use std::sync::Mutex;
 use tauri::{Emitter, State, Window};
 use tauri_plugin_dialog::DialogExt;
 
-/// Tauri command to get opened folders
+/// Tauri command to get opened items
 #[tauri::command]
-pub fn get_opened_folders(
-    app_state: State<Mutex<AppState>>,
-) -> Result<Vec<FileSystemItem>, String> {
+pub fn get_opened_items(app_state: State<Mutex<AppState>>) -> Result<Vec<FileSystemItem>, String> {
     let state = app_state.lock().unwrap();
-    Ok(state.get_opened_folders())
+    Ok(state.get_opened_items())
 }
 
 /// Tauri command to close a folder

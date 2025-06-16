@@ -55,7 +55,7 @@ impl AppState {
         self.opened_folders.retain(|f| f.path != item_path);
     }
 
-    pub fn get_opened_folders(&self) -> Vec<FileSystemItem> {
+    pub fn get_opened_items(&self) -> Vec<FileSystemItem> {
         self.opened_folders.clone()
     }
 
