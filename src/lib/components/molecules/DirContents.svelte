@@ -1,6 +1,7 @@
 <script lang="ts">
     import Directory from "./Directory.svelte";
     import type { FileSystemItem } from "$lib/types";
+    import { currentNotePath } from "$lib/stores/currentNotePath";
 
     interface Props {
         items: FileSystemItem[];
@@ -17,6 +18,7 @@
             <button
                 class="file-item"
                 class:note-file={child.is_note}
+                class:current-note={$currentNotePath === child.path}
                 onclick={() => (child.is_note ? openNote(child.path) : null)}
                 disabled={!child.is_note}
             >
@@ -63,6 +65,7 @@
         color: var(--text-secondary);
     }
 
+    /* Notes should be styles different from normal files */
     .file-item.note-file {
         color: var(--main-color);
         cursor: pointer;
@@ -70,6 +73,10 @@
 
     .file-item.note-file:hover {
         color: var(--main-color-light);
+        background-color: var(--background-dark-lighter);
+    }
+
+    .current-note {
         background-color: var(--background-dark-lighter);
     }
 

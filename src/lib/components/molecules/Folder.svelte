@@ -1,17 +1,18 @@
 <script lang="ts">
+    import { currentNotePath } from "$lib/stores/currentNotePath";
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
 
     interface Props {
-        folder: FileSystemItem;
+        item: FileSystemItem;
         closeFolder: (path: string) => void;
         openNote: (path: string) => void;
     }
 
-    let { folder, closeFolder, openNote }: Props = $props();
+    let { item, closeFolder, openNote }: Props = $props();
 
     let children = $derived(
-        folder.children?.filter((child) => {
+        item.children?.filter((child) => {
             return !(child.is_directory && child.path.endsWith(".lockd"));
         }) || []
     );
@@ -21,21 +22,24 @@
     let collapsed = $state(children.length == 0);
 </script>
 
-{#if folder.is_note}
-    <div class="folder-item note-file">
+{#if item.is_note}
+    <div
+        class="folder-item note-file"
+        class:current-note={$currentNotePath === item.path}
+    >
         <div class="folder-header">
             <button
                 class="folder-title"
-                onclick={() => openNote(folder.path)}
+                onclick={() => openNote(item.path)}
                 title="Open note"
             >
-                <span class="folder-name">{folder.name}</span>
+                <span class="folder-name">{item.name}</span>
             </button>
             <button
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeFolder(folder.path);
+                    closeFolder(item.path);
                 }}
                 title="Close folder"
             >
@@ -50,13 +54,13 @@
                 class="folder-title"
                 onclick={() => (collapsed = !collapsed)}
             >
-                <span class="folder-name">{folder.name}</span>
+                <span class="folder-name">{item.name}</span>
             </button>
             <button
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeFolder(folder.path);
+                    closeFolder(item.path);
                 }}
                 title="Close folder"
             >
@@ -64,7 +68,7 @@
             </button>
         </div>
 
-        {#if !collapsed && !folder.is_note}
+        {#if !collapsed && !item.is_note}
             <div class="file-tree">
                 {#if !children || children.length === 0}
                     <div class="no-items">No files</div>
@@ -87,7 +91,12 @@
         background-color: var(--background-dark);
     }
 
+    .current-note {
+        background-color: var(--background-dark-lighter);
+    }
+
     .folder-item.note-file .folder-name {
+        text-align: left;
         color: var(--main-color);
     }
 

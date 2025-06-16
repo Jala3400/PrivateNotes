@@ -5,6 +5,7 @@
     import type { FileSystemItem } from "$lib/types";
     import Folder from "$lib/components/molecules/Folder.svelte";
     import { throwCustomError } from "$lib/error";
+    import { currentNotePath } from "$lib/stores/currentNotePath";
 
     let openedItems: FileSystemItem[] = [];
     let unlistenFolderOpened: UnlistenFn;
@@ -23,10 +24,15 @@
 
         // Listen for folder events
         unlistenFolderOpened = await listen("item-opened", (event) => {
-            const folder = event.payload as FileSystemItem;
+            const item = event.payload as FileSystemItem;
+
+            if (item.is_note) {
+                $currentNotePath = item.path; // Update the current note path store
+            }
+
             // Remove existing folder with same path and add new one
-            openedItems = openedItems.filter((f) => f.path !== folder.path);
-            openedItems.push(folder);
+            openedItems = openedItems.filter((f) => f.path !== item.path);
+            openedItems.push(item);
             openedItems.sort((a, b) => a.name.localeCompare(b.name));
         });
 
@@ -55,6 +61,7 @@
     async function openNote(notePath: string) {
         try {
             await invoke("open_note_from_folder", { notePath });
+            $currentNotePath = notePath; // Update the current note path store
         } catch (error) {
             throwCustomError(
                 "Failed to open note" + String(error),
@@ -77,7 +84,7 @@
             </div>
         {:else}
             {#each openedItems as folder}
-                <Folder {folder} {closeFolder} {openNote} />
+                <Folder item={folder} {closeFolder} {openNote} />
             {/each}
         {/if}
     </div>
