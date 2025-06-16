@@ -33,7 +33,13 @@
             // Remove existing folder with same path and add new one
             openedItems = openedItems.filter((f) => f.path !== item.path);
             openedItems.push(item);
-            openedItems.sort((a, b) => a.name.localeCompare(b.name));
+
+            // Sort items: directories first, then files, both sorted alphabetically
+            openedItems.sort((a, b) => {
+                if (a.is_directory && !b.is_directory) return -1;
+                if (!a.is_directory && b.is_directory) return 1;
+                return a.name.localeCompare(b.name);
+            });
         });
 
         unlistenFolderClosed = await listen("folder-closed", (event) => {
