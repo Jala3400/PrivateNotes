@@ -34,20 +34,28 @@
         unlistenItemOpened = await listen("item-opened", (event) => {
             const item = event.payload as FileSystemItem;
 
-            if (item.is_note) {
-                $currentNoteId = item.id; // Update the current note ID store
+            // Insert the item in the correct position to maintain order
+            const insertIndex = openedItems.findIndex((existingItem) => {
+                // If new item is directory and existing is not, insert before
+                if (item.is_directory && !existingItem.is_directory)
+                    return true;
+                // If new item is not directory and existing is directory, continue
+                if (!item.is_directory && existingItem.is_directory)
+                    return false;
+                // Same type, compare names alphabetically
+                return item.name.localeCompare(existingItem.name) < 0;
+            });
+
+            if (insertIndex === -1) {
+                // Insert at the end if no position found
+                openedItems.push(item);
+            } else {
+                // Insert at the found position
+                openedItems.splice(insertIndex, 0, item);
             }
 
-            // Remove existing item with same ID and add new one
-            openedItems = openedItems.filter((f) => f.id !== item.id);
-            openedItems.push(item);
-
-            // Sort items: directories first, then files, both sorted alphabetically
-            openedItems.sort((a, b) => {
-                if (a.is_directory && !b.is_directory) return -1;
-                if (!a.is_directory && b.is_directory) return 1;
-                return a.name.localeCompare(b.name);
-            });
+            // Trigger reactivity
+            openedItems = openedItems;
         });
 
         unlistenItemClosed = await listen("item-closed", (event) => {

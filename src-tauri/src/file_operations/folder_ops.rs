@@ -1,11 +1,13 @@
 use crate::state::{AppState, FileSystemItem};
 use std::{path::PathBuf, sync::Mutex};
-use tauri::{Emitter, Manager, Window};
+use tauri::{Emitter, Window};
 
-/// Opens a folder and loads its file structure into the sidebar
-pub fn open_folder(folder_path: &PathBuf, window: &Window) -> Result<(), String> {
-    let app_state = window.state::<Mutex<AppState>>();
-
+/// Opens a  folder and loads its file structure into the sidebar
+pub fn open_folder(
+    folder_path: &PathBuf,
+    window: &Window,
+    app_state: tauri::State<Mutex<AppState>>,
+) -> Result<(), String> {
     // Get folder name
     let folder_name = folder_path
         .file_name()
@@ -17,6 +19,16 @@ pub fn open_folder(folder_path: &PathBuf, window: &Window) -> Result<(), String>
         .to_str()
         .ok_or("Invalid folder path encoding")?
         .to_string();
+
+    // Check if the folder is already opened
+    if app_state
+        .lock()
+        .unwrap()
+        .is_opened(folder_path_str.clone())
+        .is_some()
+    {
+        return Ok(()); // Folder already opened
+    }
 
     // Generate ID for the folder and add to mapping
     let folder_id = app_state
@@ -40,7 +52,7 @@ pub fn open_folder(folder_path: &PathBuf, window: &Window) -> Result<(), String>
     // Add to app state
     let frontend_item = {
         let mut state = app_state.lock().unwrap();
-        state.add_opened_item(opened_folder.clone());
+        state.add_opened_item(&opened_folder.clone());
         state.to_frontend_item(&opened_folder)
     };
 

@@ -55,7 +55,7 @@ pub fn can_open_file(file_path: &PathBuf) -> bool {
 pub fn open_from_path(path: &PathBuf, window: &Window) -> Result<(), String> {
     if path.is_dir() {
         // If it's a directory, open it
-        open_folder(path, window)
+        open_folder(path, window, window.state::<Mutex<AppState>>())
     } else if path.is_file() {
         // If it's a file, check if it's a .lockd file
         open_dropped_note(path, window, window.state::<Mutex<AppState>>())

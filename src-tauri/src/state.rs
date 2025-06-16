@@ -58,10 +58,22 @@ impl AppState {
         self.path.clone()
     }
 
-    pub fn add_opened_item(&mut self, item: FileSystemItem) {
-        // Remove if already exists to avoid duplicates
-        self.opened_items.retain(|f| f.path != item.path);
-        self.opened_items.push(item);
+    /// Check if an item is opened by its path
+    /// Returns the ID of the opened item if it exists, otherwise returns None
+    pub fn is_opened(&self, path: String) -> Option<String> {
+        self.opened_items
+            .iter()
+            .find(|f| f.path == path)
+            .map(|item| item.id.clone())
+    }
+
+    pub fn add_opened_item(&mut self, item: &FileSystemItem) -> bool {
+        if self.opened_items.iter().any(|f| f.path == item.path) {
+            // Item already exists, no need to add
+            return false;
+        }
+        self.opened_items.push(item.clone());
+        return true;
     }
 
     pub fn remove_opened_item(&mut self, item_id: &str) {
@@ -80,8 +92,6 @@ impl AppState {
                 }
             }
         }
-        println!("Current opened items: {:?}", self.opened_items);
-        println!("Current ID to path mapping: {:?}", self.id_to_path_map);
     }
 
     pub fn get_opened_items(&self) -> Vec<FileSystemItemFrontend> {

@@ -46,7 +46,7 @@ pub fn open_note_from_id(
     };
 
     let path = PathBuf::from(&note_path);
-    open_note_and_emit(&path, &window, &app_state)
+    open_note_and_emit(note_id, &path, &window, &app_state)
 }
 
 #[tauri::command]

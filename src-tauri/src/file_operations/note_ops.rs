@@ -11,48 +11,65 @@ pub fn open_dropped_note(
     window: &Window,
     app_state: State<Mutex<AppState>>,
 ) -> Result<(), String> {
-    // Open the note and emit its content
-    open_note_and_emit(file_path, window, &app_state)?;
-
     let file_path_str = file_path
         .to_str()
         .ok_or("Invalid file path encoding")?
         .to_string();
 
-    let id = app_state
-        .lock()
-        .unwrap()
-        .add_path_mapping(file_path_str.clone());
+    // Check if the file path is already opened
+    // You cant put this in the if statement because it causes a deadlock
+    let existing_id = app_state.lock().unwrap().is_opened(file_path_str.clone());
 
-    // Create a FileSystemItem for the current note
-    let current_note = FileSystemItem {
-        id,
-        parent_id: None, // No parent for single notes
-        name: file_path
-            .file_name()
-            .and_then(|s| s.to_str())
-            .unwrap_or("Unknown Note")
-            .to_string(),
-        path: file_path_str,
-        is_directory: false,
-        is_note: true,
-        children: None,
+    // Check if the note is already opened
+    let id = if let Some(existing_id) = existing_id {
+        existing_id
+    } else {
+        // If not opened, generate a new ID and add to mapping
+        let id = app_state
+            .lock()
+            .unwrap()
+            .add_path_mapping(file_path_str.clone());
+
+        // Create a FileSystemItem for the current note
+        let current_note = FileSystemItem {
+            id: id.clone(),
+            parent_id: None,
+            name: file_path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .unwrap_or("Unknown Note")
+                .to_string(),
+            path: file_path_str,
+            is_directory: false,
+            is_note: true,
+            children: None,
+        };
+
+        // Add the opened note to the app state
+        {
+            let mut state = app_state.lock().unwrap();
+            state.add_opened_item(&current_note);
+            let frontend_note = state.to_frontend_item(&current_note);
+            drop(state); // Release lock before emit
+
+            // Emit the event to the frontend
+            window
+                .emit("item-opened", frontend_note)
+                .map_err(|e| format!("Failed to emit event: {}", e))?;
+        }
+
+        id
     };
 
-    // Add the opened note to the app state and get frontend version
-    let frontend_note = {
-        let mut state = app_state.lock().unwrap();
-        state.add_opened_item(current_note.clone());
-        state.to_frontend_item(&current_note)
-    };
+    // Open the note and emit the content
+    open_note_and_emit(id, file_path, window, &app_state)?;
 
-    window
-        .emit("item-opened", frontend_note)
-        .map_err(|e| format!("Failed to emit event: {}", e))
+    Ok(())
 }
 
 /// Opens a note without adding items
 pub fn open_note_and_emit(
+    id: String,
     file_path: &PathBuf,
     window: &Window,
     app_state: &State<Mutex<AppState>>,
@@ -74,7 +91,7 @@ pub fn open_note_and_emit(
         .unwrap_or("Untitled");
 
     window
-        .emit("note-opened", (title, content))
+        .emit("note-opened", (title, content, id))
         .map_err(|e| format!("Failed to emit event: {}", e))?;
 
     Ok(())

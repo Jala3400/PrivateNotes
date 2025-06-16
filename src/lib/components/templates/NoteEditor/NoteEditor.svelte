@@ -4,6 +4,7 @@
     import { onDestroy, onMount } from "svelte";
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
     import { throwCustomError } from "$lib/error";
+    import { currentNoteId } from "$lib/stores/currentNoteId";
 
     let content = $state("");
     let title = $state("");
@@ -106,9 +107,10 @@
     onMount(async () => {
         unlisten = await listen("note-opened", (event: NoteOpenedEvent) => {
             // Reset the editor when a note is opened
-            const [noteTitle, noteContent] = event.payload;
+            const [noteTitle, noteContent, noteId] = event.payload;
             title = noteTitle || "";
             content = noteContent || "";
+            $currentNoteId = noteId || "";
 
             // Force editor component to restart by using key
             editorKey = Date.now();
