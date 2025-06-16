@@ -13,26 +13,26 @@ pub fn get_opened_items(app_state: State<Mutex<AppState>>) -> Result<Vec<FileSys
     Ok(state.get_opened_items())
 }
 
-/// Tauri command to close a folder
+/// Tauri command to close a item
 #[tauri::command]
-pub fn close_folder(
-    folder_path: String,
+pub fn close_item(
+    item_path: String,
     app_state: State<Mutex<AppState>>,
     window: Window,
 ) -> Result<(), String> {
-    app_state.lock().unwrap().remove_opened_item(&folder_path);
+    app_state.lock().unwrap().remove_opened_item(&item_path);
 
     // Emit event to frontend
     window
-        .emit("folder-closed", folder_path)
-        .map_err(|e| format!("Failed to emit folder-closed event: {}", e))?;
+        .emit("item-closed", item_path)
+        .map_err(|e| format!("Failed to emit item-closed event: {}", e))?;
 
     Ok(())
 }
 
-/// Tauri command to open a note from a folder
+/// Tauri command to open a note from a item
 #[tauri::command]
-pub fn open_note_from_folder(
+pub fn open_note_from_path(
     note_path: String,
     app_state: State<Mutex<AppState>>,
     window: Window,

@@ -2,7 +2,7 @@
 pub struct AppState {
     key: Option<[u8; 32]>,
     path: Option<String>,
-    opened_folders: Vec<FileSystemItem>,
+    opened_items: Vec<FileSystemItem>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -47,19 +47,19 @@ impl AppState {
 
     pub fn add_opened_item(&mut self, item: FileSystemItem) {
         // Remove if already exists to avoid duplicates
-        self.opened_folders.retain(|f| f.path != item.path);
-        self.opened_folders.push(item);
+        self.opened_items.retain(|f| f.path != item.path);
+        self.opened_items.push(item);
     }
 
     pub fn remove_opened_item(&mut self, item_path: &str) {
-        self.opened_folders.retain(|f| f.path != item_path);
+        self.opened_items.retain(|f| f.path != item_path);
     }
 
     pub fn get_opened_items(&self) -> Vec<FileSystemItem> {
-        self.opened_folders.clone()
+        self.opened_items.clone()
     }
 
-    // pub fn clear_opened_folders(&mut self) {
-    //     self.opened_folders.clear();
+    // pub fn clear_opened_items(&mut self) {
+    //     self.opened_items.clear();
     // }
 }

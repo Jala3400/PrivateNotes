@@ -5,11 +5,11 @@
 
     interface Props {
         item: FileSystemItem;
-        closeFolder: (path: string) => void;
+        closeItem: (path: string) => void;
         openNote: (path: string) => void;
     }
 
-    let { item, closeFolder, openNote }: Props = $props();
+    let { item, closeItem, openNote }: Props = $props();
 
     let children = $derived(
         item.children?.filter((child) => {
@@ -25,45 +25,45 @@
 
 {#if item.is_note}
     <div
-        class="folder-item note-file"
+        class="item note-file"
         class:current-note={$currentNotePath === item.path}
     >
-        <div class="folder-header">
+        <div class="item-header">
             <button
-                class="folder-title"
+                class="item-title"
                 onclick={() => openNote(item.path)}
                 title="Open note"
             >
-                <span class="folder-name">{item.name}</span>
+                <span class="item-name">{item.name}</span>
             </button>
             <button
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeFolder(item.path);
+                    closeItem(item.path);
                 }}
-                title="Close folder"
+                title="Close item"
             >
                 ✕
             </button>
         </div>
     </div>
 {:else}
-    <div class="folder-item" class:collapsed>
-        <div class="folder-header">
+    <div class="item" class:collapsed>
+        <div class="item-header">
             <button
-                class="folder-title"
+                class="item-title"
                 onclick={() => (collapsed = !collapsed)}
             >
-                <span class="folder-name">{item.name}</span>
+                <span class="item-name">{item.name}</span>
             </button>
             <button
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeFolder(item.path);
+                    closeItem(item.path);
                 }}
-                title="Close folder"
+                title="Close item"
             >
                 ✕
             </button>
@@ -82,7 +82,7 @@
 {/if}
 
 <style>
-    .folder-item {
+    .item {
         display: flex;
         flex-direction: column;
         gap: 0.5em;
@@ -96,12 +96,12 @@
         background-color: var(--background-dark-lighter);
     }
 
-    .folder-item.note-file .folder-name {
+    .item.note-file .item-name {
         text-align: left;
         color: var(--main-color);
     }
 
-    .folder-item.note-file:hover .folder-name {
+    .item.note-file:hover .item-name {
         color: var(--main-color-light);
     }
 
@@ -119,14 +119,14 @@
         font-style: italic;
     }
 
-    .folder-header {
+    .item-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
     }
 
-    .folder-title {
+    .item-title {
         display: flex;
         align-items: center;
         gap: 0.5em;
@@ -139,7 +139,7 @@
         flex: 1;
     }
 
-    .folder-name {
+    .item-name {
         font-weight: 500;
         color: var(--text-primary);
     }
@@ -153,7 +153,7 @@
         padding: 0.2em;
     }
 
-    .folder-item:hover .close-btn {
+    .item:hover .close-btn {
         display: block;
     }
 
