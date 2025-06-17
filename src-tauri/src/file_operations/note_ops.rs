@@ -76,12 +76,6 @@ pub fn open_note_and_emit(
 ) -> Result<(), String> {
     let file_path_str = file_path.to_str().ok_or("Invalid file path encoding")?;
 
-    // Save the file path
-    app_state
-        .lock()
-        .unwrap()
-        .set_path(file_path_str.to_string());
-
     // Decrypt the note
     let content = open_encrypted_note(file_path_str, &app_state)?;
 

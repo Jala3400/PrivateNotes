@@ -1,7 +1,6 @@
 #[derive(Default)]
 pub struct AppState {
     key: Option<[u8; 32]>,
-    path: Option<String>,
     opened_items: Vec<FileSystemItem>,
     id_to_path_map: std::collections::HashMap<String, String>,
     next_id: u32,
@@ -48,14 +47,6 @@ impl AppState {
 
     pub fn get_encryption_key(&self) -> Result<[u8; 32], &'static str> {
         self.key.ok_or("Log in first")
-    }
-
-    pub fn set_path(&mut self, path: String) {
-        self.path = Some(path);
-    }
-
-    pub fn get_path(&self) -> Option<String> {
-        self.path.clone()
     }
 
     /// Check if an item is opened by its path

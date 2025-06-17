@@ -36,7 +36,8 @@
         // Call the Tauri command to save the note
         try {
             await invoke("save_note", {
-                content: content,
+                id: $currentNoteId,
+                content,
             });
 
             // It always saves the note unless an error occurs
@@ -51,7 +52,7 @@
         }
     }
 
-    async function saveNoteAs() {
+    async function saveNoteCopy() {
         let tempTitle = title;
         if (title.trim().length === 0) {
             tempTitle = "Untitled Note";
@@ -68,9 +69,10 @@
         // Call the Tauri command to save the note
         try {
             if (
-                await invoke("save_note_as", {
+                await invoke("save_note_copy", {
+                    id: $currentNoteId,
                     title: tempTitle,
-                    content: content,
+                    content,
                 })
             ) {
                 // The user can cancel the save operation
@@ -93,7 +95,7 @@
             saveNote();
         } else if (event.ctrlKey && event.key === "g") {
             event.preventDefault();
-            saveNoteAs();
+            saveNoteCopy();
         }
     }
 

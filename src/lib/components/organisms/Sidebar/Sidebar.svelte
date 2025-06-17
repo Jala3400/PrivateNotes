@@ -69,9 +69,9 @@
         if (unlistenItemClosed) unlistenItemClosed();
     });
 
-    async function closeItem(itemId: string) {
+    async function closeItem(id: string) {
         try {
-            await invoke("close_item", { itemId: itemId });
+            await invoke("close_item", { id });
         } catch (error) {
             throwCustomError(
                 "Failed to close item" + String(error),
@@ -80,10 +80,10 @@
         }
     }
 
-    async function openNote(noteId: string) {
+    async function openNote(id: string) {
         try {
-            await invoke("open_note_from_id", { noteId });
-            $currentNoteId = noteId; // Update the current note ID store
+            await invoke("open_note_from_id", { id });
+            $currentNoteId = id; // Update the current note ID store
         } catch (error) {
             throwCustomError(
                 "Failed to open note" + String(error),

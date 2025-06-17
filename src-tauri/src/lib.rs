@@ -6,7 +6,7 @@ mod file_operations;
 mod state;
 
 use crate::file_operations::{
-    commands::{close_item, get_opened_items, open_note_from_id, save_note, save_note_as},
+    commands::{close_item, get_opened_items, open_note_from_id, save_note, save_note_copy},
     drag_drop::drop_handler,
 };
 use encryption::derive_encryption_key;
@@ -33,7 +33,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             derive_encryption_key,
             save_note,
-            save_note_as,
+            save_note_copy,
             get_opened_items,
             close_item,
             open_note_from_id

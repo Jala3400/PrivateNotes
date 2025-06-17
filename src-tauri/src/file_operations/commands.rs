@@ -18,15 +18,15 @@ pub fn get_opened_items(
 /// Tauri command to close a item
 #[tauri::command]
 pub fn close_item(
-    item_id: String,
+    id: String,
     app_state: State<Mutex<AppState>>,
     window: Window,
 ) -> Result<(), String> {
-    app_state.lock().unwrap().remove_opened_item(&item_id);
+    app_state.lock().unwrap().remove_opened_item(&id);
 
     // Emit event to frontend
     window
-        .emit("item-closed", item_id)
+        .emit("item-closed", id)
         .map_err(|e| format!("Failed to emit item-closed event: {}", e))?;
 
     Ok(())
@@ -35,23 +35,24 @@ pub fn close_item(
 /// Tauri command to open a note from a item
 #[tauri::command]
 pub fn open_note_from_id(
-    note_id: String,
+    id: String,
     app_state: State<Mutex<AppState>>,
     window: Window,
 ) -> Result<(), String> {
     // Get the actual file path from the ID
     let note_path = {
         let state = app_state.lock().unwrap();
-        state.get_path_from_id(&note_id).ok_or("Note not found")?
+        state.get_path_from_id(&id).ok_or("Note not found")?
     };
 
     let path = PathBuf::from(&note_path);
-    open_note_and_emit(note_id, &path, &window, &app_state)
+    open_note_and_emit(id, &path, &window, &app_state)
 }
 
 #[tauri::command]
 /// Encrypts a note and saves it to a file with the specified title.
-pub fn save_note_as(
+pub fn save_note_copy(
+    id: &str,
     title: &str,
     content: &str,
     app_state: State<Mutex<AppState>>,
@@ -71,7 +72,7 @@ pub fn save_note_as(
         .set_file_name(&format!("{}.lockd", title));
 
     // Set the initial directory to the last saved path if available
-    let file_path = app_state.lock().unwrap().get_path();
+    let file_path = app_state.lock().unwrap().get_path_from_id(id);
     if let Some(path) = &file_path {
         let path_buf = std::path::Path::new(path);
         dialog = dialog.set_directory(path_buf.parent().unwrap_or(path_buf));
@@ -94,7 +95,7 @@ pub fn save_note_as(
 
 #[tauri::command]
 /// Encrypts a note and saves it to a given path.
-pub fn save_note(content: &str, app_state: State<Mutex<AppState>>) -> Result<(), String> {
+pub fn save_note(id: &str, content: &str, app_state: State<Mutex<AppState>>) -> Result<(), String> {
     // Get the encryption key
     let key = app_state
         .lock()
@@ -106,7 +107,7 @@ pub fn save_note(content: &str, app_state: State<Mutex<AppState>>) -> Result<(),
     let file_data = encrypt_data(&key, content.as_bytes()).map_err(|e| e.to_string())?;
 
     // Create the path if it doesn't exist
-    let file_path = app_state.lock().unwrap().get_path().unwrap();
+    let file_path = app_state.lock().unwrap().get_path_from_id(id).unwrap();
     let path_buf = PathBuf::from(file_path);
     if let Some(parent) = path_buf.parent() {
         std::fs::create_dir_all(parent)
