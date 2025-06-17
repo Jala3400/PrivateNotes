@@ -40,8 +40,8 @@ pub fn open_folder(
     let file_structure = scan_directory_structure(folder_path, &app_state, &folder_id)?;
 
     let opened_folder = FileSystemItem {
-        id: folder_id,
-        parent_id: None, // No parent for root folders
+        id: folder_id.clone(),
+        parent_id: folder_id, // Parent ID is the same as the folder ID
         name: folder_name,
         path: folder_path_str,
         is_directory: true,
@@ -120,7 +120,7 @@ pub fn scan_directory_structure(
 
         items.push(FileSystemItem {
             id: item_id,
-            parent_id: Some(parent_id.clone()),
+            parent_id: parent_id.clone(),
             name,
             path: path_str,
             is_directory,

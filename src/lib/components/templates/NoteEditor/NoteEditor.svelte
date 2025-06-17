@@ -4,7 +4,7 @@
     import { onDestroy, onMount } from "svelte";
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
     import { throwCustomError } from "$lib/error";
-    import { currentNoteId } from "$lib/stores/currentNoteId";
+    import { currentNote } from "$lib/stores/currentNote";
 
     let content = $state("");
     let title = $state("");
@@ -36,7 +36,7 @@
         // Call the Tauri command to save the note
         try {
             await invoke("save_note", {
-                id: $currentNoteId,
+                id: $currentNote?.id,
                 content,
             });
 
@@ -70,7 +70,7 @@
         try {
             if (
                 await invoke("save_note_copy", {
-                    id: $currentNoteId,
+                    id: $currentNote?.id,
                     title: tempTitle,
                     content,
                 })
@@ -109,10 +109,13 @@
     onMount(async () => {
         unlisten = await listen("note-opened", (event: NoteOpenedEvent) => {
             // Reset the editor when a note is opened
-            const [noteTitle, noteContent, noteId] = event.payload;
+            const [noteTitle, noteContent, noteId, parentId] = event.payload;
             title = noteTitle || "";
             content = noteContent || "";
-            $currentNoteId = noteId || "";
+            $currentNote = {
+                id: noteId,
+                parentId: parentId,
+            };
 
             // Force editor component to restart by using key
             editorKey = Date.now();

@@ -5,7 +5,6 @@
     import type { FileSystemItem } from "$lib/types";
     import Item from "$lib/components/molecules/Item.svelte";
     import { throwCustomError } from "$lib/error";
-    import { currentNoteId } from "$lib/stores/currentNoteId";
 
     let openedItems: FileSystemItem[] = [];
     let unlistenItemOpened: UnlistenFn;
@@ -15,12 +14,11 @@
         // Load initial opened items
         try {
             openedItems = await invoke("get_opened_items");
-            console.log("Opened items loaded:", openedItems);
 
             // Sort items: directories first, then files, both sorted alphabetically
             openedItems.sort((a, b) => {
-                if (a.is_directory && !b.is_directory) return -1;
-                if (!a.is_directory && b.is_directory) return 1;
+                if (a.isDirectory && !b.isDirectory) return -1;
+                if (!a.isDirectory && b.isDirectory) return 1;
                 return a.name.localeCompare(b.name);
             });
         } catch (error) {
@@ -37,11 +35,9 @@
             // Insert the item in the correct position to maintain order
             const insertIndex = openedItems.findIndex((existingItem) => {
                 // If new item is directory and existing is not, insert before
-                if (item.is_directory && !existingItem.is_directory)
-                    return true;
+                if (item.isDirectory && !existingItem.isDirectory) return true;
                 // If new item is not directory and existing is directory, continue
-                if (!item.is_directory && existingItem.is_directory)
-                    return false;
+                if (!item.isDirectory && existingItem.isDirectory) return false;
                 // Same type, compare names alphabetically
                 return item.name.localeCompare(existingItem.name) < 0;
             });
@@ -79,11 +75,9 @@
             );
         }
     }
-
-    async function openNote(id: string) {
+    async function openNote(id: string, parentId: string) {
         try {
-            await invoke("open_note_from_id", { id });
-            $currentNoteId = id; // Update the current note ID store
+            await invoke("open_note_from_id", { id, parentId });
         } catch (error) {
             throwCustomError(
                 "Failed to open note" + String(error),

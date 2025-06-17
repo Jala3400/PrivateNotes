@@ -33,7 +33,7 @@ pub fn open_dropped_note(
         // Create a FileSystemItem for the current note
         let current_note = FileSystemItem {
             id: id.clone(),
-            parent_id: None,
+            parent_id: id.clone(),
             name: file_path
                 .file_name()
                 .and_then(|s| s.to_str())
@@ -62,7 +62,7 @@ pub fn open_dropped_note(
     };
 
     // Open the note and emit the content
-    open_note_and_emit(id, file_path, window, &app_state)?;
+    open_note_and_emit(id.clone(), id, file_path, window, &app_state)?;
 
     Ok(())
 }
@@ -70,6 +70,7 @@ pub fn open_dropped_note(
 /// Opens a note without adding items
 pub fn open_note_and_emit(
     id: String,
+    parent_id: String,
     file_path: &PathBuf,
     window: &Window,
     app_state: &State<Mutex<AppState>>,
@@ -85,7 +86,7 @@ pub fn open_note_and_emit(
         .unwrap_or("Untitled");
 
     window
-        .emit("note-opened", (title, content, id))
+        .emit("note-opened", (title, content, id, parent_id))
         .map_err(|e| format!("Failed to emit event: {}", e))?;
 
     Ok(())

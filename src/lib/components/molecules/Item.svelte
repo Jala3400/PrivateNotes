@@ -1,18 +1,18 @@
 <script lang="ts">
-    import { currentNoteId } from "$lib/stores/currentNoteId";
+    import { currentNote } from "$lib/stores/currentNote";
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
 
     interface Props {
         item: FileSystemItem;
-        closeItem: (id: string) => void;
-        openNote: (id: string) => void;
+        closeItem: (id: string, parentId: string) => void;
+        openNote: (id: string, parentId: string) => void;
     }
 
     let { item, closeItem, openNote }: Props = $props();
     let children = $derived(
         item.children?.filter((child) => {
-            return !(child.is_directory && child.name == ".lockd");
+            return !(child.isDirectory && child.name == ".lockd");
         }) || []
     );
 
@@ -22,12 +22,15 @@
     let collapsed = $derived(children.length == 0);
 </script>
 
-{#if item.is_note}
-    <div class="item note-file" class:current-note={$currentNoteId === item.id}>
+{#if item.isNote}
+    <div
+        class="item note-file"
+        class:current-note={$currentNote?.id === item.id}
+    >
         <div class="item-header">
             <button
                 class="item-title"
-                onclick={() => openNote(item.id)}
+                onclick={() => openNote(item.id, item.parentId || "")}
                 title="Open note"
             >
                 <span class="item-name">{item.name}</span>
@@ -36,7 +39,7 @@
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeItem(item.id);
+                    closeItem(item.id, item.parentId);
                 }}
                 title="Close item"
             >
@@ -54,7 +57,7 @@
                 class="close-btn"
                 onclick={(e) => {
                     e.stopPropagation();
-                    closeItem(item.id);
+                    closeItem(item.id, item.parentId);
                 }}
                 title="Close item"
             >
@@ -62,7 +65,7 @@
             </button>
         </div>
 
-        {#if !collapsed && !item.is_note}
+        {#if !collapsed && !item.isNote}
             <div class="file-tree">
                 {#if !children || children.length === 0}
                     <div class="no-items">No files</div>

@@ -7,24 +7,20 @@ pub struct AppState {
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-pub struct NoteInfo {
-    pub name: String,
-    pub path: String,
-}
-
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[allow(non_snake_case)]
 pub struct FileSystemItemFrontend {
     pub id: String,
+    pub parentId: String,
     pub name: String,
-    pub is_directory: bool,
-    pub is_note: bool,
+    pub isDirectory: bool,
+    pub isNote: bool,
     pub children: Option<Vec<FileSystemItemFrontend>>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct FileSystemItem {
     pub id: String,
-    pub parent_id: Option<String>,
+    pub parent_id: String,
     pub name: String,
     pub path: String, // Only used internally, not serialized to frontend
     pub is_directory: bool,
@@ -115,9 +111,10 @@ impl AppState {
     pub fn to_frontend_item(&self, item: &FileSystemItem) -> FileSystemItemFrontend {
         FileSystemItemFrontend {
             id: item.id.clone(),
+            parentId: item.parent_id.clone(),
             name: item.name.clone(),
-            is_directory: item.is_directory,
-            is_note: item.is_note,
+            isDirectory: item.is_directory,
+            isNote: item.is_note,
             children: item.children.as_ref().map(|children| {
                 children
                     .iter()

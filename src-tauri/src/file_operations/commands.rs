@@ -35,7 +35,8 @@ pub fn close_item(
 /// Tauri command to open a note from a item
 #[tauri::command]
 pub fn open_note_from_id(
-    id: String,
+    id: &str,
+    parent_id: &str,
     app_state: State<Mutex<AppState>>,
     window: Window,
 ) -> Result<(), String> {
@@ -46,7 +47,13 @@ pub fn open_note_from_id(
     };
 
     let path = PathBuf::from(&note_path);
-    open_note_and_emit(id, &path, &window, &app_state)
+    open_note_and_emit(
+        id.to_string(),
+        parent_id.to_string(),
+        &path,
+        &window,
+        &app_state,
+    )
 }
 
 #[tauri::command]

@@ -1,7 +1,13 @@
 export interface FileSystemItem {
     id: string;
+    parentId: string;
     name: string;
-    is_directory: boolean;
-    is_note: boolean;
+    isDirectory: boolean;
+    isNote: boolean;
     children?: FileSystemItem[];
+}
+
+export interface noteIds {
+    id: string;
+    parentId: string;
 }
