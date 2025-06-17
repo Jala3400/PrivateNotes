@@ -100,33 +100,47 @@
     }
 
     // Listen for drag-and-drop events to open notes
-    let unlisten: (() => void) | undefined;
+    let unlistenNoteOpened: (() => void) | undefined;
+    let unlistenItemClosed: (() => void) | undefined;
 
     type NoteOpenedEvent = {
         payload: string[];
     };
 
     onMount(async () => {
-        unlisten = await listen("note-opened", (event: NoteOpenedEvent) => {
-            // Reset the editor when a note is opened
-            const [noteTitle, noteContent, noteId, parentId] = event.payload;
-            title = noteTitle || "";
-            content = noteContent || "";
-            $currentNote = {
-                id: noteId,
-                parentId: parentId,
-            };
+        unlistenNoteOpened = await listen(
+            "note-opened",
+            (event: NoteOpenedEvent) => {
+                // Reset the editor when a note is opened
+                const [noteTitle, noteContent, noteId, parentId] =
+                    event.payload;
+                title = noteTitle || "";
+                content = noteContent || "";
+                $currentNote = {
+                    id: noteId,
+                    parentId: parentId,
+                };
 
-            // Force editor component to restart by using key
-            editorKey = Date.now();
+                // Force editor component to restart by using key
+                editorKey = Date.now();
+            }
+        );
+
+        unlistenItemClosed = await listen("item-closed", (event) => {
+            if (event.payload === $currentNote?.parentId) {
+                // Reset the editor when the current note is closed
+                title = "";
+                content = "";
+                $currentNote = null;
+                editorKey = Date.now(); // Force re-render of the editor
+            }
         });
     });
 
     onDestroy(() => {
         // Clean up the event listener when the component is destroyed
-        if (unlisten) {
-            unlisten();
-        }
+        if (unlistenNoteOpened) unlistenNoteOpened();
+        if (unlistenItemClosed) unlistenItemClosed();
     });
 </script>
 
