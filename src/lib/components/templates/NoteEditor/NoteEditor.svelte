@@ -81,7 +81,40 @@
         } catch (error) {
             throwCustomError(
                 "Failed to save note: " + String(error),
-                "An error occurred while trying to save the note."
+                "An error occurred while trying to save a copy of the note."
+            );
+        } finally {
+            isSaving = false;
+        }
+    }
+
+    async function saveNoteAs() {
+        let tempTitle = title;
+        if (title.trim().length === 0) {
+            tempTitle = "Untitled Note";
+        }
+
+        // Prevent multiple save operations
+        if (isSaving) {
+            console.warn("Save operation already in progress");
+            return;
+        }
+
+        isSaving = true;
+
+        // Call the Tauri command to save the note as a new file
+        try {
+            await invoke("save_note_as", {
+                id: $currentNote?.id,
+                title: tempTitle,
+                content,
+            });
+
+            showSaveNotification();
+        } catch (error) {
+            throwCustomError(
+                "Failed to save note as: " + String(error),
+                "An error occurred while trying to save the note as a new file."
             );
         } finally {
             isSaving = false;
@@ -92,7 +125,11 @@
         // Save note on Ctrl+S
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
-            saveNote();
+            if (!$currentNote?.id) {
+                saveNoteAs();
+            } else {
+                saveNote();
+            }
         } else if (event.ctrlKey && event.key === "g") {
             event.preventDefault();
             saveNoteCopy();

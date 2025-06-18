@@ -6,7 +6,7 @@ use std::{path::PathBuf, sync::Mutex};
 use tauri::{Emitter, State, Window};
 
 /// Opens an encrypted note and emits the content to the frontend
-pub fn open_dropped_note(
+pub fn open_note_from_path(
     file_path: &PathBuf,
     window: &Window,
     app_state: State<Mutex<AppState>>,

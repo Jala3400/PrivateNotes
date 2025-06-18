@@ -1,5 +1,5 @@
 use crate::encryption::encrypt_data;
-use crate::file_operations::note_ops::open_note_and_emit;
+use crate::file_operations::note_ops::{open_note_and_emit, open_note_from_path};
 use crate::state::{AppState, FileSystemItemFrontend};
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -59,7 +59,7 @@ pub fn open_note_from_id(
 #[tauri::command]
 /// Encrypts a note and saves it to a file with the specified title.
 pub fn save_note_copy(
-    id: &str,
+    id: Option<&str>,
     title: &str,
     content: &str,
     app_state: State<Mutex<AppState>>,
@@ -78,11 +78,13 @@ pub fn save_note_copy(
         .add_filter(title, &["lockd"])
         .set_file_name(&format!("{}.lockd", title));
 
-    // Set the initial directory to the last saved path if available
-    let file_path = app_state.lock().unwrap().get_path_from_id(id);
-    if let Some(path) = &file_path {
-        let path_buf = std::path::Path::new(path);
-        dialog = dialog.set_directory(path_buf.parent().unwrap_or(path_buf));
+    if let Some(id) = id {
+        // Set the initial directory to the last saved path if available
+        let file_path = app_state.lock().unwrap().get_path_from_id(id);
+        if let Some(path) = &file_path {
+            let path_buf = std::path::Path::new(path);
+            dialog = dialog.set_directory(path_buf.parent().unwrap_or(path_buf));
+        }
     }
 
     // Open the save file dialog
@@ -125,4 +127,55 @@ pub fn save_note(id: &str, content: &str, app_state: State<Mutex<AppState>>) -> 
     std::fs::write(path_buf, file_data).map_err(|e| format!("Failed to write file: {}", e))?;
 
     Ok(())
+}
+
+#[tauri::command]
+/// Encrypts a note and saves it to a path to be specified by the user, no id is required.
+/// Then the id is added to the opened items in the app state.
+pub fn save_note_as(
+    id: Option<&str>,
+    title: &str,
+    content: &str,
+    app_state: State<Mutex<AppState>>,
+    app_handle: tauri::AppHandle,
+    window: Window,
+) -> Result<bool, String> {
+    // Get the encryption key
+    let key = app_state.lock().unwrap().get_encryption_key()?;
+
+    // Encrypt the content
+    let file_data = encrypt_data(&key, content.as_bytes())?;
+
+    // Configure the file dialog
+    let mut dialog = app_handle
+        .dialog()
+        .file()
+        .add_filter(title, &["lockd"])
+        .set_file_name(&format!("{}.lockd", title));
+
+    if let Some(id) = id {
+        // Set the initial directory to the last saved path if available
+        let file_path = app_state.lock().unwrap().get_path_from_id(id);
+        if let Some(path) = &file_path {
+            let path_buf = std::path::Path::new(path);
+            dialog = dialog.set_directory(path_buf.parent().unwrap_or(path_buf));
+        }
+    }
+
+    // Open the save file dialog
+    let file_path = dialog.blocking_save_file();
+
+    // If the user selected a file, write the encrypted data to it
+    if let Some(path) = file_path {
+        std::fs::write(path.as_path().unwrap(), file_data)
+            .map_err(|e| format!("Failed to write file: {}", e))?;
+
+        // Immediately open the note from the path to add it to the opened items
+        // and emit the event to the frontend
+        open_note_from_path(&path.as_path().unwrap().to_path_buf(), &window, app_state)?;
+
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
