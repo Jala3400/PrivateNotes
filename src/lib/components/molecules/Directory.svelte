@@ -9,11 +9,17 @@
 
     let { item, openNote }: Props = $props();
 
-    let collapsed = $state(true);
+    let collapsed = $state(item.collapsed);
 </script>
 
 <div class="directory">
-    <button class="directory-toggle" onclick={() => (collapsed = !collapsed)}>
+    <button
+        class="directory-toggle"
+        onclick={() => {
+            collapsed = !collapsed;
+            item.collapsed = collapsed;
+        }}
+    >
         <span class="expand-icon">
             {collapsed ? "▶" : "▼"}
         </span>

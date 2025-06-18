@@ -10,20 +10,23 @@
     let { items, openNote }: Props = $props();
 </script>
 
-{#each items || [] as child}
+{#each items || [] as item}
     <div class="tree-item">
-        {#if child.isDirectory}
-            <Directory item={child} {openNote} />
+        {#if item.isDirectory}
+            <!-- Key is necessary to keep the subfolders collapsed -->
+            {#key item.id}
+                <Directory {item} {openNote} />
+            {/key}
         {:else}
             <button
                 class="file-item"
-                class:note-file={child.isNote}
-                class:current-note={$currentNote?.id === child.id}
+                class:note-file={item.isNote}
+                class:current-note={$currentNote?.id === item.id}
                 onclick={() =>
-                    child.isNote ? openNote(child.id, child.parentId) : null}
-                disabled={!child.isNote}
+                    item.isNote ? openNote(item.id, item.parentId) : null}
+                disabled={!item.isNote}
             >
-                <span class="item-name">{child.name}</span>
+                <span class="item-name">{item.name}</span>
             </button>
         {/if}
     </div>

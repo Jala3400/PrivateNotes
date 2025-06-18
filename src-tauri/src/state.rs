@@ -15,6 +15,7 @@ pub struct FileSystemItemFrontend {
     pub isDirectory: bool,
     pub isNote: bool,
     pub children: Option<Vec<FileSystemItemFrontend>>,
+    pub collapsed: bool,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -121,6 +122,7 @@ impl AppState {
                     .map(|child| self.to_frontend_item(child))
                     .collect()
             }),
+            collapsed: true,
         }
     }
 }

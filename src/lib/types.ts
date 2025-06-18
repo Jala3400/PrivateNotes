@@ -5,6 +5,7 @@ export interface FileSystemItem {
     isDirectory: boolean;
     isNote: boolean;
     children?: FileSystemItem[];
+    collapsed: boolean;
 }
 
 export interface noteIds {
