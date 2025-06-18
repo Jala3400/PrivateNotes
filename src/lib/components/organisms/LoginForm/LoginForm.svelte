@@ -2,6 +2,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import Input from "$lib/components/atoms/Input.svelte";
     import NeonButton from "$lib/components/atoms/NeonButton.svelte";
+    import { throwCustomError } from "$lib/error";
 
     let username = $state("");
     let passValid = $state(false);
@@ -35,8 +36,10 @@
             // Navigate to /Notes after successful login
             window.location.replace("/Notes");
         } catch (error) {
-            console.error("Error during login:", error);
-            alert("An unexpected error occurred. Please try again.");
+            throwCustomError(
+                "Error during login: " + error,
+                "An unexpected error occurred. Please try again."
+            );
         }
     }
 </script>

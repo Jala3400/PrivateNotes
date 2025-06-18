@@ -3,11 +3,21 @@
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
+    import { throwCustomError } from "$lib/error";
+    import { currentNote } from "$lib/stores/currentNote";
 
     let content = $state("");
     let title = $state("");
     let isSaving = $state(false);
     let editorKey = $state(Date.now());
+    let showNotification = $state(false);
+
+    function showSaveNotification() {
+        showNotification = true;
+        setTimeout(() => {
+            showNotification = false;
+        }, 2000);
+    }
 
     async function saveNote() {
         let tempTitle = title;
@@ -25,12 +35,87 @@
 
         // Call the Tauri command to save the note
         try {
-            await invoke("save_encrypted_note", {
-                title: tempTitle,
-                content: content,
+            await invoke("save_note", {
+                id: $currentNote?.id,
+                content,
             });
+
+            // It always saves the note unless an error occurs
+            showSaveNotification();
         } catch (error) {
-            console.error("Failed to save note:", error);
+            throwCustomError(
+                "Failed to save note: " + String(error),
+                "An error occurred while trying to save the note."
+            );
+        } finally {
+            isSaving = false;
+        }
+    }
+
+    async function saveNoteCopy() {
+        let tempTitle = title;
+        if (title.trim().length === 0) {
+            tempTitle = "Untitled Note";
+        }
+
+        // Prevent multiple save operations
+        if (isSaving) {
+            console.warn("Save operation already in progress");
+            return;
+        }
+
+        isSaving = true;
+
+        // Call the Tauri command to save the note
+        try {
+            if (
+                await invoke("save_note_copy", {
+                    id: $currentNote?.id,
+                    title: tempTitle,
+                    content,
+                })
+            ) {
+                // The user can cancel the save operation
+                showSaveNotification();
+            }
+        } catch (error) {
+            throwCustomError(
+                "Failed to save note: " + String(error),
+                "An error occurred while trying to save a copy of the note."
+            );
+        } finally {
+            isSaving = false;
+        }
+    }
+
+    async function saveNoteAs() {
+        let tempTitle = title;
+        if (title.trim().length === 0) {
+            tempTitle = "Untitled Note";
+        }
+
+        // Prevent multiple save operations
+        if (isSaving) {
+            console.warn("Save operation already in progress");
+            return;
+        }
+
+        isSaving = true;
+
+        // Call the Tauri command to save the note as a new file
+        try {
+            await invoke("save_note_as", {
+                id: $currentNote?.id,
+                title: tempTitle,
+                content,
+            });
+
+            showSaveNotification();
+        } catch (error) {
+            throwCustomError(
+                "Failed to save note as: " + String(error),
+                "An error occurred while trying to save the note as a new file."
+            );
         } finally {
             isSaving = false;
         }
@@ -40,34 +125,59 @@
         // Save note on Ctrl+S
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
-            saveNote();
+            if (!$currentNote?.id) {
+                saveNoteAs();
+            } else {
+                saveNote();
+            }
+        } else if (event.ctrlKey && event.key === "g") {
+            event.preventDefault();
+            saveNoteCopy();
         }
     }
 
     // Listen for drag-and-drop events to open notes
-    let unlisten: (() => void) | undefined;
+    let unlistenNoteOpened: (() => void) | undefined;
+    let unlistenItemClosed: (() => void) | undefined;
 
     type NoteOpenedEvent = {
         payload: string[];
     };
 
     onMount(async () => {
-        unlisten = await listen("note-opened", (event: NoteOpenedEvent) => {
-            // Reset the editor when a note is opened
-            const [noteTitle, noteContent] = event.payload;
-            title = noteTitle || "";
-            content = noteContent || "";
+        unlistenNoteOpened = await listen(
+            "note-opened",
+            (event: NoteOpenedEvent) => {
+                // Reset the editor when a note is opened
+                const [noteTitle, noteContent, noteId, parentId] =
+                    event.payload;
+                title = noteTitle || "";
+                content = noteContent || "";
+                $currentNote = {
+                    id: noteId,
+                    parentId: parentId,
+                };
 
-            // Force editor component to restart by using key
-            editorKey = Date.now();
+                // Force editor component to restart by using key
+                editorKey = Date.now();
+            }
+        );
+
+        unlistenItemClosed = await listen("item-closed", (event) => {
+            if (event.payload === $currentNote?.parentId) {
+                // Reset the editor when the current note is closed
+                title = "";
+                content = "";
+                $currentNote = null;
+                editorKey = Date.now(); // Force re-render of the editor
+            }
         });
     });
 
     onDestroy(() => {
         // Clean up the event listener when the component is destroyed
-        if (unlisten) {
-            unlisten();
-        }
+        if (unlistenNoteOpened) unlistenNoteOpened();
+        if (unlistenItemClosed) unlistenItemClosed();
     });
 </script>
 
@@ -90,6 +200,10 @@
         {/key}
     </div>
 </div>
+
+{#if showNotification}
+    <div class="notification">Note saved</div>
+{/if}
 
 <style>
     .editor-container {
@@ -124,5 +238,15 @@
     #note-contents {
         flex: 1;
         overflow: hidden;
+    }
+
+    .notification {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        padding: 4px 8px;
+        background: var(--background-dark-light);
+        border-top-left-radius: var(--border-radius-small);
+        z-index: 1000;
     }
 </style>

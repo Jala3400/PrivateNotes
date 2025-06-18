@@ -1,6 +1,6 @@
 <script lang="ts">
     import { listen } from "@tauri-apps/api/event";
-    import { message } from "@tauri-apps/plugin-dialog";
+    import { throwCustomError } from "$lib/error";
     import { onDestroy, onMount } from "svelte";
     import "../app.css";
 
@@ -9,8 +9,7 @@
     onMount(async () => {
         unlisten = await listen("error", async (event) => {
             // Handle error events
-            console.error("Error event received:", event.payload);
-            await message(String(event.payload), { kind: "error" });
+            throwCustomError(event.payload as string);
         });
     });
 
