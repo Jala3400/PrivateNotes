@@ -11,6 +11,7 @@
     let isSaving = $state(false);
     let editorKey = $state(Date.now());
     let showNotification = $state(false);
+    let editorRef = $state<Editor>();
 
     function showSaveNotification() {
         showNotification = true;
@@ -19,7 +20,7 @@
         }, 2000);
     }
 
-    async function saveNote() {
+    async function saveNote(noteContent: string) {
         let tempTitle = title;
         if (title.trim().length === 0) {
             tempTitle = "Untitled Note";
@@ -37,7 +38,7 @@
         try {
             await invoke("save_note", {
                 id: $currentNote?.id,
-                content,
+                content: noteContent,
             });
 
             // It always saves the note unless an error occurs
@@ -52,7 +53,7 @@
         }
     }
 
-    async function saveNoteCopy() {
+    async function saveNoteCopy(noteContent: string) {
         let tempTitle = title;
         if (title.trim().length === 0) {
             tempTitle = "Untitled Note";
@@ -72,7 +73,7 @@
                 await invoke("save_note_copy", {
                     id: $currentNote?.id,
                     title: tempTitle,
-                    content,
+                    content: noteContent,
                 })
             ) {
                 // The user can cancel the save operation
@@ -88,7 +89,7 @@
         }
     }
 
-    async function saveNoteAs() {
+    async function saveNoteAs(noteContent: string) {
         let tempTitle = title;
         if (title.trim().length === 0) {
             tempTitle = "Untitled Note";
@@ -107,7 +108,7 @@
             await invoke("save_note_as", {
                 id: $currentNote?.id,
                 title: tempTitle,
-                content,
+                content: noteContent,
             });
 
             showSaveNotification();
@@ -125,14 +126,16 @@
         // Save note on Ctrl+S
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
+            const currentContent = editorRef?.getContent() || "";
             if (!$currentNote?.id) {
-                saveNoteAs();
+                saveNoteAs(currentContent);
             } else {
-                saveNote();
+                saveNote(currentContent);
             }
         } else if (event.ctrlKey && event.key === "g") {
             event.preventDefault();
-            saveNoteCopy();
+            const currentContent = editorRef?.getContent() || "";
+            saveNoteCopy(currentContent);
         }
     }
 
@@ -193,10 +196,9 @@
         disabled={isSaving}
         autocomplete="off"
     />
-
     <div id="note-contents">
         {#key editorKey}
-            <Editor bind:content />
+            <Editor bind:this={editorRef} {content} />
         {/key}
     </div>
 </div>
