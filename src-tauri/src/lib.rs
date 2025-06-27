@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 use tauri::{Emitter, Manager, WindowEvent};
 
+mod app_ops;
 mod encryption;
 mod file_operations;
 mod state;
@@ -11,6 +12,7 @@ use crate::file_operations::{
     },
     drag_drop::drop_handler,
 };
+use app_ops::reset_app;
 use encryption::derive_encryption_key;
 use state::AppState;
 
@@ -39,7 +41,8 @@ pub fn run() {
             save_note_copy,
             get_opened_items,
             close_item,
-            open_note_from_id
+            open_note_from_id,
+            reset_app
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
