@@ -23,4 +23,8 @@
         border: 1px solid var(--main-color);
         border-radius: var(--border-radius-small);
     }
+
+    .tool-button:hover {
+        background-color: var(--background-dark-lighter);
+    }
 </style>
