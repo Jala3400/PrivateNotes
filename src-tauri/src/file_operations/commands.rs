@@ -68,9 +68,6 @@ pub fn save_note_copy(
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
 
-    // Encrypt the content
-    let file_data = encrypt_data(&key, content.as_bytes())?;
-
     // Configure the file dialog
     let mut dialog = app_handle
         .dialog()
@@ -93,6 +90,9 @@ pub fn save_note_copy(
     // If the user selected a file, write the encrypted data to it
     // It is Ok to cancel the dialog
     if let Some(path) = file_path {
+        // Encrypt the content
+        let file_data = encrypt_data(&key, content.as_bytes())?;
+
         std::fs::write(path.as_path().unwrap(), file_data)
             .map_err(|e| format!("Failed to write file: {}", e))?;
     } else {
@@ -112,9 +112,6 @@ pub fn save_note(id: &str, content: &str, app_state: State<Mutex<AppState>>) -> 
         .get_encryption_key()
         .map_err(|e| e.to_string())?;
 
-    // Encrypt the content
-    let file_data = encrypt_data(&key, content.as_bytes()).map_err(|e| e.to_string())?;
-
     // Create the path if it doesn't exist
     let file_path = app_state.lock().unwrap().get_path_from_id(id).unwrap();
     let path_buf = PathBuf::from(file_path);
@@ -122,6 +119,9 @@ pub fn save_note(id: &str, content: &str, app_state: State<Mutex<AppState>>) -> 
         std::fs::create_dir_all(parent)
             .map_err(|e| format!("Failed to create directory: {}", e))?;
     }
+
+    // Encrypt the content
+    let file_data = encrypt_data(&key, content.as_bytes()).map_err(|e| e.to_string())?;
 
     // Write the encrypted data to the file
     std::fs::write(path_buf, file_data).map_err(|e| format!("Failed to write file: {}", e))?;
@@ -142,9 +142,6 @@ pub fn save_note_as(
 ) -> Result<bool, String> {
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
-
-    // Encrypt the content
-    let file_data = encrypt_data(&key, content.as_bytes())?;
 
     // Configure the file dialog
     let mut dialog = app_handle
@@ -167,6 +164,9 @@ pub fn save_note_as(
 
     // If the user selected a file, write the encrypted data to it
     if let Some(path) = file_path {
+        // Encrypt the content
+        let file_data = encrypt_data(&key, content.as_bytes())?;
+
         std::fs::write(path.as_path().unwrap(), file_data)
             .map_err(|e| format!("Failed to write file: {}", e))?;
 

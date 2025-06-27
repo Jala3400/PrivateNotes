@@ -40,12 +40,6 @@ pub fn encrypt_file(
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
 
-    // Read the file content
-    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
-
-    // Encrypt the content using the shared utility function
-    let encrypted_data = encrypt_data(&key, &file_data)?;
-
     // Show save dialog
     let title = file_path
         .file_name()
@@ -63,6 +57,13 @@ pub fn encrypt_file(
 
     // Write the encrypted data back to the file
     if let Some(path) = save_path {
+        // Read the file content
+        let file_data =
+            std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+        // Encrypt the content using the shared utility function
+        let encrypted_data = encrypt_data(&key, &file_data)?;
+
         std::fs::write(path.as_path().unwrap(), encrypted_data)
             .map_err(|e| format!("Failed to write file: {}", e))?;
     }
@@ -78,12 +79,6 @@ pub fn decrypt_file(
 ) -> Result<(), String> {
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
-
-    // Read the file content
-    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
-
-    // Decrypt the content using the shared utility function
-    let decrypted_content = decrypt_data(&key, &file_data)?;
 
     // Get the original filename without .lockd extension
     let original_filename = file_path
@@ -102,6 +97,13 @@ pub fn decrypt_file(
 
     // Write the decrypted data to the chosen location
     if let Some(path) = save_path {
+        // Read the file content
+        let file_data =
+            std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+        // Decrypt the content using the shared utility function
+        let decrypted_content = decrypt_data(&key, &file_data)?;
+
         std::fs::write(path.as_path().unwrap(), decrypted_content)
             .map_err(|e| format!("Failed to write file: {}", e))?;
     }
