@@ -30,6 +30,13 @@ pub struct FileSystemItem {
 }
 
 impl AppState {
+    pub fn reset(&mut self) {
+        self.key = None;
+        self.opened_items.clear();
+        self.id_to_path_map.clear();
+        self.next_id = 0;
+    }
+
     pub fn set_key(&mut self, key: [u8; 32]) {
         self.key = Some(key);
     }
