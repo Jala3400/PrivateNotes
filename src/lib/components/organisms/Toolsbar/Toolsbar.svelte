@@ -3,6 +3,12 @@
     import ToolButton from "$lib/components/atoms/ToolButton.svelte";
     import { throwCustomError } from "$lib/error";
 
+    interface Props {
+        sidebar_collapsed?: boolean;
+    }
+
+    let { sidebar_collapsed = $bindable(false) }: Props = $props();
+
     let tools = [
         {
             name: "Reset the app",
@@ -24,21 +30,55 @@
 </script>
 
 <div class="toolsbar">
-    {#each tools as tool}
-        <ToolButton name={tool.name} icon={tool.icon} onClick={tool.action} />
-    {/each}
+    <div class="top-toolsbar">
+        <ToolButton
+            name="Toggle Sidebar"
+            icon={sidebar_collapsed ? ">" : "<"}
+            onClick={() => (sidebar_collapsed = !sidebar_collapsed)}
+        />
+    </div>
+    <div class="main-toolsbar">
+        {#each tools as tool}
+            <ToolButton
+                name={tool.name}
+                icon={tool.icon}
+                onClick={tool.action}
+            />
+        {/each}
+    </div>
 </div>
 
 <style>
     .toolsbar {
         display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 0.5em;
+        flex-direction: column;
+        align-items: center;
 
-        padding: 0.5em;
+        width: 3em;
+        height: 100%;
 
         background-color: var(--background-dark-light);
         border-right: 1px solid var(--background-dark-lighter);
+    }
+
+    .top-toolsbar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5em;
+
+        width: 100%;
+        border-bottom: 1px solid var(--background-dark-lighter);
+        padding: 0.5em;
+    }
+
+    .main-toolsbar {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5em;
+
+        width: 100%;
+        padding: 0.5em;
     }
 </style>

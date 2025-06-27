@@ -2,11 +2,18 @@
     import NoteEditor from "$lib/components/templates/NoteEditor/NoteEditor.svelte";
     import Sidebar from "$lib/components/organisms/Sidebar/Sidebar.svelte";
     import Toolsbar from "$lib/components/organisms/Toolsbar/Toolsbar.svelte";
+
+    let sidebar_collapsed = $state(false);
 </script>
 
-<div class="app-layout">
-    <Toolsbar />
-    <Sidebar />
+<div
+    class="app-layout"
+    style="--sidebar-width: {sidebar_collapsed
+        ? '0'
+        : 'clamp(10em, 30%, 20em)'};"
+>
+    <Toolsbar bind:sidebar_collapsed />
+    <Sidebar {sidebar_collapsed} />
     <div class="main-content">
         <NoteEditor />
     </div>
@@ -15,7 +22,7 @@
 <style>
     .app-layout {
         display: grid;
-        grid-template-columns: 3em clamp(10em, 30%, 20em) auto;
+        grid-template-columns: 3em var(--sidebar-width) auto;
 
         height: 100%;
         width: 100%;

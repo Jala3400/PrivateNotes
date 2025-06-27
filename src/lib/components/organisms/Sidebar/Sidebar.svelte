@@ -6,7 +6,13 @@
     import Item from "$lib/components/molecules/Item.svelte";
     import { throwCustomError } from "$lib/error";
 
-    let openedItems: FileSystemItem[] = [];
+    interface Props {
+        sidebar_collapsed?: boolean;
+    }
+
+    let { sidebar_collapsed = $bindable(false) }: Props = $props();
+
+    let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;
     let unlistenItemClosed: UnlistenFn;
 
@@ -87,7 +93,7 @@
     }
 </script>
 
-<div class="sidebar">
+<div class="sidebar" class:collapsed={sidebar_collapsed}>
     <div class="sidebar-header">
         <h2>Opened Items</h2>
     </div>
@@ -118,6 +124,12 @@
         padding: 1em;
         background-color: var(--background-dark-light);
         overflow: hidden;
+    }
+
+    .sidebar.collapsed {
+        width: 0;
+        overflow: hidden;
+        padding: 0;
     }
 
     .sidebar-content {
