@@ -153,7 +153,7 @@
 .cm-gutters {
     background-color: transparent !important;
     color: var(--text-secondary) !important;
-    border-right: 1px solid var(--background-dark-lighter) !important;
+    border-right: 1px solid var(--border-color-light) !important;
 }
 
 .cm-gutterElement {
@@ -197,7 +197,7 @@
 }
 
 .cm-panels-bottom {
-    border-top: 1px solid var(--background-dark-lighter) !important;
+    border-top: 1px solid var(--border-color-light) !important;
 }
 
 .cm-panel {
@@ -208,14 +208,14 @@
     background-color: var(--background-dark-light) !important;
     color: var(--text-primary) !important;
     border-radius: var(--border-radius-small) !important;
-    border: 1px solid var(--background-dark-lighter) !important;
+    border: 1px solid var(--border-color-light) !important;
 }
 
 .cm-button {
     background-color: var(--background-dark-light) !important;
     background-image: none !important;
     color: var(--text-primary) !important;
-    border: 1px solid var(--background-dark-lighter) !important;
+    border: 1px solid var(--border-color-light) !important;
     border-radius: var(--border-radius-small) !important;
     padding: 0.25em 0.5em !important;
     transition: background var(--transition) !important;
@@ -229,7 +229,7 @@
 .cm-tooltip {
     background-color: var(--background-dark-light) !important;
     color: var(--text-primary) !important;
-    border: 1px solid var(--background-dark-lighter) !important;
+    border: 1px solid var(--border-color-light) !important;
     border-radius: var(--border-radius-small) !important;
     overflow: hidden !important;
 }

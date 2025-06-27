@@ -58,7 +58,7 @@
         height: 100%;
 
         background-color: var(--background-dark-light);
-        border-right: 1px solid var(--background-dark-lighter);
+        border-right: 1px solid var(--border-color-light);
     }
 
     .top-toolsbar {
@@ -68,7 +68,7 @@
         gap: 0.5em;
 
         width: 100%;
-        border-bottom: 1px solid var(--background-dark-lighter);
+        border-bottom: 1px solid var(--border-color-light);
         padding: 0.5em;
     }
 
