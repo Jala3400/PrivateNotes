@@ -15,6 +15,9 @@ El proyecto está en fase temprana de desarrollo, por lo que la funcionalidad es
   - [Prerrequisitos](#prerrequisitos)
   - [Instalación](#instalación)
   - [Guía de uso](#guía-de-uso)
+    - [Login](#login)
+    - [Notas](#notas)
+    - [Encriptar archivos](#encriptar-archivos)
   - [Cómo funciona](#cómo-funciona)
   - [Tecnologías utilizadas](#tecnologías-utilizadas)
 
@@ -52,19 +55,46 @@ Para instalar la aplicación, sigue estos pasos:
 
 ## Guía de uso
 
+### Login
+
 Primero debes introducir un nombre de usuario y una contraseña. Si es la primera vez que usas la aplicación puedes usar cualquier nombre de usuario y contraseña, no es necesario que el usuario exista.
 
-Aunque parezca que se está haciendo un login en realidad no se guarda ningún dato del usuario. Se necesita saber el nombre de usuario y la contraseña porque de ellos se saca la clave con la que se encriptan las notas. Se puede ver más sobre esto en [cómo funciona](#cómo-funciona).
+Aunque parezca que se está haciendo un login, en realidad no se guarda ningún dato del usuario. Se necesita saber el nombre de usuario y la contraseña porque de ellos se saca la clave con la que se encriptan las notas. Se puede ver más sobre esto en [cómo funciona](#cómo-funciona).
 
-Una vez iniciado sesión, puedes editar tus notas. Por ahora solo permite una nota a la vez. Para cargar la nota se debe arrastrar y soltar el archivo en la ventana de la aplicación.
+Se puede reiniciar la aplicación para volver a la pantalla del login pulsando el botón en la barra lateral.
 
-Para guardar la nota se pulsa `ctrl + s`, lo que muestra un diálogo para guardar el archivo.
+### Notas
 
-Este archivo se guarda encriptado y con la extensión `.lockd`. Esto será lo único que se guarde en el disco y solo se puede desencriptar con el login correcto.
+Una vez iniciado sesión puedes editar tus notas.
+
+Para cargar notas se arrastra un archivo `.lockd` y se abre automáticamente.
+
+También se pueden abrir carpetas, pero estas deben tener dentro otra carpeta llamada `.lockd`.
+
+Para guardar la nota se pulsa `ctrl + s`.
+Para guardar una copia se pulsa `ctrl + g`. Después de guardar una copia se puede seguir editando la nota actual, pero la copia no se actualizará.
+
+### Encriptar archivos
+
+También se pueden encriptar archivos que no sean notas con esta aplicación.
+
+Simplemente arrastra el archivo que se quiera encriptar a la ventana de la aplicación. Se creará un archivo con el mismo nombre y extensión al que se le añadirá la extensión `.lockd`, es decir, el archivo final será `nombre.ext.lockd`. Te dejará elegir la ubicación en la que se guardará.
+
+Para desencriptarlo se arrastra el archivo `.ext.lockd` a la ventana de la aplicación. Se te preguntará dónde quieres guardar el archivo desencriptado. El archivo desencriptado tendrá el mismo nombre y extensión que el original, es decir, `nombre.ext`.
+
+Se diferencian de las notas porque los archivos encriptados tienen más de una extensión. Por el momento, si quieres guardar el contenido de una nota encriptada como texto plano debes cambiar el nombre del archivo a `nombre.txt.lockd` o `nombre.md.lockd` antes de arrastrarlo a la ventana de la aplicación.
+
+Para encriptar una carpeta, se arrastra la carpeta a la ventana de la aplicación. Se creará una carpeta con el mismo nombre y extensión al que se le añadirá la extensión `.lockd`, es decir, la carpeta final será `nombre.lockd`. Se encriptarán todos los archivos dentro de esta carpeta y se guardarán con la extensión `.lockd` en la misma carpeta.
+
+Para desencriptar una carpeta, se arrastra la carpeta `.lockd` a la ventana de la aplicación. Se te preguntará dónde quieres guardar la carpeta desencriptada. La carpeta desencriptada tendrá el mismo nombre y extensión que la original. Dentro de esta carpeta estarán los archivos desencriptados.
+
+Se diferencia de una carpeta que puedes abrir en la aplicación porque esta carpeta no tiene dentro otra carpeta `.lockd`.
 
 ## Cómo funciona
 
-Para poder encriptar y desencriptar algo se necesita una contraseña. En este caso, la contraseña se genera a partir del nombre de usuario y la contraseña introducidos al iniciar sesión mediante el algoritmo Argon2id.
+Esta aplicación tiene como objetivo encriptar archivos de forma más segura posible. Para ello, no se guarda más información de la estrictamente necesaria, es decir, la nota encriptada.
+
+Primero necesitamos una contraseña. En este caso se genera a partir del nombre de usuario y la contraseña introducidos al iniciar sesión mediante el algoritmo Argon2id.
 
 Argon2id es un algoritmo de hashing de contraseñas que es resistente a ataques de fuerza bruta y se utiliza para generar una clave segura a partir de la contraseña del usuario. Un algoritmo de hashing toma una entrada y produce una salida de tamaño fijo llamada hash. Esta salida es especial porque es única para cada entrada y un cambio mínimo en la entrada produce un gran cambio en la salida. Esto implica que es prácticamente imposible de invertir el proceso y obtener la contraseña original a partir del hash.
 
