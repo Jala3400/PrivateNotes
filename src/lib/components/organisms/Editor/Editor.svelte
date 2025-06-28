@@ -11,9 +11,12 @@
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
-    let {
-        content = $bindable(`# Hello World\n\nThis is a live preview demo.`),
-    } = $props();
+    let { content = "" } = $props();
+
+    export function getContent(): string {
+        return editorView ? editorView.state.doc.toString() : content;
+    }
+
     onMount(() => {
         // Create custom markdown highlighting style
         const markdownHighlighting = HighlightStyle.define([
@@ -37,11 +40,6 @@
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
                 EditorView.lineWrapping,
-                EditorView.updateListener.of((update) => {
-                    if (update.docChanged) {
-                        content = update.state.doc.toString();
-                    }
-                }),
             ],
         });
 

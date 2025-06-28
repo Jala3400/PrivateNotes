@@ -1,15 +1,20 @@
 use std::sync::Mutex;
 use tauri::{Emitter, Manager, WindowEvent};
 
+mod app_ops;
 mod encryption;
 mod file_operations;
-mod notes;
 mod state;
 
+use crate::file_operations::{
+    commands::{
+        close_item, get_opened_items, open_note_from_id, save_note, save_note_as, save_note_copy,
+    },
+    drag_drop::drop_handler,
+};
+use app_ops::reset_app;
 use encryption::derive_encryption_key;
 use state::AppState;
-
-use crate::{file_operations::drop_handler, notes::save_encrypted_note};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -31,7 +36,13 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             derive_encryption_key,
-            save_encrypted_note
+            save_note,
+            save_note_as,
+            save_note_copy,
+            get_opened_items,
+            close_item,
+            open_note_from_id,
+            reset_app
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

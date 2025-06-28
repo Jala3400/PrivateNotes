@@ -1,27 +1,12 @@
-use crate::{
-    encryption::{decrypt_data, encrypt_data},
-    notes::open_encrypted_note,
-    state::AppState,
-};
-use std::{path::PathBuf, sync::Mutex};
-use tauri::{Emitter, Manager, State, Window};
+use crate::encryption::{decrypt_data, encrypt_data};
+use crate::state::AppState;
+use std::path::PathBuf;
+use std::sync::Mutex;
+use tauri::{Manager, State, Window};
 use tauri_plugin_dialog::DialogExt;
 
-pub fn drop_handler(window: &Window, event: &tauri::DragDropEvent) -> Result<(), String> {
-    match event {
-        // Handle file drops
-        tauri::DragDropEvent::Drop { paths, .. } => {
-            for path in paths {
-                open_from_path(path, window)?;
-            }
-        }
-        _ => {}
-    }
-    Ok(())
-}
-
 /// Opens a file from the given path, handling both encrypted and non-encrypted files.
-pub fn open_from_path(file_path: &PathBuf, window: &Window) -> Result<(), String> {
+pub fn handle_path(file_path: &PathBuf, window: &Window) -> Result<(), String> {
     let app_state = window.state::<Mutex<AppState>>();
     let app_handle = window.app_handle();
 
@@ -35,8 +20,8 @@ pub fn open_from_path(file_path: &PathBuf, window: &Window) -> Result<(), String
         // .lockd directory - decrypt folder
         (true, true) => decrypt_folder(file_path, app_state, app_handle),
 
-        // .lockd file - check if it's a double extension or encrypted note
-        (true, false) => handle_lockd_file(file_path, window, app_state, app_handle),
+        // .lockd file - decrypt
+        (true, false) => decrypt_file(file_path, app_state, app_handle),
 
         // Regular directory - encrypt folder
         (false, true) => encrypt_folder(file_path, app_state, app_handle),
@@ -44,44 +29,6 @@ pub fn open_from_path(file_path: &PathBuf, window: &Window) -> Result<(), String
         // Regular file - encrypt file
         (false, false) => encrypt_file(file_path, app_state, app_handle),
     }
-}
-
-fn handle_lockd_file(
-    file_path: &PathBuf,
-    window: &Window,
-    app_state: State<Mutex<AppState>>,
-    app_handle: &tauri::AppHandle,
-) -> Result<(), String> {
-    // Extract file stem once and check for double extension
-    let file_stem = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
-
-    // Check if file has double extension (e.g., "document.txt.lockd")
-    if PathBuf::from(file_stem).extension().is_some() {
-        // Double extension - decrypt as regular file
-        decrypt_file(file_path, app_state, app_handle)
-    } else {
-        // Single extension - open as encrypted note
-        open_encrypted_note_and_emit(file_path, window, app_state)
-    }
-}
-
-fn open_encrypted_note_and_emit(
-    file_path: &PathBuf,
-    window: &Window,
-    app_state: State<Mutex<AppState>>,
-) -> Result<(), String> {
-    let file_path_str = file_path.to_str().ok_or("Invalid file path encoding")?;
-
-    let content = open_encrypted_note(file_path_str, app_state)?;
-
-    let title = file_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("Untitled");
-
-    window
-        .emit("note-opened", (title, content))
-        .map_err(|e| format!("Failed to emit event: {}", e))
 }
 
 /// Encrypts a file at the given path and saves it with a .lockd extension.
@@ -92,12 +39,6 @@ pub fn encrypt_file(
 ) -> Result<(), String> {
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
-
-    // Read the file content
-    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
-
-    // Encrypt the content using the shared utility function
-    let encrypted_data = encrypt_data(&key, &file_data)?;
 
     // Show save dialog
     let title = file_path
@@ -116,6 +57,13 @@ pub fn encrypt_file(
 
     // Write the encrypted data back to the file
     if let Some(path) = save_path {
+        // Read the file content
+        let file_data =
+            std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+        // Encrypt the content using the shared utility function
+        let encrypted_data = encrypt_data(&key, &file_data)?;
+
         std::fs::write(path.as_path().unwrap(), encrypted_data)
             .map_err(|e| format!("Failed to write file: {}", e))?;
     }
@@ -123,6 +71,7 @@ pub fn encrypt_file(
     Ok(())
 }
 
+/// Decrypts a file at the given path and saves it without the .lockd extension.
 pub fn decrypt_file(
     file_path: &PathBuf,
     app_state: State<Mutex<AppState>>,
@@ -130,12 +79,6 @@ pub fn decrypt_file(
 ) -> Result<(), String> {
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
-
-    // Read the file content
-    let file_data = std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
-
-    // Decrypt the content using the shared utility function
-    let decrypted_content = decrypt_data(&key, &file_data)?;
 
     // Get the original filename without .lockd extension
     let original_filename = file_path
@@ -154,6 +97,13 @@ pub fn decrypt_file(
 
     // Write the decrypted data to the chosen location
     if let Some(path) = save_path {
+        // Read the file content
+        let file_data =
+            std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+        // Decrypt the content using the shared utility function
+        let decrypted_content = decrypt_data(&key, &file_data)?;
+
         std::fs::write(path.as_path().unwrap(), decrypted_content)
             .map_err(|e| format!("Failed to write file: {}", e))?;
     }
@@ -184,6 +134,7 @@ pub fn encrypt_folder(
             "Select destination for encrypted folder: {}",
             folder_name
         ))
+        .set_directory(folder_path.parent().unwrap_or(folder_path.as_path()))
         .blocking_pick_folder();
 
     let Some(output_path) = output_dir else {
@@ -281,6 +232,7 @@ pub fn decrypt_folder(
             "Select destination for decrypted folder: {}",
             folder_name
         ))
+        .set_directory(folder_path.parent().unwrap_or(folder_path.as_path()))
         .blocking_pick_folder();
 
     let Some(output_path) = output_dir else {
