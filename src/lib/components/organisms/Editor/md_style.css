@@ -178,16 +178,24 @@
     opacity: 0.4;
 }
 
-/* Selection Match Highlighting */
+/* Search and selection Match Highlighting */
+.cm-searchMatch,
+.cm-selectionMatch {
+    display: inline-block;
+    border-radius: var(--border-radius-small);
+}
+
 .cm-searchMatch {
     background-color: var(--main-color-dark) !important;
     color: var(--background-dark) !important;
-    border-radius: var(--border-radius-small);
-    display: inline-block;
 }
 
 .cm-searchMatch.cm-searchMatch-selected {
     background-color: var(--main-color-light) !important;
+}
+
+.cm-selectionMatch {
+    background-color: color-mix(in srgb, var(--text-primary), transparent 80%) !important;
 }
 
 /* Panels */
