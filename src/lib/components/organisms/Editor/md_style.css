@@ -247,6 +247,13 @@
     color: var(--text-primary) !important;
 }
 
+.cm-foldPlaceholder {
+    background-color: var(--background-dark-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-small) !important;
+    border-color: var(--border-color-light) !important;
+}
+
 /* Smooth transitions for live preview */
 /* .cm-editor .tok-heading,
 .cm-editor .tok-strong,
