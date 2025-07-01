@@ -8,6 +8,8 @@
     import { classHighlighter, tags } from "@lezer/highlight";
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import "./md_style.css";
+    import { tableRendererPlugin } from "./TableRendererPlugin";
+    import { Table } from "@lezer/markdown";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
@@ -35,10 +37,11 @@
             doc: content,
             extensions: [
                 basicSetup,
-                markdown(),
+                markdown({ extensions: [Table] }),
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
+                tableRendererPlugin(),
                 EditorView.lineWrapping,
             ],
         });

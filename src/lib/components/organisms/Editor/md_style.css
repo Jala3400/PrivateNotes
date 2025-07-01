@@ -264,3 +264,54 @@
 .cm-editor .md-list-item {
     transition: var(--transition);
 } */
+
+/* Table styling */
+.cm-widgetBuffer {
+    display: none !important;
+}
+
+.cm-table-widget {
+    overflow-x: auto;
+    display: block !important;
+    margin: 0 0.5em !important;
+}
+
+.cm-table-hidden-line {
+    display: none !important;
+    height: 0 !important;
+    line-height: 0 !important;
+}
+
+.md-table {
+    border-collapse: collapse;
+    background-color: var(--background-dark-light);
+    border-radius: var(--border-radius-medium);
+    overflow: hidden;
+}
+
+.md-table th,
+.md-table td {
+    padding: 0.25em 0.5em;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color-light);
+    position: relative;
+}
+
+.md-table th {
+    background-color: var(--background-dark-lighter);
+    font-weight: 600;
+    color: var(--main-color);
+    border-bottom: 2px solid var(--main-color);
+}
+
+.md-table tr:hover {
+    background-color: var(--background-dark-lighter);
+}
+
+.md-table tr:last-child td {
+    border-bottom: none;
+}
+
+.md-table td {
+    color: var(--text-primary);
+}
