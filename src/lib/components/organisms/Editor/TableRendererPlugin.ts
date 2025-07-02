@@ -9,6 +9,7 @@ class TableWidget extends WidgetType {
     rendered: string;
     private editorView: EditorView | null = null;
     public tablePosition: { from: number; to: number } | null = null;
+    private isEditing: boolean = false;
 
     constructor(public source: string, from: number, to: number) {
         super();
@@ -41,7 +42,7 @@ class TableWidget extends WidgetType {
         this.rendered = html;
     }
 
-    onCellBlur(cell: HTMLElement, cellIndex: number) {
+    onCellInput(cell: HTMLElement, cellIndex: number) {
         if (this.editorView && this.tablePosition) {
             const newContent = cell.textContent || "";
             this.updateTableInEditor(cellIndex, newContent);
@@ -53,6 +54,8 @@ class TableWidget extends WidgetType {
     }
 
     eq(widget: TableWidget): boolean {
+        // Don't rerender if currently editing
+        if (this.isEditing || widget.isEditing) return true;
         return this.source === widget.source;
     }
 
@@ -67,10 +70,17 @@ class TableWidget extends WidgetType {
         // Attach event listeners to all editable cells
         const cells = content.querySelectorAll(".md-editable-cell");
         cells.forEach((cell, cellIndex) => {
-            // Bind the onBlur method to this instance
-            cell.addEventListener("blur", (event) =>
-                this.onCellBlur(event?.target as HTMLElement, cellIndex)
+            cell.addEventListener("input", (event) =>
+                this.onCellInput(event?.target as HTMLElement, cellIndex)
             );
+
+            cell.addEventListener("focus", () => {
+                this.isEditing = true;
+            });
+
+            cell.addEventListener("blur", () => {
+                this.isEditing = false;
+            });
         });
 
         return content;
