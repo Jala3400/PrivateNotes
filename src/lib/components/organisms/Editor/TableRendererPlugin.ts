@@ -77,7 +77,11 @@ export function tableRendererPlugin() {
         },
 
         update(decorations, transaction) {
-            return RangeSet.of(renderTables(transaction.state), true);
+            if (transaction.docChanged) {
+                return RangeSet.of(renderTables(transaction.state), true);
+            }
+
+            return decorations.map(transaction.changes);
         },
 
         provide(field) {
