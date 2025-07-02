@@ -105,9 +105,7 @@ class TableWidget extends WidgetType {
 
         // Parse current table and update specific cell
         const lines = this.source.split("\n");
-
         const line = lines[row];
-
         const cells = line.split("|");
 
         if (cells.length <= col) {
@@ -132,6 +130,9 @@ class TableWidget extends WidgetType {
                 insert: newTableSource,
             },
         });
+
+        // Update the source
+        this.source = newTableSource;
 
         // Update the table position for future edits
         const newToPosition = this.tablePosition.from + newTableSource.length;
