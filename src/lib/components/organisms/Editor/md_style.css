@@ -297,6 +297,11 @@
     position: relative;
 }
 
+.md-table th:focus,
+.md-table td:focus {
+    outline: none;
+}
+
 .md-table th {
     background-color: var(--background-dark-lighter);
     font-weight: 600;
