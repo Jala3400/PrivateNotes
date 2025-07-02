@@ -9,7 +9,7 @@ class TableWidget extends WidgetType {
     rendered: string;
     private editorView: EditorView | null = null;
     public tablePosition: { from: number; to: number } | null = null;
-    private isEditing: boolean = false;
+    public isEditing: boolean = false;
 
     constructor(public source: string, from: number, to: number) {
         super();
@@ -17,36 +17,30 @@ class TableWidget extends WidgetType {
         this.tablePosition = { from, to };
 
         // Parse the source as markdown table and convert to HTML
-        const lines = source.trim().split("\n");
+        const lines = source.split("\n");
         let html = '<table class="md-table">';
 
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line || line.match(/^\|[\s\-\|:]+\|$/)) continue; // Skip separator rows
+        for (let rowIndex = 0; rowIndex < lines.length; rowIndex++) {
+            const line = lines[rowIndex];
+            if (!line || line.match(/^\s*\|[\s\-:]+(\|[\s\-:]+)*\|\s*$/))
+                continue; // Skip separator rows
 
             const cells = line
                 .split("|")
                 .slice(1, -1)
                 .map((cell) => cell.trim());
-            const tag = i === 0 ? "th" : "td";
+            const tag = rowIndex === 0 ? "th" : "td";
 
             html += "<tr>";
-            for (const cell of cells) {
-                // html += `<${tag}><input class="cell-input" value ="${cell}"</${tag}>`;
-                html += `<${tag} class="md-editable-cell" contenteditable="true">${cell}</${tag}>`;
+            for (let colIndex = 0; colIndex < cells.length; colIndex++) {
+                const cell = cells[colIndex];
+                html += `<${tag} class="md-editable-cell" contenteditable="true" data-row="${rowIndex}" data-col="${colIndex}">${cell}</${tag}>`;
             }
             html += "</tr>";
         }
 
         html += "</table>";
         this.rendered = html;
-    }
-
-    onCellInput(cell: HTMLElement, cellIndex: number) {
-        if (this.editorView && this.tablePosition) {
-            const newContent = cell.textContent || "";
-            this.updateTableInEditor(cellIndex, newContent);
-        }
     }
 
     setEditorContext(editorView: EditorView | null) {
@@ -56,7 +50,10 @@ class TableWidget extends WidgetType {
     eq(widget: TableWidget): boolean {
         // Don't rerender if currently editing
         if (this.isEditing || widget.isEditing) return true;
-        return this.source === widget.source;
+        return (
+            this.source === widget.source &&
+            this.tablePosition === widget.tablePosition
+        );
     }
 
     toDOM(): HTMLElement {
@@ -69,9 +66,9 @@ class TableWidget extends WidgetType {
 
         // Attach event listeners to all editable cells
         const cells = content.querySelectorAll(".md-editable-cell");
-        cells.forEach((cell, cellIndex) => {
+        cells.forEach((cell) => {
             cell.addEventListener("input", (event) =>
-                this.onCellInput(event?.target as HTMLElement, cellIndex)
+                this.onCellInput(event?.target as HTMLElement)
             );
 
             cell.addEventListener("focus", () => {
@@ -86,51 +83,62 @@ class TableWidget extends WidgetType {
         return content;
     }
 
-    private updateTableInEditor(cellIndex: number, newContent: string) {
+    onCellInput(cell: HTMLElement) {
         if (!this.editorView || !this.tablePosition) return;
 
+        // Get cell position data
+        const row = parseInt(cell.dataset.row || "0");
+        const col = parseInt(cell.dataset.col || "0");
+
+        // Get the new cell content
+        const newContent = cell.textContent || "";
+
+        // Rebuild the entire table with the new content
+        this.updateTableInEditor(newContent, row, col);
+    }
+
+    private updateTableInEditor(newContent: string, row: number, col: number) {
+        if (!this.editorView || !this.tablePosition) return;
+
+        // Adjust column index to account for leading pipe
+        col = col + 1;
+
         // Parse current table and update specific cell
-        const lines = this.source.trim().split("\n");
+        const lines = this.source.split("\n");
 
-        // Calculate which row and column based on cellIndex, skipping separator rows
-        let currentCellIndex = 0;
-        let dataRowIndex = 0;
+        const line = lines[row];
 
-        for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-            const line = lines[lineIndex].trim();
+        const cells = line.split("|");
 
-            // Skip separator rows
-            if (!line || line.match(/^\|[\s\-\|:]+\|$/)) continue;
-
-            const cells = line.split("|").slice(1, -1);
-
-            for (let colIndex = 0; colIndex < cells.length; colIndex++) {
-                if (currentCellIndex === cellIndex) {
-                    // Update this cell
-                    const updatedCells = [...cells];
-                    updatedCells[colIndex] = ` ${newContent} `;
-                    const updatedLine = `|${updatedCells.join("|")}|`;
-
-                    // Reconstruct the entire table preserving original structure
-                    const updatedLines = [...lines];
-                    updatedLines[lineIndex] = updatedLine;
-
-                    const newTableSource = updatedLines.join("\n");
-
-                    // Dispatch transaction to update editor
-                    this.editorView.dispatch({
-                        changes: {
-                            from: this.tablePosition.from,
-                            to: this.tablePosition.to,
-                            insert: newTableSource,
-                        },
-                    });
-                    return;
-                }
-                currentCellIndex++;
-            }
-            dataRowIndex++;
+        if (cells.length <= col) {
+            console.warn("Column index out of bounds");
+            return;
         }
+
+        // Update the specific cell
+        cells[col] = ` ${newContent} `;
+        const updatedLine = `${cells.join("|")}`;
+
+        // Reconstruct the entire table preserving original structure
+        lines[row] = updatedLine;
+
+        const newTableSource = lines.join("\n");
+
+        // Dispatch transaction to update editor
+        this.editorView.dispatch({
+            changes: {
+                from: this.tablePosition.from,
+                to: this.tablePosition.to,
+                insert: newTableSource,
+            },
+        });
+
+        // Update the table position for future edits
+        const newToPosition = this.tablePosition.from + newTableSource.length;
+        this.tablePosition = {
+            from: this.tablePosition.from,
+            to: newToPosition,
+        };
     }
 }
 
