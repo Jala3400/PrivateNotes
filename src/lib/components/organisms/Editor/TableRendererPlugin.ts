@@ -89,6 +89,11 @@ class TableWidget extends WidgetType {
             cell.addEventListener("blur", () => {
                 this.isEditing = false;
             });
+
+            cell.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+                this.showContextMenu(event as MouseEvent, cell as HTMLElement);
+            });
         });
     }
 
@@ -216,6 +221,26 @@ class TableWidget extends WidgetType {
         this.updateTableSource(updatedLines.join("\n"));
     }
 
+    private deleteRow(rowIndex: number) {
+        const lines = this.source.split("\n");
+        lines.splice(rowIndex, 1);
+        this.updateTableSource(lines.join("\n"));
+    }
+
+    private deleteColumn(colIndex: number) {
+        const lines = this.source.split("\n");
+        const deleteIndex = colIndex + 1; // Account for leading pipe
+
+        const updatedLines = lines.map((line) => {
+            if (!line.trim()) return line;
+            const cells = line.split("|");
+            cells.splice(deleteIndex, 1);
+            return cells.join("|");
+        });
+
+        this.updateTableSource(updatedLines.join("\n"));
+    }
+
     private updateTableSource(newSource: string) {
         if (!this.editorView || !this.tablePosition) return;
 
@@ -229,6 +254,73 @@ class TableWidget extends WidgetType {
                 insert: newSource,
             },
         });
+    }
+
+    private showContextMenu(event: MouseEvent, cell: HTMLElement): void {
+        const row = parseInt(cell.dataset.row || "0");
+        const col = parseInt(cell.dataset.col || "0");
+
+        // Remove any existing context menu
+        this.removeContextMenu();
+
+        const menu = document.createElement("div");
+        menu.className = "table-context-menu";
+        menu.style.left = `${event.pageX}px`;
+        menu.style.top = `${event.pageY}px`;
+
+        const menuItems = [
+            { text: "Add Row Above", action: () => this.addRow(row) },
+            { text: "Add Row Below", action: () => this.addRow(row + 1) },
+            { text: "Add Column Left", action: () => this.addColumn(col) },
+            { text: "Add Column Right", action: () => this.addColumn(col + 1) },
+            { text: "---", action: null }, // Separator
+            { text: "Delete Row", action: () => this.deleteRow(row) },
+            { text: "Delete Column", action: () => this.deleteColumn(col) },
+        ];
+
+        menuItems.forEach((item) => {
+            if (item.text === "---") {
+                const separator = document.createElement("div");
+                separator.style.height = "1px";
+                separator.style.backgroundColor = "var(--border-color-light)";
+                separator.style.margin = "4px 0";
+                menu.appendChild(separator);
+            } else {
+                const menuItem = document.createElement("div");
+                menuItem.className = "table-context-menu-item";
+                menuItem.textContent = item.text;
+
+                if (item.action) {
+                    menuItem.addEventListener("click", () => {
+                        item.action!();
+                        this.removeContextMenu();
+                    });
+                }
+
+                menu.appendChild(menuItem);
+            }
+        });
+
+        document.body.appendChild(menu);
+
+        // Close menu when clicking outside
+        const closeMenu = (e: MouseEvent) => {
+            if (!menu.contains(e.target as Node)) {
+                this.removeContextMenu();
+                document.removeEventListener("click", closeMenu);
+            }
+        };
+
+        setTimeout(() => {
+            document.addEventListener("click", closeMenu);
+        }, 0);
+    }
+
+    private removeContextMenu(): void {
+        const existingMenu = document.querySelector(".table-context-menu");
+        if (existingMenu) {
+            existingMenu.remove();
+        }
     }
 }
 

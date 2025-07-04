@@ -335,3 +335,32 @@
 .table-button:hover {
     opacity: 1;
 }
+
+/* Context menu styling */
+.table-context-menu {
+    position: absolute;
+    background-color: var(--background-dark-light);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius-medium);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 160px;
+    overflow: hidden;
+    font-family: inherit;
+}
+
+.table-context-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.table-context-menu-item:hover {
+    background-color: var(--background-dark-lighter);
+}
+
+.table-context-menu-item:active {
+    background-color: var(--main-color);
+    color: var(--background-dark);
+}
