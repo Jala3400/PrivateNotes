@@ -265,8 +265,8 @@ class TableWidget extends WidgetType {
 
         const menu = document.createElement("div");
         menu.className = "table-context-menu";
-        menu.style.left = `${event.pageX}px`;
-        menu.style.top = `${event.pageY}px`;
+        menu.style.setProperty("--menu-x", `${event.pageX}px`);
+        menu.style.setProperty("--menu-y", `${event.pageY}px`);
 
         const menuItems = [
             { text: "Add Row Above", action: () => this.addRow(row) },
