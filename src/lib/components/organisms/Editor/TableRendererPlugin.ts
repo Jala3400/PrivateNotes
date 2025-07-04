@@ -22,7 +22,12 @@ class TableWidget extends WidgetType {
 
         for (let rowIndex = 0; rowIndex < lines.length; rowIndex++) {
             const line = lines[rowIndex];
-            if (!line || line.match(/^\s*\|[\s\-:]+(\|[\s\-:]+)*\|\s*$/))
+            const trimmed = line.trim();
+            if (
+                /^[\|\s\-:]+$/.test(trimmed) &&
+                trimmed.includes("-") &&
+                trimmed.includes("|")
+            )
                 continue; // Skip separator rows
 
             const cells = line
@@ -80,10 +85,38 @@ class TableWidget extends WidgetType {
             });
         });
 
+        this.addHoverButtons(content);
+
         return content;
     }
 
-    onCellInput(cell: HTMLElement) {
+    private addHoverButtons(content: HTMLElement) {
+        const table = content.querySelector("table");
+        if (!table) return;
+
+        const addColBtn = document.createElement("button");
+        addColBtn.className = "table-button add-col-btn";
+        addColBtn.textContent = "+";
+        addColBtn.onclick = () => {
+            const firstRow = table.querySelector("tr");
+            const colCount = firstRow
+                ? firstRow.querySelectorAll("th, td").length
+                : 0;
+            this.addColumn(colCount);
+        };
+
+        content.appendChild(addColBtn);
+
+        const addRowBtn = document.createElement("button");
+        addRowBtn.className = "table-button add-row-btn";
+        addRowBtn.textContent = "+";
+        addRowBtn.onclick = () =>
+            this.addRow(table.querySelectorAll("tr").length + 1); // + 1 to add for the separator row
+
+        content.appendChild(addRowBtn);
+    }
+
+    private onCellInput(cell: HTMLElement) {
         if (!this.editorView || !this.tablePosition) return;
 
         // Get cell position data
@@ -140,6 +173,60 @@ class TableWidget extends WidgetType {
             from: this.tablePosition.from,
             to: newToPosition,
         };
+    }
+
+    private addRow(index: number) {
+        const lines = this.source.split("\n");
+
+        const colCount = lines[0].split("|").length - 2; // Exclude leading/trailing
+        const newRow =
+            "|" +
+            " "
+                .repeat(colCount)
+                .split("")
+                .map(() => "   ")
+                .join("|") +
+            "|";
+
+        lines.splice(index, 0, newRow);
+        this.updateTableSource(lines.join("\n"));
+    }
+
+    private addColumn(index: number) {
+        const lines = this.source.split("\n");
+
+        const updatedLines = lines.map((line, idx) => {
+            if (!line.trim()) return line;
+
+            const cells = line.split("|");
+
+            // Handle separator row
+            // index + 1 to account for leading pipe
+            if (idx === 1) {
+                cells.splice(index + 1, 0, "---");
+            } else {
+                cells.splice(index + 1, 0, "   ");
+            }
+
+            return cells.join("|");
+        });
+
+        this.updateTableSource(updatedLines.join("\n"));
+    }
+
+    private updateTableSource(newSource: string) {
+        if (!this.editorView || !this.tablePosition) return;
+
+        // Reset editing state so the table gets re-rendered
+        this.isEditing = false;
+
+        this.editorView.dispatch({
+            changes: {
+                from: this.tablePosition.from,
+                to: this.tablePosition.to,
+                insert: newSource,
+            },
+        });
     }
 }
 

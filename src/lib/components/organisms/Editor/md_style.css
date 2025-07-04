@@ -272,7 +272,9 @@
 
 .cm-table-widget {
     overflow-x: auto;
-    display: block !important;
+    display: grid;
+    /* grid to fit the add row and column buttons */
+    grid-template-columns: fit-content(100%) fit-content(100%);
     margin: 0 0.5em !important;
 }
 
@@ -319,4 +321,17 @@
 
 .md-table td {
     color: var(--text-primary);
+}
+
+.table-button {
+    min-height: 1lh;
+    min-width: 1lh;
+    border: 1px solid var(--border-color-light);
+    background-color: transparent;
+    color: var(--text-secondary);
+    opacity: 0;
+}
+
+.table-button:hover {
+    opacity: 1;
 }
