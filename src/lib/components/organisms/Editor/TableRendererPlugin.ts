@@ -69,8 +69,14 @@ class TableWidget extends WidgetType {
         // Store reference to this widget instance
         (content as any).__tableWidget = this;
 
-        // Attach event listeners to all editable cells
-        const cells = content.querySelectorAll(".md-editable-cell");
+        this.addCellEventListeners(content);
+        this.addHoverButtons(content);
+
+        return content;
+    }
+
+    private addCellEventListeners(container: HTMLElement): void {
+        const cells = container.querySelectorAll(".md-editable-cell");
         cells.forEach((cell) => {
             cell.addEventListener("input", (event) =>
                 this.onCellInput(event?.target as HTMLElement)
@@ -84,10 +90,6 @@ class TableWidget extends WidgetType {
                 this.isEditing = false;
             });
         });
-
-        this.addHoverButtons(content);
-
-        return content;
     }
 
     private addHoverButtons(content: HTMLElement) {
