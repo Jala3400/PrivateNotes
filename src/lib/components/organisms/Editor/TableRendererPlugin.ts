@@ -1,6 +1,7 @@
 import { Decoration, WidgetType, EditorView } from "@codemirror/view";
 import { RangeSet, StateField } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
+import { keymap } from "@codemirror/view";
 
 import type { DecorationSet } from "@codemirror/view";
 import type { EditorState, Extension, Range } from "@codemirror/state";
@@ -322,6 +323,66 @@ class TableWidget extends WidgetType {
             existingMenu.remove();
         }
     }
+
+    private focusFirstCell(container: HTMLElement): void {
+        const firstCell = container.querySelector(
+            ".md-editable-cell"
+        ) as HTMLElement;
+
+        if (firstCell) {
+            firstCell.focus();
+            // Place cursor at the beginning of the cell
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+                range.setStart(firstCell, 0);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+    }
+
+    private focusLastCell(container: HTMLElement): void {
+        const lastCell = container.querySelector(
+            "tr:last-child .md-editable-cell:last-child"
+        ) as HTMLElement;
+
+        if (lastCell) {
+            lastCell.focus();
+            // Place cursor at the end of the cell
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+                range.setStart(lastCell, lastCell.childNodes.length);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+    }
+
+    // Checks if the cursor position is at the top of the table
+    public shouldEnterTableFromTop(cursorPos: number): boolean {
+        if (!this.tablePosition) return false;
+        return cursorPos === this.tablePosition.from - 1;
+    }
+
+    // Checks if the cursor position is at the bottom of the table
+    public shouldEnterTableFromBottom(cursorPos: number): boolean {
+        if (!this.tablePosition) return false;
+        return cursorPos === this.tablePosition.to + 1;
+    }
+
+    // Focuses the first cell when entering from the top
+    public enterTableFromTop(container: HTMLElement): void {
+        this.focusFirstCell(container);
+    }
+
+    // Focuses the last cell when entering from the bottom
+    public enterTableFromBottom(container: HTMLElement): void {
+        this.focusLastCell(container);
+    }
 }
 
 function renderTables(state: EditorState, from?: number, to?: number) {
@@ -345,6 +406,51 @@ function renderTables(state: EditorState, from?: number, to?: number) {
 
     return decorations;
 }
+
+const tableKeymap = [
+    {
+        key: "ArrowRight",
+        run: (view: EditorView) => {
+            const cursorPos = view.state.selection.main.head;
+
+            // Find table widgets and check if cursor should enter any of them
+            const widgets = view.dom.querySelectorAll(".cm-table-widget");
+            for (const widgetElement of widgets) {
+                const widget = (widgetElement as any).__tableWidget;
+                if (widget && widget instanceof TableWidget) {
+                    if (widget.shouldEnterTableFromTop(cursorPos)) {
+                        widget.enterTableFromTop(widgetElement as HTMLElement);
+                        return true; // Prevent default behavior
+                    }
+                }
+            }
+
+            return false; // Allow default behavior
+        },
+    },
+    {
+        key: "ArrowLeft",
+        run: (view: EditorView) => {
+            const cursorPos = view.state.selection.main.head;
+
+            // Find table widgets and check if cursor should enter any of them
+            const widgets = view.dom.querySelectorAll(".cm-table-widget");
+            for (const widgetElement of widgets) {
+                const widget = (widgetElement as any).__tableWidget;
+                if (widget && widget instanceof TableWidget) {
+                    if (widget.shouldEnterTableFromBottom(cursorPos)) {
+                        widget.enterTableFromBottom(
+                            widgetElement as HTMLElement
+                        );
+                        return true; // Prevent default behavior
+                    }
+                }
+            }
+
+            return false; // Allow default behavior
+        },
+    },
+];
 
 export function tableRendererPlugin(): Extension {
     return [
@@ -382,5 +488,7 @@ export function tableRendererPlugin(): Extension {
                 });
             }
         }),
+
+        keymap.of(tableKeymap),
     ];
 }

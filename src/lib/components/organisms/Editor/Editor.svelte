@@ -36,13 +36,13 @@
         const state = EditorState.create({
             doc: content,
             extensions: [
-                basicSetup,
                 markdown({ extensions: [Table] }),
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
                 tableRendererPlugin(),
                 EditorView.lineWrapping,
+                basicSetup,
             ],
         });
 
