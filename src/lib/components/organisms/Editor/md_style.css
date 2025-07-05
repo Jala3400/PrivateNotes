@@ -295,8 +295,11 @@
 .md-table td {
     padding: 0.25em 0.5em;
     text-align: left;
-    border-bottom: 1px solid var(--border-color-light);
     position: relative;
+}
+
+.md-table td {
+    border: 1px solid var(--border-color-light);
 }
 
 .md-table th:focus,
@@ -313,6 +316,10 @@
 
 .md-table tr:hover {
     background-color: var(--background-dark-lighter);
+}
+
+.md-table tr:hover td {
+    border-color: var(--border-color);
 }
 
 .md-table tr:last-child td {
