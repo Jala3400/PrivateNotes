@@ -461,25 +461,47 @@ class TableWidget extends WidgetType {
     ): void {
         let row = parseInt(cell.dataset.row || "0");
         const col = parseInt(cell.dataset.col || "0");
+        const table = container.querySelector("table");
+        if (!table) return;
+
+        const maxRow = table.rows.length;
 
         switch (event.key) {
             case "ArrowDown":
-                // Skip if we're at the last row
-                const table = container.querySelector("table");
-                if (row === table?.rows.length) return;
                 event.preventDefault();
-                if (row === 0) {
-                    row += 1; // Take in count the separator row
+                if (row === maxRow) {
+                    // Exit table when at the last row
+                    if (this.editorView && this.tablePosition) {
+                        const pos = this.tablePosition.to + 1;
+                        this.editorView.focus();
+                        this.editorView.dispatch({
+                            selection: { anchor: pos, head: pos },
+                        });
+                    }
+                } else {
+                    if (row === 0) {
+                        row += 1; // Take in count the separator row
+                    }
+                    this.focusCellAt(container, row + 1, col);
                 }
-                this.focusCellAt(container, row + 1, col);
                 break;
             case "ArrowUp":
-                if (row === 0) return;
                 event.preventDefault();
-                if (row === 2) {
-                    row -= 1; // Prevent going above the header row
+                if (row === 0) {
+                    // Exit table when at the first row
+                    if (this.editorView && this.tablePosition) {
+                        const pos = this.tablePosition.from - 1;
+                        this.editorView.focus();
+                        this.editorView.dispatch({
+                            selection: { anchor: pos, head: pos },
+                        });
+                    }
+                } else {
+                    if (row === 2) {
+                        row -= 1; // Take in count the separator row
+                    }
+                    this.focusCellAt(container, row - 1, col);
                 }
-                this.focusCellAt(container, row - 1, col);
                 break;
         }
     }
