@@ -205,6 +205,13 @@ class TableWidget extends WidgetType {
             "|";
 
         lines.splice(index, 0, newRow);
+
+        // Take in count the separator row
+        if (index <= 1) {
+            // Swap the second an third row if adding above the separator
+            [lines[1], lines[2]] = [lines[2], lines[1]];
+        }
+
         this.updateTableSource(lines.join("\n"));
     }
 
@@ -233,6 +240,12 @@ class TableWidget extends WidgetType {
     private deleteRow(rowIndex: number) {
         const lines = this.source.split("\n");
         lines.splice(rowIndex, 1);
+
+        // Take in count the separator row
+        if (rowIndex == 0) {
+            [lines[0], lines[1]] = [lines[1], lines[0]];
+        }
+
         this.updateTableSource(lines.join("\n"));
     }
 
