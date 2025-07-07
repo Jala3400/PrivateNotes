@@ -390,3 +390,8 @@
     background-color: var(--main-color);
     color: var(--background-dark);
 }
+
+.table-context-menu-separator {
+    height: 1px;
+    background-color: var(--border-color-light);
+}

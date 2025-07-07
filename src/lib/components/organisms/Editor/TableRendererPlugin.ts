@@ -396,9 +396,7 @@ class TableWidget extends WidgetType {
         menuItems.forEach((item) => {
             if (item.text === "---") {
                 const separator = document.createElement("div");
-                separator.style.height = "1px";
-                separator.style.backgroundColor = "var(--border-color-light)";
-                separator.style.margin = "4px 0";
+                separator.className = "table-context-menu-separator";
                 menu.appendChild(separator);
             } else {
                 const menuItem = document.createElement("div");
@@ -423,11 +421,21 @@ class TableWidget extends WidgetType {
             if (!menu.contains(e.target as Node)) {
                 this.removeContextMenu();
                 document.removeEventListener("click", closeMenu);
+                document.removeEventListener("keydown", closeMenuOnEsc);
+            }
+        };
+
+        const closeMenuOnEsc = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                this.removeContextMenu();
+                document.removeEventListener("click", closeMenu);
+                document.removeEventListener("keydown", closeMenuOnEsc);
             }
         };
 
         setTimeout(() => {
             document.addEventListener("click", closeMenu);
+            document.addEventListener("keydown", closeMenuOnEsc);
         }, 0);
     }
 
