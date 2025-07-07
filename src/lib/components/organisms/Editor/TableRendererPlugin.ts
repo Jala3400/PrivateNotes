@@ -448,7 +448,8 @@ class TableWidget extends WidgetType {
         const table = container.querySelector("table");
         if (!table) return;
 
-        const maxRow = table.rows.length;
+        const maxRow = table.rows.length; // Not -1 because we include the separator row
+        const maxCol = table.rows[0].cells.length - 1;
 
         switch (event.key) {
             case "ArrowDown":
@@ -487,6 +488,50 @@ class TableWidget extends WidgetType {
                     this.focusCellAt(container, row - 1, col);
                 }
                 break;
+            case "Tab":
+                event.preventDefault();
+                if (event.shiftKey) {
+                    // Shift+Tab: move to previous cell
+                    if (row === 0 && col === 0) {
+                        // Exit table from the top
+                        if (this.editorView && this.tablePosition) {
+                            const pos = this.tablePosition.from - 1;
+                            this.editorView.focus();
+                            this.editorView.dispatch({
+                                selection: { anchor: pos, head: pos },
+                            });
+                        }
+                    } else {
+                        // Move to previous cell. It is done this way to place the cursor at the end of the cell
+                        const prevCol = col - 1 >= 0 ? col - 1 : maxCol;
+                        let prevRow = col === 0 ? row - 1 : row;
+                        if (prevRow === 1) {
+                            prevRow -= 1; // Take in count the separator row
+                        }
+                        this.focusCellAt(container, prevRow, prevCol);
+                    }
+                } else {
+                    // Tab: move to next cell
+                    if (col === maxCol && row === maxRow) {
+                        // Exit table and focus editor after the table
+                        if (this.editorView && this.tablePosition) {
+                            const pos = this.tablePosition.to + 1;
+                            this.editorView.focus();
+                            this.editorView.dispatch({
+                                selection: { anchor: pos, head: pos },
+                            });
+                        }
+                    } else {
+                        // Move to next cell. It is done this way to place the cursor at the end of the cell
+                        const nextCol = col + 1 <= maxCol ? col + 1 : 0;
+                        let nextRow = nextCol === 0 ? row + 1 : row;
+                        if (nextRow === 1) {
+                            // Take in count the separator row
+                            nextRow += 1;
+                        }
+                        this.focusCellAt(container, nextRow, nextCol);
+                    }
+                }
         }
     }
 
