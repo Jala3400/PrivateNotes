@@ -424,15 +424,6 @@ class TableWidget extends WidgetType {
 
         if (firstCell) {
             firstCell.focus();
-            // Place cursor at the beginning of the cell
-            const range = document.createRange();
-            const selection = window.getSelection();
-            if (selection) {
-                range.setStart(firstCell, 0);
-                range.collapse(true);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
         }
     }
 
