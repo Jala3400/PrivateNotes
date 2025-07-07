@@ -425,35 +425,6 @@ class TableWidget extends WidgetType {
         }
     }
 
-    private focusFirstCell(container: HTMLElement): void {
-        const firstCell = container.querySelector(
-            ".md-editable-cell"
-        ) as HTMLElement;
-
-        if (firstCell) {
-            firstCell.focus();
-        }
-    }
-
-    private focusLastCell(container: HTMLElement): void {
-        const lastCell = container.querySelector(
-            "tr:last-child .md-editable-cell:last-child"
-        ) as HTMLElement;
-
-        if (lastCell) {
-            lastCell.focus();
-            // Place cursor at the end of the cell
-            const range = document.createRange();
-            const selection = window.getSelection();
-            if (selection) {
-                range.setStart(lastCell, lastCell.childNodes.length);
-                range.collapse(true);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-        }
-    }
-
     private handleCellKeydown(
         event: KeyboardEvent,
         cell: HTMLElement,
@@ -543,12 +514,61 @@ class TableWidget extends WidgetType {
 
     // Focuses the first cell when entering from the top
     public enterTableFromTop(container: HTMLElement): void {
-        this.focusFirstCell(container);
+        const firstCell = container.querySelector(
+            ".md-editable-cell"
+        ) as HTMLElement;
+
+        if (firstCell) {
+            firstCell.focus();
+            // Place cursor at the end of the cell
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+                range.setStart(firstCell, firstCell.childNodes.length);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
     }
 
     // Focuses the last cell when entering from the bottom
     public enterTableFromBottom(container: HTMLElement): void {
-        this.focusLastCell(container);
+        const lastCell = container.querySelector(
+            "tr:last-child .md-editable-cell"
+        ) as HTMLElement;
+
+        if (lastCell) {
+            lastCell.focus();
+            // Place cursor at the end of the cell
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+                range.setStart(lastCell, lastCell.childNodes.length);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+    }
+
+    public enterTableFromLeft(container: HTMLElement): void {
+        const firstCell = container.querySelector(
+            "tr:last-child .md-editable-cell:last-child"
+        ) as HTMLElement;
+
+        if (firstCell) {
+            firstCell.focus();
+            // Place cursor at the end of the cell
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+                range.setStart(firstCell, firstCell.childNodes.length);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
     }
 }
 
@@ -603,6 +623,22 @@ function enterTableFromBottomKeymap(view: EditorView): boolean {
     }
     return false; // Allow default behavior
 }
+
+function enterTableFromLeftKeymap(view: EditorView): boolean {
+    const cursorPos = view.state.selection.main.head;
+    const widgets = view.dom.querySelectorAll(".cm-table-widget");
+    for (const widgetElement of widgets) {
+        const widget = (widgetElement as any).__tableWidget;
+        if (widget && widget instanceof TableWidget) {
+            if (widget.shouldEnterTableFromBottom(cursorPos)) {
+                widget.enterTableFromLeft(widgetElement as HTMLElement);
+                return true; // Prevent default behavior
+            }
+        }
+    }
+    return false; // Allow default behavior
+}
+
 const tableKeymap = [
     {
         key: "ArrowRight",
@@ -619,7 +655,7 @@ const tableKeymap = [
     {
         key: "ArrowLeft",
         run: (view: EditorView) => {
-            return enterTableFromBottomKeymap(view);
+            return enterTableFromLeftKeymap(view);
         },
     },
     {
