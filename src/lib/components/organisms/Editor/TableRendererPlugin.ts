@@ -242,6 +242,88 @@ class TableWidget extends WidgetType {
         this.updateTableSource(updatedLines.join("\n"));
     }
 
+    private moveRowUp(rowIndex: number) {
+        if (rowIndex <= 0) return; // Can't move header row or first data row above header
+
+        const lines = this.source.split("\n");
+
+        // Handle separator row (skip it in calculations)
+
+        if (rowIndex >= lines.length) return;
+
+        // Swap with previous row
+        [lines[rowIndex], lines[rowIndex - 1]] = [
+            lines[rowIndex - 1],
+            lines[rowIndex],
+        ];
+
+        this.updateTableSource(lines.join("\n"));
+    }
+
+    private moveRowDown(rowIndex: number) {
+        const lines = this.source.split("\n");
+
+        // Handle separator row (skip it in calculations)
+        let actualRowIndex = rowIndex;
+
+        if (actualRowIndex >= lines.length - 1) return; // Can't move last row down
+
+        // Swap with next row
+        [lines[actualRowIndex], lines[actualRowIndex + 1]] = [
+            lines[actualRowIndex + 1],
+            lines[actualRowIndex],
+        ];
+
+        this.updateTableSource(lines.join("\n"));
+    }
+
+    private moveColumnLeft(colIndex: number) {
+        if (colIndex <= 0) return; // Can't move leftmost column
+
+        const lines = this.source.split("\n");
+        const moveIndex = colIndex + 1; // Account for leading pipe
+
+        const updatedLines = lines.map((line) => {
+            if (!line.trim()) return line;
+            const cells = line.split("|");
+
+            // Swap columns
+            [cells[moveIndex], cells[moveIndex - 1]] = [
+                cells[moveIndex - 1],
+                cells[moveIndex],
+            ];
+
+            return cells.join("|");
+        });
+
+        this.updateTableSource(updatedLines.join("\n"));
+    }
+
+    private moveColumnRight(colIndex: number) {
+        const lines = this.source.split("\n");
+        const firstLine = lines[0];
+        const maxCols = firstLine.split("|").length - 2; // Exclude leading/trailing pipes
+
+        if (colIndex >= maxCols - 1) return; // Can't move rightmost column
+
+        const moveIndex = colIndex + 1; // Account for leading pipe
+
+        const updatedLines = lines.map((line) => {
+            if (!line.trim()) return line;
+            const cells = line.split("|");
+
+            // Swap columns
+            [cells[moveIndex], cells[moveIndex + 1]] = [
+                cells[moveIndex + 1],
+                cells[moveIndex],
+            ];
+
+            return cells.join("|");
+        });
+
+        this.updateTableSource(updatedLines.join("\n"));
+    }
+
     private updateTableSource(newSource: string) {
         if (!this.editorView || !this.tablePosition) return;
 
@@ -274,6 +356,17 @@ class TableWidget extends WidgetType {
             { text: "Add Row Below", action: () => this.addRow(row + 1) },
             { text: "Add Column Left", action: () => this.addColumn(col) },
             { text: "Add Column Right", action: () => this.addColumn(col + 1) },
+            { text: "---", action: null }, // Separator
+            { text: "Move Row Up", action: () => this.moveRowUp(row) },
+            { text: "Move Row Down", action: () => this.moveRowDown(row) },
+            {
+                text: "Move Column Left",
+                action: () => this.moveColumnLeft(col),
+            },
+            {
+                text: "Move Column Right",
+                action: () => this.moveColumnRight(col),
+            },
             { text: "---", action: null }, // Separator
             { text: "Delete Row", action: () => this.deleteRow(row) },
             { text: "Delete Column", action: () => this.deleteColumn(col) },

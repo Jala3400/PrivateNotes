@@ -372,7 +372,7 @@
     max-inline-size: calc(100vi - 2rem);
     max-block-size: calc(100vb - 2rem);
     inset-inline-start: clamp(1rem, var(--menu-x), calc(100vi - 160px - 1rem));
-    inset-block-start: clamp(1rem, var(--menu-y), calc(100vb - 200px - 1rem));
+    inset-block-start: clamp(1rem, var(--menu-y), calc(100vb - 350px - 1rem));
 }
 
 .table-context-menu-item {
