@@ -17,26 +17,31 @@ class TableWidget extends WidgetType {
 
         this.tablePosition = { from, to };
 
-        // Parse the source as markdown table and convert to HTML
+        // Split the source into lines and render as HTML table
         const lines = source.split("\n");
         let html = '<table class="md-table">';
 
+        // For each line, create a table row
         for (let rowIndex = 0; rowIndex < lines.length; rowIndex++) {
             const line = lines[rowIndex];
             const trimmed = line.trim();
+
+            // Skip separator lines
             if (
                 /^[\|\s\-:]+$/.test(trimmed) &&
                 trimmed.includes("-") &&
                 trimmed.includes("|")
             )
-                continue; // Skip separator rows
+                continue;
 
+            // Split the line into cells
             const cells = line
                 .split("|")
                 .slice(1, -1)
                 .map((cell) => cell.trim());
             const tag = rowIndex === 0 ? "th" : "td";
 
+            // For each cell, create a table cell
             html += "<tr>";
             for (let colIndex = 0; colIndex < cells.length; colIndex++) {
                 const cell = cells[colIndex];
@@ -49,12 +54,15 @@ class TableWidget extends WidgetType {
         this.rendered = html;
     }
 
+    // Sets the editor context for this widget
     setEditorContext(editorView: EditorView | null) {
         this.editorView = editorView;
     }
 
+    // Checks if this widget should be rerendered
     eq(widget: TableWidget): boolean {
         // Don't rerender if currently editing
+        // Otherwise the cells loses focus
         if (this.isEditing || widget.isEditing) return true;
         return (
             this.source === widget.source &&
@@ -62,14 +70,17 @@ class TableWidget extends WidgetType {
         );
     }
 
+    // Converts the widget to a DOM element
     toDOM(): HTMLElement {
         let content = document.createElement("div");
         content.className = "cm-table-widget";
         content.innerHTML = this.rendered;
 
         // Store reference to this widget instance
+        // Used to pass the editor context later
         (content as any).__tableWidget = this;
 
+        // Add extra functionality
         this.addCellEventListeners(content);
         this.addHoverButtons(content);
 
@@ -110,6 +121,7 @@ class TableWidget extends WidgetType {
         const table = content.querySelector("table");
         if (!table) return;
 
+        // Add column button
         const addColBtn = document.createElement("button");
         addColBtn.className = "table-button add-col-btn";
         addColBtn.textContent = "+";
@@ -123,6 +135,7 @@ class TableWidget extends WidgetType {
 
         content.appendChild(addColBtn);
 
+        // Add row button
         const addRowBtn = document.createElement("button");
         addRowBtn.className = "table-button add-row-btn";
         addRowBtn.textContent = "+";
@@ -157,6 +170,7 @@ class TableWidget extends WidgetType {
         const line = lines[row];
         const cells = line.split("|");
 
+        // Validate row and column indices
         if (cells.length <= col) {
             console.warn("Column index out of bounds");
             return;
@@ -192,9 +206,10 @@ class TableWidget extends WidgetType {
     }
 
     private addRow(index: number) {
+        // Split the source into lines
         const lines = this.source.split("\n");
 
-        const colCount = lines[0].split("|").length - 2; // Exclude leading/trailing
+        const colCount = lines[0].split("|").length - 2; // Exclude leading/trailing pipes
         const newRow =
             "|" +
             " "
@@ -204,6 +219,7 @@ class TableWidget extends WidgetType {
                 .join("|") +
             "|";
 
+        // Insert the new row at the specified index
         lines.splice(index, 0, newRow);
 
         // Take in count the separator row
@@ -212,15 +228,20 @@ class TableWidget extends WidgetType {
             [lines[1], lines[2]] = [lines[2], lines[1]];
         }
 
+        // Commit the changes to the editor
         this.updateTableSource(lines.join("\n"));
     }
 
     private addColumn(index: number) {
+        // Split the source into lines
         const lines = this.source.split("\n");
 
+        // Add a new column to each row
         const updatedLines = lines.map((line, idx) => {
+            // Skip empty lines
             if (!line.trim()) return line;
 
+            // Split the line into cells
             const cells = line.split("|");
 
             // Handle separator row
@@ -234,42 +255,58 @@ class TableWidget extends WidgetType {
             return cells.join("|");
         });
 
+        // Commit the changes to the editor
         this.updateTableSource(updatedLines.join("\n"));
     }
 
     private deleteRow(rowIndex: number) {
+        // Split the source into lines
         const lines = this.source.split("\n");
+
+        // Delete the specified row
         lines.splice(rowIndex, 1);
 
         // Take in count the separator row
         if (rowIndex == 0) {
+            // Swap the first and second rows if deleting the header
             [lines[0], lines[1]] = [lines[1], lines[0]];
         }
 
+        // Commit the changes to the editor
         this.updateTableSource(lines.join("\n"));
     }
 
     private deleteColumn(colIndex: number) {
+        // Split the source into lines
         const lines = this.source.split("\n");
+
         const deleteIndex = colIndex + 1; // Account for leading pipe
 
+        // Delete the specified column from each row
         const updatedLines = lines.map((line) => {
+            // Skip empty lines
             if (!line.trim()) return line;
+
+            // Split the line into cells
             const cells = line.split("|");
+
+            // Delete the specified column
             cells.splice(deleteIndex, 1);
+
             return cells.join("|");
         });
 
+        // Commit the changes to the editor
         this.updateTableSource(updatedLines.join("\n"));
     }
 
     private moveRowUp(rowIndex: number) {
-        if (rowIndex <= 0) return; // Can't move header row or first data row above header
+        if (rowIndex <= 0) return; // Can't move first row up
 
+        // Split the source into lines
         const lines = this.source.split("\n");
 
-        // Handle separator row (skip it in calculations)
-
+        // Validate row index
         if (rowIndex >= lines.length) return;
 
         // Swap with previous row
@@ -278,10 +315,12 @@ class TableWidget extends WidgetType {
             lines[rowIndex],
         ];
 
+        // Commit the changes to the editor
         this.updateTableSource(lines.join("\n"));
     }
 
     private moveRowDown(rowIndex: number) {
+        // Split the source into lines
         const lines = this.source.split("\n");
 
         // Handle separator row (skip it in calculations)
@@ -299,13 +338,19 @@ class TableWidget extends WidgetType {
     }
 
     private moveColumnLeft(colIndex: number) {
-        if (colIndex <= 0) return; // Can't move leftmost column
+        if (colIndex <= 0) return; // Can't move left leftmost column
 
+        // Split the source into lines
         const lines = this.source.split("\n");
+
         const moveIndex = colIndex + 1; // Account for leading pipe
 
+        // Move the column left for each row
         const updatedLines = lines.map((line) => {
+            // Skip empty lines
             if (!line.trim()) return line;
+
+            // Split the line into cells
             const cells = line.split("|");
 
             // Swap columns
@@ -317,10 +362,12 @@ class TableWidget extends WidgetType {
             return cells.join("|");
         });
 
+        // Commit the changes to the editor
         this.updateTableSource(updatedLines.join("\n"));
     }
 
     private moveColumnRight(colIndex: number) {
+        // Split the source into lines
         const lines = this.source.split("\n");
         const firstLine = lines[0];
         const maxCols = firstLine.split("|").length - 2; // Exclude leading/trailing pipes
@@ -329,8 +376,12 @@ class TableWidget extends WidgetType {
 
         const moveIndex = colIndex + 1; // Account for leading pipe
 
+        // Move the column right for each row
         const updatedLines = lines.map((line) => {
+            // Skip empty lines
             if (!line.trim()) return line;
+
+            // Split the line into cells
             const cells = line.split("|");
 
             // Swap columns
@@ -342,6 +393,7 @@ class TableWidget extends WidgetType {
             return cells.join("|");
         });
 
+        // Commit the changes to the editor
         this.updateTableSource(updatedLines.join("\n"));
     }
 
@@ -351,6 +403,7 @@ class TableWidget extends WidgetType {
         // Reset editing state so the table gets re-rendered
         this.isEditing = false;
 
+        // Update the editor source
         this.editorView.dispatch({
             changes: {
                 from: this.tablePosition.from,
@@ -361,17 +414,20 @@ class TableWidget extends WidgetType {
     }
 
     private showContextMenu(event: MouseEvent, cell: HTMLElement): void {
+        // Get the row and column indices from the cell
         const row = parseInt(cell.dataset.row || "0");
         const col = parseInt(cell.dataset.col || "0");
 
         // Remove any existing context menu
         this.removeContextMenu();
 
+        // Create a new context menu
         const menu = document.createElement("div");
         menu.className = "table-context-menu";
         menu.style.setProperty("--menu-x", `${event.pageX}px`);
         menu.style.setProperty("--menu-y", `${event.pageY}px`);
 
+        // Specify menu items
         const menuItems = [
             { text: "Add Row Above", action: () => this.addRow(row) },
             { text: "Add Row Below", action: () => this.addRow(row + 1) },
@@ -393,16 +449,20 @@ class TableWidget extends WidgetType {
             { text: "Delete Column", action: () => this.deleteColumn(col) },
         ];
 
+        // Create menu items
         menuItems.forEach((item) => {
             if (item.text === "---") {
+                // Create a separator
                 const separator = document.createElement("div");
                 separator.className = "table-context-menu-separator";
                 menu.appendChild(separator);
             } else {
+                // Create a menu item
                 const menuItem = document.createElement("div");
                 menuItem.className = "table-context-menu-item";
                 menuItem.textContent = item.text;
 
+                // Assign action if provided
                 if (item.action) {
                     menuItem.addEventListener("click", () => {
                         item.action!();
@@ -410,6 +470,7 @@ class TableWidget extends WidgetType {
                     });
                 }
 
+                // Append the menu item to the menu
                 menu.appendChild(menuItem);
             }
         });
@@ -425,6 +486,7 @@ class TableWidget extends WidgetType {
             }
         };
 
+        // Close menu when pressing Escape
         const closeMenuOnEsc = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 this.removeContextMenu();
@@ -433,6 +495,8 @@ class TableWidget extends WidgetType {
             }
         };
 
+        // Add event listeners to close the menu
+        // Use setTimeout to ensure the menu is rendered before adding listeners
         setTimeout(() => {
             document.addEventListener("click", closeMenu);
             document.addEventListener("keydown", closeMenuOnEsc);
@@ -451,6 +515,7 @@ class TableWidget extends WidgetType {
         cell: HTMLElement,
         container: HTMLElement
     ): void {
+        // Get the current row and column indices from the cell
         let row = parseInt(cell.dataset.row || "0");
         const col = parseInt(cell.dataset.col || "0");
         const table = container.querySelector("table");
@@ -461,6 +526,7 @@ class TableWidget extends WidgetType {
 
         switch (event.key) {
             case "ArrowDown":
+                // Move to the next cell down or exit the table
                 event.preventDefault();
                 if (row === maxRow) {
                     // Exit table when at the last row
@@ -479,6 +545,7 @@ class TableWidget extends WidgetType {
                 }
                 break;
             case "ArrowUp":
+                // Move to the previous cell up or exit the table
                 event.preventDefault();
                 if (row === 0) {
                     // Exit table when at the first row
@@ -497,9 +564,10 @@ class TableWidget extends WidgetType {
                 }
                 break;
             case "Tab":
+                // Move backward or forward through the table cells
                 event.preventDefault();
                 if (event.shiftKey) {
-                    // Shift+Tab: move to previous cell
+                    // Move to previous cell or exit the table
                     if (row === 0 && col === 0) {
                         // Exit table from the top
                         if (this.editorView && this.tablePosition) {
@@ -513,13 +581,16 @@ class TableWidget extends WidgetType {
                         // Move to previous cell. It is done this way to place the cursor at the end of the cell
                         const prevCol = col - 1 >= 0 ? col - 1 : maxCol;
                         let prevRow = col === 0 ? row - 1 : row;
+
+                        // Take in count the separator row
                         if (prevRow === 1) {
-                            prevRow -= 1; // Take in count the separator row
+                            prevRow -= 1;
                         }
+
                         this.focusCellAt(container, prevRow, prevCol);
                     }
                 } else {
-                    // Tab: move to next cell
+                    // Move to next cell or exit the table
                     if (col === maxCol && row === maxRow) {
                         // Exit table and focus editor after the table
                         if (this.editorView && this.tablePosition) {
@@ -533,10 +604,12 @@ class TableWidget extends WidgetType {
                         // Move to next cell. It is done this way to place the cursor at the end of the cell
                         const nextCol = col + 1 <= maxCol ? col + 1 : 0;
                         let nextRow = nextCol === 0 ? row + 1 : row;
+
+                        // Take in count the separator row
                         if (nextRow === 1) {
-                            // Take in count the separator row
                             nextRow += 1;
                         }
+
                         this.focusCellAt(container, nextRow, nextCol);
                     }
                 }
@@ -548,13 +621,16 @@ class TableWidget extends WidgetType {
         row: number,
         col: number
     ): void {
+        // Find the target cell using data attributes
         const targetCell = container.querySelector(
             `[data-row="${row}"][data-col="${col}"]`
         ) as HTMLElement;
 
         if (targetCell) {
+            // Focus the target cell
             targetCell.focus();
-            // Place cursor at the beginning of the cell
+
+            // Place cursor at the end of the cell
             const range = document.createRange();
             const selection = window.getSelection();
             if (selection) {
@@ -580,12 +656,15 @@ class TableWidget extends WidgetType {
 
     // Focuses the first cell when entering from the top
     public enterTableFromTop(container: HTMLElement): void {
+        // Find the first cell in the table
         const firstCell = container.querySelector(
             ".md-editable-cell"
         ) as HTMLElement;
 
         if (firstCell) {
+            // Focus the first cell
             firstCell.focus();
+
             // Place cursor at the end of the cell
             const range = document.createRange();
             const selection = window.getSelection();
@@ -600,12 +679,15 @@ class TableWidget extends WidgetType {
 
     // Focuses the last cell when entering from the bottom
     public enterTableFromBottom(container: HTMLElement): void {
+        // Find the first cell in the last row
         const lastCell = container.querySelector(
             "tr:last-child .md-editable-cell"
         ) as HTMLElement;
 
         if (lastCell) {
+            // Focus the last cell
             lastCell.focus();
+
             // Place cursor at the end of the cell
             const range = document.createRange();
             const selection = window.getSelection();
@@ -619,12 +701,15 @@ class TableWidget extends WidgetType {
     }
 
     public enterTableFromLeft(container: HTMLElement): void {
+        // Find the first cell in the last row
         const firstCell = container.querySelector(
             "tr:last-child .md-editable-cell:last-child"
         ) as HTMLElement;
 
         if (firstCell) {
+            // Focus the first cell
             firstCell.focus();
+
             // Place cursor at the end of the cell
             const range = document.createRange();
             const selection = window.getSelection();
@@ -641,18 +726,22 @@ class TableWidget extends WidgetType {
 function renderTables(state: EditorState, from?: number, to?: number) {
     const decorations: Range<Decoration>[] = [];
 
+    // Go through the syntax tree and find all Table nodes
     syntaxTree(state).iterate({
         from,
         to,
         enter(node) {
+            // Check if the node is a Table node
             if (node.name !== "Table") return;
 
+            // Create a new TableWidget with the text content of the node
             const text = state.doc.sliceString(node.from, node.to);
             const decoration = Decoration.replace({
                 widget: new TableWidget(text, node.from, node.to),
                 block: true,
             });
 
+            // Add the decoration to the decorations array
             decorations.push(decoration.range(node.from, node.to));
         },
     });
@@ -663,45 +752,60 @@ function renderTables(state: EditorState, from?: number, to?: number) {
 function enterTableFromTopKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
     const widgets = view.dom.querySelectorAll(".cm-table-widget");
+
+    // Iterate through all table widgets in the editor
     for (const widgetElement of widgets) {
         const widget = (widgetElement as any).__tableWidget;
         if (widget && widget instanceof TableWidget) {
+            // Check if cursor is positioned to enter this table from the top
             if (widget.shouldEnterTableFromTop(cursorPos)) {
+                // Focus the first cell of the table
                 widget.enterTableFromTop(widgetElement as HTMLElement);
                 return true; // Prevent default behavior
             }
         }
     }
+
     return false; // Allow default behavior
 }
 
 function enterTableFromBottomKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
     const widgets = view.dom.querySelectorAll(".cm-table-widget");
+
+    // Iterate through all table widgets in the editor
     for (const widgetElement of widgets) {
         const widget = (widgetElement as any).__tableWidget;
         if (widget && widget instanceof TableWidget) {
+            // Check if cursor is positioned to enter this table from the bottom
             if (widget.shouldEnterTableFromBottom(cursorPos)) {
+                // Focus the first cell of the last row
                 widget.enterTableFromBottom(widgetElement as HTMLElement);
                 return true; // Prevent default behavior
             }
         }
     }
+
     return false; // Allow default behavior
 }
 
 function enterTableFromLeftKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
     const widgets = view.dom.querySelectorAll(".cm-table-widget");
+
+    // Iterate through all table widgets in the editor
     for (const widgetElement of widgets) {
         const widget = (widgetElement as any).__tableWidget;
         if (widget && widget instanceof TableWidget) {
+            // Check if cursor is positioned to enter this table from the left
             if (widget.shouldEnterTableFromBottom(cursorPos)) {
+                // Focus the last cell of the table
                 widget.enterTableFromLeft(widgetElement as HTMLElement);
                 return true; // Prevent default behavior
             }
         }
     }
+
     return false; // Allow default behavior
 }
 
@@ -709,24 +813,28 @@ const tableKeymap = [
     {
         key: "ArrowRight",
         run: (view: EditorView) => {
+            // Enter table from top when pressing right arrow
             return enterTableFromTopKeymap(view);
         },
     },
     {
         key: "ArrowDown",
         run: (view: EditorView) => {
+            // Enter table from top when pressing down arrow
             return enterTableFromTopKeymap(view);
         },
     },
     {
         key: "ArrowLeft",
         run: (view: EditorView) => {
+            // Enter table from left when pressing left arrow
             return enterTableFromLeftKeymap(view);
         },
     },
     {
         key: "ArrowUp",
         run: (view: EditorView) => {
+            // Enter table from bottom when pressing up arrow
             return enterTableFromBottomKeymap(view);
         },
     },
@@ -734,11 +842,15 @@ const tableKeymap = [
 
 export function tableRendererPlugin(): Extension {
     return [
+        // State field to manage table decorations
+        // It is not a view plugin because it replaces line breaks
         StateField.define<DecorationSet>({
+            // Initialize decorations when editor is created
             create(state) {
                 return RangeSet.of(renderTables(state), true);
             },
 
+            // Update decorations when document changes
             update(decorations, transaction) {
                 if (transaction.docChanged) {
                     return RangeSet.of(renderTables(transaction.state), true);
@@ -747,11 +859,13 @@ export function tableRendererPlugin(): Extension {
                 return decorations.map(transaction.changes);
             },
 
+            // Provide decorations to the editor view
             provide(field) {
                 return EditorView.decorations.from(field);
             },
         }),
 
+        // Update listener to maintain widget references
         EditorView.updateListener.of((update) => {
             if (update.view) {
                 // Find all table widgets and set their editor context
@@ -760,7 +874,7 @@ export function tableRendererPlugin(): Extension {
                 widgets.forEach((widgetElement) => {
                     const widget = (widgetElement as any).__tableWidget;
                     if (widget && widget instanceof TableWidget) {
-                        // Update the EditorView reference
+                        // Update the EditorView reference for editing functionality
                         if (widget.tablePosition) {
                             widget.setEditorContext(update.view);
                         }
@@ -769,6 +883,7 @@ export function tableRendererPlugin(): Extension {
             }
         }),
 
+        // Register keyboard shortcuts for table navigation
         keymap.of(tableKeymap),
     ];
 }
