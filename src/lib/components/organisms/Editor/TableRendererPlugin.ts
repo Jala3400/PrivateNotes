@@ -95,6 +95,14 @@ class TableWidget extends WidgetType {
                 event.preventDefault();
                 this.showContextMenu(event as MouseEvent, cell as HTMLElement);
             });
+
+            cell.addEventListener("keydown", (event) => {
+                this.handleCellKeydown(
+                    event as KeyboardEvent,
+                    cell as HTMLElement,
+                    container
+                );
+            });
         });
     }
 
@@ -439,6 +447,59 @@ class TableWidget extends WidgetType {
             const selection = window.getSelection();
             if (selection) {
                 range.setStart(lastCell, lastCell.childNodes.length);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+    }
+
+    private handleCellKeydown(
+        event: KeyboardEvent,
+        cell: HTMLElement,
+        container: HTMLElement
+    ): void {
+        let row = parseInt(cell.dataset.row || "0");
+        const col = parseInt(cell.dataset.col || "0");
+
+        switch (event.key) {
+            case "ArrowDown":
+                // Skip if we're at the last row
+                const table = container.querySelector("table");
+                if (row === table?.rows.length) return;
+                event.preventDefault();
+                if (row === 0) {
+                    row += 1; // Take in count the separator row
+                }
+                this.focusCellAt(container, row + 1, col);
+                break;
+            case "ArrowUp":
+                if (row === 0) return;
+                event.preventDefault();
+                if (row === 2) {
+                    row -= 1; // Prevent going above the header row
+                }
+                this.focusCellAt(container, row - 1, col);
+                break;
+        }
+    }
+
+    private focusCellAt(
+        container: HTMLElement,
+        row: number,
+        col: number
+    ): void {
+        const targetCell = container.querySelector(
+            `[data-row="${row}"][data-col="${col}"]`
+        ) as HTMLElement;
+
+        if (targetCell) {
+            targetCell.focus();
+            // Place cursor at the beginning of the cell
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+                range.setStart(targetCell, targetCell.childNodes.length);
                 range.collapse(true);
                 selection.removeAllRanges();
                 selection.addRange(range);
