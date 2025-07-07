@@ -1,15 +1,20 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { EditorView } from "@codemirror/view";
+    import { EditorView, keymap } from "@codemirror/view";
     import { EditorState } from "@codemirror/state";
     import { markdown } from "@codemirror/lang-markdown";
     import { basicSetup } from "codemirror";
-    import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
+    import {
+        syntaxHighlighting,
+        HighlightStyle,
+        indentUnit,
+    } from "@codemirror/language";
     import { classHighlighter, tags } from "@lezer/highlight";
     import { selectedLinePlugin } from "./SelectedLinePlugin";
-    import "./md_style.css";
+    import { indentWithTab } from "@codemirror/commands";
     import { tableRendererPlugin } from "./TableRendererPlugin";
     import { Table } from "@lezer/markdown";
+    import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
@@ -33,6 +38,8 @@
             { tag: tags.list, class: "md-list-item" },
         ]);
 
+        const indentUnitExtension = indentUnit.of("    "); // 4 spaces
+
         const state = EditorState.create({
             doc: content,
             extensions: [
@@ -43,6 +50,8 @@
                 tableRendererPlugin(),
                 EditorView.lineWrapping,
                 basicSetup,
+                keymap.of([indentWithTab]),
+                indentUnitExtension,
             ],
         });
 

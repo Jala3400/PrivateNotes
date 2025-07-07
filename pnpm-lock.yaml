@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@codemirror/commands':
+        specifier: ^6.8.1
+        version: 6.8.1
       '@codemirror/lang-markdown':
         specifier: ^6.3.2
         version: 6.3.2
@@ -26,6 +29,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.1
         version: 1.2.1
+      '@lezer/markdown':
+        specifier: ^1.4.3
+        version: 1.4.3
       '@tauri-apps/api':
         specifier: ^2
         version: 2.5.0
