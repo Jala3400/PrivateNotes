@@ -552,47 +552,58 @@ function renderTables(state: EditorState, from?: number, to?: number) {
     return decorations;
 }
 
+function enterTableFromTopKeymap(view: EditorView): boolean {
+    const cursorPos = view.state.selection.main.head;
+    const widgets = view.dom.querySelectorAll(".cm-table-widget");
+    for (const widgetElement of widgets) {
+        const widget = (widgetElement as any).__tableWidget;
+        if (widget && widget instanceof TableWidget) {
+            if (widget.shouldEnterTableFromTop(cursorPos)) {
+                widget.enterTableFromTop(widgetElement as HTMLElement);
+                return true; // Prevent default behavior
+            }
+        }
+    }
+    return false; // Allow default behavior
+}
+
+function enterTableFromBottomKeymap(view: EditorView): boolean {
+    const cursorPos = view.state.selection.main.head;
+    const widgets = view.dom.querySelectorAll(".cm-table-widget");
+    for (const widgetElement of widgets) {
+        const widget = (widgetElement as any).__tableWidget;
+        if (widget && widget instanceof TableWidget) {
+            if (widget.shouldEnterTableFromBottom(cursorPos)) {
+                widget.enterTableFromBottom(widgetElement as HTMLElement);
+                return true; // Prevent default behavior
+            }
+        }
+    }
+    return false; // Allow default behavior
+}
 const tableKeymap = [
     {
         key: "ArrowRight",
         run: (view: EditorView) => {
-            const cursorPos = view.state.selection.main.head;
-
-            // Find table widgets and check if cursor should enter any of them
-            const widgets = view.dom.querySelectorAll(".cm-table-widget");
-            for (const widgetElement of widgets) {
-                const widget = (widgetElement as any).__tableWidget;
-                if (widget && widget instanceof TableWidget) {
-                    if (widget.shouldEnterTableFromTop(cursorPos)) {
-                        widget.enterTableFromTop(widgetElement as HTMLElement);
-                        return true; // Prevent default behavior
-                    }
-                }
-            }
-
-            return false; // Allow default behavior
+            return enterTableFromTopKeymap(view);
+        },
+    },
+    {
+        key: "ArrowDown",
+        run: (view: EditorView) => {
+            return enterTableFromTopKeymap(view);
         },
     },
     {
         key: "ArrowLeft",
         run: (view: EditorView) => {
-            const cursorPos = view.state.selection.main.head;
-
-            // Find table widgets and check if cursor should enter any of them
-            const widgets = view.dom.querySelectorAll(".cm-table-widget");
-            for (const widgetElement of widgets) {
-                const widget = (widgetElement as any).__tableWidget;
-                if (widget && widget instanceof TableWidget) {
-                    if (widget.shouldEnterTableFromBottom(cursorPos)) {
-                        widget.enterTableFromBottom(
-                            widgetElement as HTMLElement
-                        );
-                        return true; // Prevent default behavior
-                    }
-                }
-            }
-
-            return false; // Allow default behavior
+            return enterTableFromBottomKeymap(view);
+        },
+    },
+    {
+        key: "ArrowUp",
+        run: (view: EditorView) => {
+            return enterTableFromBottomKeymap(view);
         },
     },
 ];
