@@ -5,6 +5,8 @@
     import type { FileSystemItem } from "$lib/types";
     import Item from "$lib/components/molecules/Item.svelte";
     import { throwCustomError } from "$lib/error";
+    import { currentNote } from "$lib/stores/currentNote";
+    import { ask } from "@tauri-apps/plugin-dialog";
 
     interface Props {
         sidebar_collapsed?: boolean;
@@ -72,6 +74,24 @@
     });
 
     async function closeItem(id: string) {
+        // Check if the current note is the one being closed
+        if ($currentNote?.parentId === id) {
+            // Create a Yes/No dialog
+            const answer = await ask(
+                "This item is currently open in the editor. Do you want to close it?",
+                {
+                    title: "Close Item",
+                    kind: "warning",
+                }
+            );
+
+            if (answer === false) {
+                // User chose not to close the item
+                return;
+            }
+        }
+
+        // Close the item
         try {
             await invoke("close_item", { id });
         } catch (error) {
@@ -81,6 +101,7 @@
             );
         }
     }
+
     async function openNote(id: string, parentId: string) {
         try {
             await invoke("open_note_from_id", { id, parentId });

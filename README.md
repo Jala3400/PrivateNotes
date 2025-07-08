@@ -100,7 +100,7 @@ Argon2id es un algoritmo de hashing de contraseñas que es resistente a ataques 
 
 Además, se utiliza el nombre de cada usuario como sal para el algoritmo de hashing. "Sal" en un algoritmo de hashing es un parámetro adicional que cambia el resultado del hash, por lo que incluso si dos usuarios tienen la misma contraseña sus hashes serán diferentes. Otra ventaja es la protección contra ataques de tablas arcoíris, que son tablas precalculadas de hashes comunes que se utilizan para romper contraseñas. Con este método cada usuario requiere un ataque diferente.
 
-A la hora de encriptar y desencriptar las notas se utiliza el algoritmo AES (Advanced Encryption Standard). AES es un estándar de cifrado simétrico que utiliza la misma clave para encriptar y desencriptar datos.
+A la hora de encriptar y desencriptar las notas se utiliza el algoritmo AES (Advanced Encryption Standard). AES es un estándar de cifrado simétrico, es decir, que utiliza la misma clave para encriptar y desencriptar datos.
 
 Para aumentar la seguridad, se utiliza un nonce diferente cada vez que se encripta una nota. Un nonce es un número aleatorio que se debe utilizar una sola vez por cada proceso de encriptación y que se debe guardar junto con el resultado. Este hace que el texto cifrado sea único cada vez que se encripta, incluso si se encripta el mismo texto. Se puede comprobar encriptando varias veces la misma nota y viendo que el contenido del archivo cambia. De otra forma se podrían ver patrones en el texto cifrado.
 
