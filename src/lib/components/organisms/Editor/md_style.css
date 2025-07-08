@@ -417,3 +417,13 @@
     background-color: var(--border-color-light);
     margin: 0.3em;
 }
+
+/* Task List Styles */
+.task-checkbox {
+    cursor: pointer;
+    accent-color: var(--main-color);
+}
+
+.task-item-checked {
+    color: var(--text-muted);
+}

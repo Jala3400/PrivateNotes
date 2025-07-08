@@ -13,10 +13,9 @@
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import { indentWithTab } from "@codemirror/commands";
     import { tableRendererPlugin } from "./TableRendererPlugin";
-    import { GFM } from "@lezer/markdown";
+    import { taskListPlugin } from "./TaskListPlugin";
+    import { Strikethrough, Table, TaskList } from "@lezer/markdown";
     import "./md_style.css";
-    import { Table } from "@lezer/markdown";
-    import { Strikethrough } from "@lezer/markdown";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
@@ -71,11 +70,12 @@
         const state = EditorState.create({
             doc: content,
             extensions: [
-                markdown({ extensions: [Table, Strikethrough] }), // Don't use GFM because it hides the links
+                markdown({ extensions: [Table, Strikethrough, TaskList] }), // Don't use GFM because it hides the links
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
                 tableRendererPlugin(),
+                taskListPlugin(),
                 EditorView.lineWrapping,
                 basicSetup,
                 keymap.of([indentWithTab]),
