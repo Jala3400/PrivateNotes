@@ -531,6 +531,7 @@ class TableWidget extends WidgetType {
 
         switch (event.key) {
             case "ArrowDown":
+            case "Enter":
                 // Move to the next cell down or exit the table
                 event.preventDefault();
                 if (row === maxRow) {
@@ -618,6 +619,7 @@ class TableWidget extends WidgetType {
                         this.focusCellAt(container, nextRow, nextCol);
                     }
                 }
+                break;
         }
     }
 
