@@ -65,7 +65,8 @@
 }
 
 /* Strikethrough */
-.tok-deleted {
+.tok-deleted,
+.md-strikethrough {
     text-decoration: line-through;
 }
 

@@ -13,7 +13,7 @@
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import { indentWithTab } from "@codemirror/commands";
     import { tableRendererPlugin } from "./TableRendererPlugin";
-    import { Table } from "@lezer/markdown";
+    import { GFM } from "@lezer/markdown";
     import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
@@ -61,6 +61,7 @@
             { tag: tags.monospace, class: "md-code-inline" },
             { tag: tags.quote, class: "md-quote" },
             { tag: tags.list, class: "md-list-item" },
+            { tag: tags.strikethrough, class: "md-strikethrough" },
         ]);
 
         const indentUnitExtension = indentUnit.of("    "); // 4 spaces
@@ -68,7 +69,7 @@
         const state = EditorState.create({
             doc: content,
             extensions: [
-                markdown({ extensions: [Table] }),
+                markdown({ extensions: [GFM] }), // Use GFM for GitHub Flavored Markdown. Contains Table, Task Lists, Strikethrough and AutoLink
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
