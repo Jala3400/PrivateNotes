@@ -30,7 +30,8 @@
     }
 
     function insertTable() {
-        const tableTemplate = `| Header | Header |
+        const tableTemplate = `
+| Header | Header |
 |--------|--------|
 | Cell   | Cell   |
 `;

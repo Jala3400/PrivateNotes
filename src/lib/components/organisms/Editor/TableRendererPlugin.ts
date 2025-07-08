@@ -741,13 +741,31 @@ function renderTables(state: EditorState, from?: number, to?: number) {
 
             // Create a new TableWidget with the text content of the node
             const text = state.doc.sliceString(node.from, node.to);
+            const lines = text.split("\n");
+
+            let endPos = node.to;
+
+            // Find the last line that is a valid table row
+            for (let i = lines.length - 1; i >= 0; i--) {
+                if (lines[i][0] !== "|") {
+                    // If the last line is not a table row, adjust the end position
+                    endPos = endPos - lines[i].length - 1;
+                } else {
+                    break; // Stop at the first valid table row
+                }
+            }
+
             const decoration = Decoration.replace({
-                widget: new TableWidget(text, node.from, node.to),
+                widget: new TableWidget(
+                    state.doc.sliceString(node.from, endPos),
+                    node.from,
+                    endPos
+                ),
                 block: true,
             });
 
             // Add the decoration to the decorations array
-            decorations.push(decoration.range(node.from, node.to));
+            decorations.push(decoration.range(node.from, endPos));
         },
     });
 
