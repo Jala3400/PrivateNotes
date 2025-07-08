@@ -34,7 +34,8 @@
 }
 
 /* List items */
-.md-list-item.tok-meta:first-child {
+/* Only the first child of a direct child of cm-line (only the first dot in a list)*/
+.cm-line>.md-list-item.tok-meta:first-child {
     display: inline;
 }
 
@@ -96,28 +97,19 @@
 }
 
 /* Superscript */
-.md-superscript {
+.md-superscript,
+.md-subscript {
     font-size: 0.8em;
-    vertical-align: super;
     color: var(--text-muted);
-    margin-left: 0.8em;
+    margin: 0 0.1em;
 }
 
-.cm-activeLine .md-superscript,
-.cm-selected-line .md-superscript {
-    margin-left: 0.1em;
+.md-superscript {
+    vertical-align: super;
 }
 
 .md-subscript {
-    font-size: 0.8em;
     vertical-align: sub;
-    color: var(--text-muted);
-    margin-left: 0.8em;
-}
-
-.cm-activeLine .md-subscript,
-.cm-selected-line .md-subscript {
-    margin-left: 0.1em;
 }
 
 /* Hide markdown styling elements */
