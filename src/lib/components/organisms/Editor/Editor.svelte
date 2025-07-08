@@ -20,8 +20,32 @@
     let editorView: EditorView;
     let { content = "" } = $props();
 
+    let contextMenu = $state<HTMLDivElement>();
+    let showContextMenu = $state(false);
+    let contextMenuX = $state(0);
+    let contextMenuY = $state(0);
+
     export function getContent(): string {
         return editorView ? editorView.state.doc.toString() : content;
+    }
+
+    function insertTable() {
+        const tableTemplate = `| Header | Header |
+|--------|--------|
+| Cell   | Cell   |
+`;
+
+        const pos = editorView.state.selection.main.head;
+        editorView.dispatch({
+            changes: { from: pos, insert: tableTemplate },
+        });
+
+        hideContextMenu();
+        editorView.focus();
+    }
+
+    function hideContextMenu() {
+        showContextMenu = false;
     }
 
     onMount(() => {
@@ -59,16 +83,40 @@
             state,
             parent: editorContainer,
         });
+
+        // Add context menu event listener
+        editorView.dom.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            contextMenuX = event.clientX;
+            contextMenuY = event.clientY;
+            showContextMenu = true;
+        });
+
+        // Hide context menu when clicking elsewhere
+        document.addEventListener("click", hideContextMenu);
     });
 
     onDestroy(() => {
         if (editorView) {
             editorView.destroy();
         }
+        document.removeEventListener("click", hideContextMenu);
     });
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
+
+{#if showContextMenu}
+    <div
+        class="context-menu"
+        bind:this={contextMenu}
+        style="left: {contextMenuX}px; top: {contextMenuY}px;"
+    >
+        <button class="context-menu-item" onclick={insertTable}>
+            Insert Table
+        </button>
+    </div>
+{/if}
 
 <style>
     .editor-container {

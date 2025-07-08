@@ -357,8 +357,11 @@
 
 
 /* Context menu styling */
-.table-context-menu {
+.context-menu {
     position: fixed;
+    display: flex;
+    flex-direction: column;
+    padding: 0.2em;
     background-color: var(--background-dark-light);
     border: 1px solid var(--border-color-light);
     border-radius: var(--border-radius-medium);
@@ -372,26 +375,39 @@
     max-inline-size: calc(100vi - 2rem);
     max-block-size: calc(100vb - 2rem);
     inset-inline-start: clamp(1rem, var(--menu-x), calc(100vi - 160px - 1rem));
-    inset-block-start: clamp(1rem, var(--menu-y), calc(100vb - 350px - 1rem));
+    inset-block-start: clamp(1rem, var(--menu-y), calc(100vb - 380px - 1rem));
 }
 
-.table-context-menu-item {
-    padding: 8px 12px;
+.context-menu-item {
+    padding: 0.5em 1em;
     cursor: pointer;
     font-size: 14px;
     color: var(--text-primary);
+    background-color: var(--background-dark-light);
+    border: none;
+    text-align: left;
 }
 
-.table-context-menu-item:hover {
+.context-menu-item,
+.context-menu-separator {
+    width: 100%;
+}
+
+.context-menu-item {
+    border-radius: var(--border-radius-small);
+}
+
+.context-menu-item:hover {
     background-color: var(--background-dark-lighter);
 }
 
-.table-context-menu-item:active {
+.context-menu-item:active {
     background-color: var(--main-color);
     color: var(--background-dark);
 }
 
-.table-context-menu-separator {
+.context-menu-separator {
     height: 1px;
     background-color: var(--border-color-light);
+    margin: 0.5em;
 }

@@ -427,7 +427,7 @@ class TableWidget extends WidgetType {
 
         // Create a new context menu
         const menu = document.createElement("div");
-        menu.className = "table-context-menu";
+        menu.className = "context-menu";
         menu.style.setProperty("--menu-x", `${event.pageX}px`);
         menu.style.setProperty("--menu-y", `${event.pageY}px`);
 
@@ -458,12 +458,12 @@ class TableWidget extends WidgetType {
             if (item.text === "---") {
                 // Create a separator
                 const separator = document.createElement("div");
-                separator.className = "table-context-menu-separator";
+                separator.className = "context-menu-separator";
                 menu.appendChild(separator);
             } else {
                 // Create a menu item
-                const menuItem = document.createElement("div");
-                menuItem.className = "table-context-menu-item";
+                const menuItem = document.createElement("button");
+                menuItem.className = "context-menu-item";
                 menuItem.textContent = item.text;
 
                 // Assign action if provided
@@ -508,7 +508,7 @@ class TableWidget extends WidgetType {
     }
 
     private removeContextMenu(): void {
-        const existingMenu = document.querySelector(".table-context-menu");
+        const existingMenu = document.querySelector(".context-menu");
         if (existingMenu) {
             existingMenu.remove();
         }
