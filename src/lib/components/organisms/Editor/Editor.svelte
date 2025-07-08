@@ -15,6 +15,8 @@
     import { tableRendererPlugin } from "./TableRendererPlugin";
     import { GFM } from "@lezer/markdown";
     import "./md_style.css";
+    import { Table } from "@lezer/markdown";
+    import { Strikethrough } from "@lezer/markdown";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
@@ -69,7 +71,7 @@
         const state = EditorState.create({
             doc: content,
             extensions: [
-                markdown({ extensions: [GFM] }), // Use GFM for GitHub Flavored Markdown. Contains Table, Task Lists, Strikethrough and AutoLink
+                markdown({ extensions: [Table, Strikethrough] }), // Don't use GFM because it hides the links
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
