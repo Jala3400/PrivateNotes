@@ -309,9 +309,11 @@ class TableWidget extends WidgetType {
         // Validate row index
         if (rowIndex >= lines.length) return;
 
+        const destRowIndex = rowIndex == 2 ? 0 : rowIndex - 1;
+
         // Swap with previous row
-        [lines[rowIndex], lines[rowIndex - 1]] = [
-            lines[rowIndex - 1],
+        [lines[rowIndex], lines[destRowIndex]] = [
+            lines[destRowIndex],
             lines[rowIndex],
         ];
 
@@ -328,9 +330,11 @@ class TableWidget extends WidgetType {
 
         if (actualRowIndex >= lines.length - 1) return; // Can't move last row down
 
+        const destRowIndex = rowIndex == 0 ? 2 : rowIndex + 1;
+
         // Swap with next row
-        [lines[actualRowIndex], lines[actualRowIndex + 1]] = [
-            lines[actualRowIndex + 1],
+        [lines[actualRowIndex], lines[destRowIndex]] = [
+            lines[destRowIndex],
             lines[actualRowIndex],
         ];
 
