@@ -197,12 +197,12 @@
 /* Text Selection */
 .cm-editor .cm-selectionBackground {
     background-color: var(--main-color) !important;
-    opacity: 0.3;
+    opacity: 0.15;
 }
 
 .cm-editor.cm-focused .cm-selectionBackground {
     background-color: var(--main-color) !important;
-    opacity: 0.4;
+    opacity: 0.2;
 }
 
 /* Search and selection Match Highlighting */
