@@ -14,9 +14,10 @@
     import { indentWithTab } from "@codemirror/commands";
     import { tableRendererPlugin } from "./TableRendererPlugin";
     import { taskListPlugin } from "./TaskListPlugin";
-    import { superscriptPlugin } from "./SuperscriptPlugin";
+    import { superscriptPlugin } from "./SubAndSuperscriptPlugin";
     import {
         Strikethrough,
+        Subscript,
         Superscript,
         Table,
         TaskList,
@@ -89,7 +90,13 @@
             doc: content,
             extensions: [
                 markdown({
-                    extensions: [Table, Strikethrough, TaskList, Superscript],
+                    extensions: [
+                        Table,
+                        Strikethrough,
+                        TaskList,
+                        Superscript,
+                        Subscript,
+                    ],
                 }), // Don't use GFM because it hides the links
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),

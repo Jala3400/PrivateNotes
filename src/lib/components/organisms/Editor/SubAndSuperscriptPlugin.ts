@@ -40,6 +40,13 @@ export function superscriptPlugin(): Extension {
                             decorations.push(
                                 decoration.range(node.from, node.to)
                             );
+                        } else if (node.name === "Subscript") {
+                            const decoration = Decoration.mark({
+                                class: "md-subscript",
+                            });
+                            decorations.push(
+                                decoration.range(node.from, node.to)
+                            );
                         }
                     },
                 });
