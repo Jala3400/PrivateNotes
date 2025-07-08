@@ -45,7 +45,7 @@
         padding: var(--file-item-padding);
         border-radius: var(--border-radius-small);
         font-size: 0.85em;
-        color: var(--text-secondary);
+        color: var(--text-muted);
         width: 100%;
         padding-left: var(--folder-indicator-width);
         text-align: left;
@@ -66,7 +66,7 @@
 
     .file-item:disabled:hover {
         background-color: transparent;
-        color: var(--text-secondary);
+        color: var(--text-muted);
     }
 
     /* Notes should be styles different from normal files */

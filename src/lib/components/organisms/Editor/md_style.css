@@ -89,7 +89,7 @@
 /* Hide markdown styling elements */
 .tok-meta,
 .tok-url {
-    color: var(--text-secondary);
+    color: var(--text-muted);
     display: none;
 }
 
@@ -110,7 +110,7 @@
 }
 
 .tok-comment {
-    color: var(--text-secondary);
+    color: var(--text-muted);
     font-style: italic;
 }
 
@@ -120,7 +120,7 @@
 }
 
 .tok-punctuation {
-    color: var(--text-secondary);
+    color: var(--text-muted);
 }
 
 .tok-invalid {
@@ -153,7 +153,7 @@
 /* Gutters */
 .cm-gutters {
     background-color: transparent !important;
-    color: var(--text-secondary) !important;
+    color: var(--text-muted) !important;
     border-right: 1px solid var(--border-color-light) !important;
 }
 
@@ -340,7 +340,7 @@
     min-height: 1lh;
     min-width: 1lh;
     background-color: transparent;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     border: none;
     border: 1px solid transparent;
     opacity: 0;
