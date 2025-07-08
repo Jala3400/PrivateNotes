@@ -419,11 +419,11 @@
 }
 
 /* Task List Styles */
-.task-checkbox {
+.md-task-checkbox {
     cursor: pointer;
     accent-color: var(--main-color);
 }
 
-.task-item-checked {
+.md-task-item-checked {
     color: var(--text-muted);
 }

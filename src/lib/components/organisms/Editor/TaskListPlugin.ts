@@ -7,6 +7,7 @@ import {
 } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import type { Extension, Range } from "@codemirror/state";
+import { syntaxTree } from "@codemirror/language";
 
 /**
  * Widget for rendering interactive checkboxes in task lists
@@ -25,7 +26,7 @@ class TaskCheckboxWidget extends WidgetType {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = this.checked;
-        checkbox.className = "task-checkbox";
+        checkbox.className = "md-task-checkbox";
 
         checkbox.onmousedown = (event) => {
             // Prevent default behavior to avoid focus issues
@@ -89,35 +90,43 @@ export function taskListPlugin(): Extension {
 
             buildDecorations(view: EditorView): DecorationSet {
                 const decorations: Range<Decoration>[] = [];
-                const doc = view.state.doc;
+                const { state } = view;
+                const { doc } = state;
 
-                // Iterate through visible lines
-                for (let pos = 0; pos < doc.length; ) {
-                    const line = doc.lineAt(pos);
-                    const lineText = line.text;
+                // Use syntax tree iteration for better performance
+                syntaxTree(state).iterate({
+                    enter: (node) => {
+                        // Check if we're in a task node
+                        if (node.name !== "Task") return;
 
-                    // Check for task list patterns: - [ ] or - [x]
-                    const taskMatch = lineText.match(/^(\s*)- \[([ x])\]/i);
+                        const lineStart = doc.lineAt(node.from).from;
+                        const lineEnd = doc.lineAt(node.to).to;
+                        const lineText = doc.sliceString(lineStart, lineEnd);
 
-                    if (taskMatch) {
+                        // Check for task list patterns: - [ ] or - [x]
+                        const taskMatch = lineText.match(/^(\s*)- \[([ x])\]/i);
+
+                        // If no task list pattern is found, skip this line
+                        if (!taskMatch) return;
+
                         const isChecked = taskMatch[2].toLowerCase() === "x";
                         const checkboxStart =
-                            line.from + taskMatch[1].length + 2; // Position of the [
+                            lineStart + taskMatch[1].length + 2; // Position of the [
                         const checkboxEnd = checkboxStart + 3; // Length of the checkbox "[ ]" or "[x]"
 
                         // Add styling decoration for the entire task line
                         const lineClass = isChecked
-                            ? "task-item-checked"
-                            : "task-item-unchecked";
+                            ? "md-task-item-checked"
+                            : "md-task-item-unchecked";
 
                         const lineDecoration = Decoration.line({
                             class: lineClass,
                         });
 
-                        decorations.push(lineDecoration.range(line.from));
+                        decorations.push(lineDecoration.range(lineStart));
 
                         // Check if the line is selected or active
-                        const selections = view.state.selection.ranges;
+                        const selections = state.selection.ranges;
                         const isCheckboxSelected = selections.some(
                             ({ from, to }) =>
                                 from <= checkboxEnd && to >= checkboxStart
@@ -127,7 +136,7 @@ export function taskListPlugin(): Extension {
                         if (!isCheckboxSelected) {
                             const widget = new TaskCheckboxWidget(
                                 isChecked,
-                                line.from
+                                lineStart
                             );
 
                             const decoration = Decoration.replace({
@@ -138,13 +147,12 @@ export function taskListPlugin(): Extension {
                             decorations.push(
                                 decoration.range(checkboxStart, checkboxEnd)
                             );
-                        } else {
-                            console.log("skip");
                         }
-                    }
 
-                    pos = line.to + 1;
-                }
+                        // Stop further iteration for this node
+                        return true;
+                    },
+                });
 
                 return Decoration.set(decorations);
             }
