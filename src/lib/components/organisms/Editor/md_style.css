@@ -198,6 +198,11 @@
     background-color: color-mix(in srgb, var(--text-primary), transparent 80%) !important;
 }
 
+.cm-focused .cm-matchingBracket {
+    background-color: color-mix(in srgb, var(--main-color), transparent 50%) !important;
+    border-radius: var(--border-radius-small) !important;
+}
+
 /* Panels */
 .cm-panels {
     background-color: var(--background-dark) !important;
