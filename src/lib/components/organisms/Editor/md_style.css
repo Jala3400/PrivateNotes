@@ -178,16 +178,24 @@
     opacity: 0.4;
 }
 
-/* Selection Match Highlighting */
+/* Search and selection Match Highlighting */
+.cm-searchMatch,
+.cm-selectionMatch {
+    display: inline-block;
+    border-radius: var(--border-radius-small);
+}
+
 .cm-searchMatch {
     background-color: var(--main-color-dark) !important;
     color: var(--background-dark) !important;
-    border-radius: var(--border-radius-small);
-    display: inline-block;
 }
 
 .cm-searchMatch.cm-searchMatch-selected {
     background-color: var(--main-color-light) !important;
+}
+
+.cm-selectionMatch {
+    background-color: color-mix(in srgb, var(--text-primary), transparent 80%) !important;
 }
 
 /* Panels */
@@ -239,6 +247,13 @@
     color: var(--text-primary) !important;
 }
 
+.cm-foldPlaceholder {
+    background-color: var(--background-dark-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-small) !important;
+    border-color: var(--border-color-light) !important;
+}
+
 /* Smooth transitions for live preview */
 /* .cm-editor .tok-heading,
 .cm-editor .tok-strong,
@@ -249,3 +264,150 @@
 .cm-editor .md-list-item {
     transition: var(--transition);
 } */
+
+/* Table styling */
+.cm-widgetBuffer {
+    display: none !important;
+}
+
+.cm-table-widget {
+    overflow-x: auto;
+    display: grid;
+    /* grid to fit the add row and column buttons */
+    grid-template-columns: fit-content(100%) fit-content(100%);
+    margin: 0 0.5em !important;
+}
+
+.cm-table-hidden-line {
+    display: none !important;
+    height: 0 !important;
+    line-height: 0 !important;
+}
+
+.md-table {
+    border-collapse: collapse;
+    background-color: var(--background-dark-light);
+    border-radius: var(--border-radius-medium);
+    overflow: hidden;
+}
+
+.md-table th,
+.md-table td {
+    padding: 0.25em 0.5em;
+    text-align: left;
+    position: relative;
+}
+
+.md-table td {
+    border: 1px solid var(--border-color-light);
+}
+
+.md-table th:focus,
+.md-table td:focus {
+    outline: none;
+}
+
+.md-table th {
+    background-color: var(--background-dark-lighter);
+    font-weight: 600;
+    color: var(--main-color);
+    border-bottom: 2px solid var(--main-color);
+}
+
+.md-table tr:hover {
+    background-color: var(--background-dark-lighter);
+}
+
+.md-table tr:hover td {
+    border-color: var(--border-color);
+}
+
+.md-table tr:last-child td {
+    border-bottom: none;
+}
+
+.md-table td {
+    color: var(--text-primary);
+}
+
+.table-button {
+    min-height: 1lh;
+    min-width: 1lh;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: none;
+    border: 1px solid transparent;
+    opacity: 0;
+}
+
+.table-button:hover {
+    opacity: 1;
+    border: 1px solid var(--border-color-light);
+}
+
+.table-button.add-row-btn {
+    border-top: 0;
+    border-radius: 0 0 var(--border-radius-small) var(--border-radius-small);
+}
+
+.table-button.add-col-btn {
+    border-left: 0;
+    border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
+}
+
+
+/* Context menu styling */
+.context-menu {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    padding: 0.25em;
+    background-color: var(--background-dark-light);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius-medium);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 160px;
+    overflow: hidden;
+    font-family: inherit;
+
+    /* Modern CSS viewport constraints */
+    max-inline-size: calc(100vi - 2rem);
+    max-block-size: calc(100vb - 2rem);
+    inset-inline-start: clamp(1rem, var(--menu-x), calc(100vi - 160px - 1rem));
+    inset-block-start: clamp(1rem, var(--menu-y), calc(100vb - 330px - 1rem));
+}
+
+.context-menu-item {
+    padding: 0.5em 0.66em;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+    background-color: var(--background-dark-light);
+    border: none;
+    text-align: left;
+}
+
+.context-menu-item,
+.context-menu-separator {
+    width: 100%;
+}
+
+.context-menu-item {
+    border-radius: var(--border-radius-small);
+}
+
+.context-menu-item:hover {
+    background-color: var(--background-dark-lighter);
+}
+
+.context-menu-item:active {
+    background-color: var(--main-color);
+    color: var(--background-dark);
+}
+
+.context-menu-separator {
+    height: 1px;
+    background-color: var(--border-color-light);
+    margin: 0.3em;
+}

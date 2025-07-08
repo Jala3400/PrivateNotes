@@ -1,20 +1,52 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { EditorView } from "@codemirror/view";
+    import { EditorView, keymap } from "@codemirror/view";
     import { EditorState } from "@codemirror/state";
     import { markdown } from "@codemirror/lang-markdown";
     import { basicSetup } from "codemirror";
-    import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
+    import {
+        syntaxHighlighting,
+        HighlightStyle,
+        indentUnit,
+    } from "@codemirror/language";
     import { classHighlighter, tags } from "@lezer/highlight";
     import { selectedLinePlugin } from "./SelectedLinePlugin";
+    import { indentWithTab } from "@codemirror/commands";
+    import { tableRendererPlugin } from "./TableRendererPlugin";
+    import { Table } from "@lezer/markdown";
     import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
     let { content = "" } = $props();
 
+    let contextMenu = $state<HTMLDivElement>();
+    let showContextMenu = $state(false);
+    let contextMenuX = $state(0);
+    let contextMenuY = $state(0);
+
     export function getContent(): string {
         return editorView ? editorView.state.doc.toString() : content;
+    }
+
+    function insertTable() {
+        const tableTemplate = `
+| Header | Header |
+|--------|--------|
+| Cell   | Cell   |
+`;
+
+        const pos = editorView.state.selection.main.head;
+        editorView.dispatch({
+            changes: { from: pos, insert: tableTemplate },
+        });
+
+        hideContextMenu();
+        editorView.focus();
+    }
+
+    function hideContextMenu() {
+        showContextMenu = false;
     }
 
     onMount(() => {
@@ -31,15 +63,20 @@
             { tag: tags.list, class: "md-list-item" },
         ]);
 
+        const indentUnitExtension = indentUnit.of("    "); // 4 spaces
+
         const state = EditorState.create({
             doc: content,
             extensions: [
-                basicSetup,
-                markdown(),
+                markdown({ extensions: [Table] }),
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
+                tableRendererPlugin(),
                 EditorView.lineWrapping,
+                basicSetup,
+                keymap.of([indentWithTab]),
+                indentUnitExtension,
             ],
         });
 
@@ -47,16 +84,52 @@
             state,
             parent: editorContainer,
         });
+
+        // Add context menu event listener
+        editorView.dom.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            contextMenuX = event.clientX;
+            contextMenuY = event.clientY;
+            showContextMenu = true;
+        });
+
+        // Hide context menu when clicking elsewhere
+        document.addEventListener("click", hideContextMenu);
+
+        // Hide context menu when pressing Escape
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                hideContextMenu();
+            }
+        });
     });
 
     onDestroy(() => {
         if (editorView) {
             editorView.destroy();
         }
+        document.removeEventListener("click", hideContextMenu);
+        document.removeEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                hideContextMenu();
+            }
+        });
     });
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
+
+{#if showContextMenu}
+    <div
+        class="context-menu"
+        bind:this={contextMenu}
+        style="left: {contextMenuX}px; top: {contextMenuY}px;"
+    >
+        <button class="context-menu-item" onclick={insertTable}>
+            Insert Table
+        </button>
+    </div>
+{/if}
 
 <style>
     .editor-container {
