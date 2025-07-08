@@ -94,6 +94,13 @@
 
         // Hide context menu when clicking elsewhere
         document.addEventListener("click", hideContextMenu);
+
+        // Hide context menu when pressing Escape
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                hideContextMenu();
+            }
+        });
     });
 
     onDestroy(() => {
@@ -101,6 +108,11 @@
             editorView.destroy();
         }
         document.removeEventListener("click", hideContextMenu);
+        document.removeEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                hideContextMenu();
+            }
+        });
     });
 </script>
 

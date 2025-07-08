@@ -104,6 +104,7 @@ class TableWidget extends WidgetType {
 
             cell.addEventListener("contextmenu", (event) => {
                 event.preventDefault();
+                event.stopPropagation();
                 this.showContextMenu(event as MouseEvent, cell as HTMLElement);
             });
 
@@ -467,12 +468,13 @@ class TableWidget extends WidgetType {
                 menuItem.textContent = item.text;
 
                 // Assign action if provided
-                if (item.action) {
-                    menuItem.addEventListener("click", () => {
-                        item.action!();
-                        this.removeContextMenu();
-                    });
-                }
+                menuItem.onclick = (e) => {
+                    e.stopPropagation();
+                    if (item.action) {
+                        item.action();
+                    }
+                    this.removeContextMenu();
+                };
 
                 // Append the menu item to the menu
                 menu.appendChild(menuItem);
@@ -508,10 +510,9 @@ class TableWidget extends WidgetType {
     }
 
     private removeContextMenu(): void {
-        const existingMenu = document.querySelector(".context-menu");
-        if (existingMenu) {
-            existingMenu.remove();
-        }
+        document
+            .querySelectorAll(".context-menu")
+            .forEach((menu) => menu.remove());
     }
 
     private handleCellKeydown(
