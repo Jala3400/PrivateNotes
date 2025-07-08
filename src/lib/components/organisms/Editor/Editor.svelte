@@ -46,6 +46,18 @@
         editorView.focus();
     }
 
+    function insertTaskList() {
+        const taskListTemplate = `- [ ] `;
+
+        const pos = editorView.state.selection.main.head;
+        editorView.dispatch({
+            changes: { from: pos, insert: taskListTemplate },
+            selection: { anchor: pos + taskListTemplate.length },
+        });
+
+        hideContextMenu();
+        editorView.focus();
+    }
     function hideContextMenu() {
         showContextMenu = false;
     }
@@ -130,6 +142,9 @@
     >
         <button class="context-menu-item" onclick={insertTable}>
             Insert Table
+        </button>
+        <button class="context-menu-item" onclick={insertTaskList}>
+            Insert Task List
         </button>
     </div>
 {/if}
