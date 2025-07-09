@@ -68,6 +68,36 @@
         editorView.focus();
     }
 
+    function insertSuperscript() {
+        const selection = editorView.state.selection.main;
+        const selectedText = editorView.state.doc.sliceString(selection.from, selection.to);
+        const superscriptText = selectedText ? `^${selectedText}^` : `^^`;
+        
+        editorView.dispatch({
+            changes: { from: selection.from, to: selection.to, insert: superscriptText },
+            selection: selectedText 
+                ? { anchor: selection.from, head: selection.from + superscriptText.length }
+                : { anchor: selection.from + 1, head: selection.from + 1 }
+        });
+
+        hideContextMenu();
+    }
+
+    function insertSubscript() {
+        const selection = editorView.state.selection.main;
+        const selectedText = editorView.state.doc.sliceString(selection.from, selection.to);
+        const subscriptText = selectedText ? `~${selectedText}~` : `~~`;
+        
+        editorView.dispatch({
+            changes: { from: selection.from, to: selection.to, insert: subscriptText },
+            selection: selectedText 
+                ? { anchor: selection.from, head: selection.from + subscriptText.length }
+                : { anchor: selection.from + 1, head: selection.from + 1 }
+        });
+
+        hideContextMenu();
+    }
+
     function hideContextMenu() {
         showContextMenu = false;
     }
@@ -166,6 +196,12 @@
         </button>
         <button class="context-menu-item" onclick={insertTaskList}>
             Insert Task List
+        </button>
+        <button class="context-menu-item" onclick={insertSuperscript}>
+            Insert Superscript
+        </button>
+        <button class="context-menu-item" onclick={insertSubscript}>
+            Insert Subscript
         </button>
     </div>
 {/if}
