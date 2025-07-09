@@ -57,11 +57,13 @@
 
     function insertTaskList() {
         const taskListTemplate = `- [ ] `;
-
         const pos = editorView.state.selection.main.head;
+        const line = editorView.state.doc.lineAt(pos);
+        const lineStart = line.from;
+
         editorView.dispatch({
-            changes: { from: pos, insert: taskListTemplate },
-            selection: { anchor: pos + taskListTemplate.length },
+            changes: { from: lineStart, insert: taskListTemplate },
+            selection: { anchor: lineStart + taskListTemplate.length },
         });
 
         hideContextMenu();
