@@ -75,7 +75,7 @@
     content: "";
     display: block;
     background-color: var(--border-color-light);
-    height: 1px !important;
+    height: 2px !important;
     width: 100%;
 }
 
