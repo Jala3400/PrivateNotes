@@ -233,7 +233,8 @@
 
 /* Search and selection Match Highlighting */
 .cm-searchMatch,
-.cm-selectionMatch {
+.cm-selectionMatch,
+.cm-matchingBracket {
     display: inline-block;
     border-radius: var(--border-radius-small);
 }
@@ -253,7 +254,6 @@
 
 .cm-focused .cm-matchingBracket {
     background-color: color-mix(in srgb, var(--main-color), transparent 50%) !important;
-    border-radius: var(--border-radius-small) !important;
 }
 
 /* Panels */
