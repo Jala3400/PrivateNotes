@@ -109,7 +109,7 @@
 
     .no-items {
         text-align: center;
-        color: var(--text-secondary);
+        color: var(--text-muted);
         font-size: 0.85em;
         padding: 0.5em;
         font-style: italic;
@@ -144,7 +144,7 @@
         display: none;
         background: none;
         border: none;
-        color: var(--text-secondary);
+        color: var(--text-muted);
         cursor: pointer;
         padding: 0.2em;
     }

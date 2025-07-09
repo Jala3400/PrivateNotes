@@ -162,6 +162,6 @@
     }
 
     .empty-state {
-        color: var(--text-secondary);
+        color: var(--text-muted);
     }
 </style>
