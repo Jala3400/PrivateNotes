@@ -14,7 +14,7 @@
     import { indentWithTab } from "@codemirror/commands";
     import { tableRendererPlugin } from "./TableRendererPlugin";
     import { taskListPlugin } from "./TaskListPlugin";
-    import { superscriptPlugin } from "./SubAndSuperscriptPlugin";
+    import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
     import {
         Strikethrough,
         Subscript,
@@ -103,7 +103,7 @@
                 selectedLinePlugin(),
                 tableRendererPlugin(),
                 taskListPlugin(),
-                superscriptPlugin(),
+                subAndSuperscriptPlugin(),
                 EditorView.lineWrapping,
                 basicSetup,
                 keymap.of([indentWithTab]),

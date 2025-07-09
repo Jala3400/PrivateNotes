@@ -11,7 +11,7 @@ import { syntaxTree } from "@codemirror/language";
 /**
  * Simple plugin to add a class to selected lines
  */
-export function superscriptPlugin(): Extension {
+export function subAndSuperscriptPlugin(): Extension {
     return ViewPlugin.fromClass(
         class {
             decorations: DecorationSet;
