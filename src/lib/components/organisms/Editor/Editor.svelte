@@ -16,6 +16,7 @@
     import { taskListPlugin } from "./TaskListPlugin";
     import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
     import { separatorLinePlugin } from "./SeparatorLinePlugin";
+    import { blockquotePlugin } from "./BlockquotePlugin";
     import {
         Strikethrough,
         Subscript,
@@ -66,6 +67,7 @@
         hideContextMenu();
         editorView.focus();
     }
+
     function hideContextMenu() {
         showContextMenu = false;
     }
@@ -106,6 +108,7 @@
                 taskListPlugin(),
                 subAndSuperscriptPlugin(),
                 separatorLinePlugin(),
+                blockquotePlugin(),
                 EditorView.lineWrapping,
                 basicSetup,
                 keymap.of([indentWithTab]),

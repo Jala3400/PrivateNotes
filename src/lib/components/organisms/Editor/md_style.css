@@ -40,14 +40,13 @@
 }
 
 /* Blockquotes */
-.md-quote {
+.md-quote-mark {
     padding-left: 0.5em;
-    font-style: normal;
-    border-left: 4px solid var(--main-color);
+    border-left: 0.2em solid var(--main-color);
 }
 
-.cm-activeLine .md-quote,
-.cm-selected-line .md-quote {
+.cm-activeLine .md-quote-mark,
+.cm-selected-line .md-quote-mark {
     padding-left: 0;
     margin-left: 0;
     border: none;
