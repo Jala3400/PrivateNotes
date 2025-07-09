@@ -63,6 +63,33 @@
     color: var(--text-muted);
 }
 
+/* Separator */
+.md-separator {
+    display: flex !important;
+    align-items: center;
+    max-height: 1lh;
+    color: transparent;
+    font-weight: bolder;
+}
+
+.md-separator::before {
+    content: "";
+    display: block;
+    background-color: var(--border-color-light);
+    height: 1px !important;
+    width: 100%;
+}
+
+.cm-activeLine.md-separator,
+.cm-selected-line.md-separator {
+    color: var(--text-muted);
+}
+
+.cm-activeLine.md-separator::before,
+.cm-selected-line.md-separator::before {
+    display: none;
+}
+
 /** Inline elements */
 
 /* Bold text */

@@ -15,6 +15,7 @@
     import { tableRendererPlugin } from "./TableRendererPlugin";
     import { taskListPlugin } from "./TaskListPlugin";
     import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
+    import { separatorLinePlugin } from "./SeparatorLinePlugin";
     import {
         Strikethrough,
         Subscript,
@@ -104,6 +105,7 @@
                 tableRendererPlugin(),
                 taskListPlugin(),
                 subAndSuperscriptPlugin(),
+                separatorLinePlugin(),
                 EditorView.lineWrapping,
                 basicSetup,
                 keymap.of([indentWithTab]),
