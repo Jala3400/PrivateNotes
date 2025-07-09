@@ -183,6 +183,14 @@
             }
         });
     });
+
+    const contextMenuItems = [
+        { text: "Insert Superscript", action: insertSuperscript },
+        { text: "Insert Subscript", action: insertSubscript },
+        { text: "---", action: null },
+        { text: "Insert Table", action: insertTable },
+        { text: "Insert Task List", action: insertTaskList },
+    ];
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
@@ -193,18 +201,15 @@
         bind:this={contextMenu}
         style="left: {contextMenuX}px; top: {contextMenuY}px;"
     >
-        <button class="context-menu-item" onclick={insertTable}>
-            Insert Table
-        </button>
-        <button class="context-menu-item" onclick={insertTaskList}>
-            Insert Task List
-        </button>
-        <button class="context-menu-item" onclick={insertSuperscript}>
-            Insert Superscript
-        </button>
-        <button class="context-menu-item" onclick={insertSubscript}>
-            Insert Subscript
-        </button>
+        {#each contextMenuItems as item}
+            {#if item.text === "---"}
+                <div class="context-menu-separator"></div>
+            {:else}
+                <button class="context-menu-item" onclick={item.action}>
+                    {item.text}
+                </button>
+            {/if}
+        {/each}
     </div>
 {/if}
 
