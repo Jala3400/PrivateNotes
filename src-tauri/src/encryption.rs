@@ -34,6 +34,11 @@ pub fn encrypt_data(key: &[u8; 32], data: &[u8]) -> Result<Vec<u8>, String> {
 
 /// Decrypt data with the given key from file data (nonce + encrypted content)
 pub fn decrypt_data(key: &[u8; 32], file_data: &[u8]) -> Result<Vec<u8>, String> {
+    // Open the file if it is empty
+    if file_data.is_empty() {
+        return Ok(Vec::new());
+    }
+
     // Extract nonce and encrypted content
     if file_data.len() < 12 {
         return Err("File is too short".to_string());
