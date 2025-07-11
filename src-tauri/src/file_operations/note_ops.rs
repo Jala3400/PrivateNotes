@@ -21,7 +21,7 @@ pub fn open_note_from_path(
     let existing_id = app_state.lock().unwrap().is_opened(file_path_str.clone());
 
     // Check if the note is already opened
-    let id = if let Some(existing_id) = existing_id {
+    let id = if let Some(existing_id) = existing_id.clone() {
         existing_id
     } else {
         // If not opened, generate a new ID and add to mapping
@@ -30,6 +30,17 @@ pub fn open_note_from_path(
             .unwrap()
             .add_path_mapping(file_path_str.clone());
 
+        id
+    };
+
+    // Open the note and emit the content
+    open_note_and_emit(id.clone(), id.clone(), file_path, window, &app_state)?;
+
+    // If the note is already opened, we don't need to create a new FileSystemItem
+    // and emit an event, just return early
+    // This should be after the open_note_and_emit call
+    // to ensure the note is opened
+    if existing_id.is_none() {
         // Create a FileSystemItem for the current note
         let current_note = FileSystemItem {
             id: id.clone(),
@@ -46,23 +57,16 @@ pub fn open_note_from_path(
         };
 
         // Add the opened note to the app state
-        {
-            let mut state = app_state.lock().unwrap();
-            state.add_opened_item(&current_note);
-            let frontend_note = state.to_frontend_item(&current_note);
-            drop(state); // Release lock before emit
+        let mut state = app_state.lock().unwrap();
+        state.add_opened_item(&current_note);
+        let frontend_note = state.to_frontend_item(&current_note);
+        drop(state); // Release lock before emit
 
-            // Emit the event to the frontend
-            window
-                .emit("item-opened", frontend_note)
-                .map_err(|e| format!("Failed to emit event: {}", e))?;
-        }
-
-        id
-    };
-
-    // Open the note and emit the content
-    open_note_and_emit(id.clone(), id, file_path, window, &app_state)?;
+        // Emit the event to the frontend
+        window
+            .emit("item-opened", frontend_note)
+            .map_err(|e| format!("Failed to emit event: {}", e))?;
+    }
 
     Ok(())
 }

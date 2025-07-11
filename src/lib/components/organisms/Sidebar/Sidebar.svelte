@@ -93,6 +93,9 @@
 
         // Close the item
         try {
+            // On the back end this will emit an "item-closed" event
+            // which will be listened to in the Sidebar component to remove the item
+            // and on the NoteEditor component to reset the editor
             await invoke("close_item", { id });
         } catch (error) {
             throwCustomError(
@@ -145,7 +148,7 @@
         padding: 1em;
         background-color: var(--background-dark-light);
         overflow: hidden;
-        border-right: 1px solid var(--border-color-light);
+        border-right: 1px solid var(--border-color-dark);
     }
 
     .sidebar.collapsed {
@@ -159,9 +162,10 @@
         flex-direction: column;
         gap: 0.8em;
         overflow: auto;
+        padding-right: 8px;
     }
 
     .empty-state {
-        color: var(--text-secondary);
+        color: var(--text-muted);
     }
 </style>

@@ -13,7 +13,17 @@
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import { indentWithTab } from "@codemirror/commands";
     import { tableRendererPlugin } from "./TableRendererPlugin";
-    import { Table } from "@lezer/markdown";
+    import { taskListPlugin } from "./TaskListPlugin";
+    import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
+    import { separatorLinePlugin } from "./SeparatorLinePlugin";
+    import { blockquotePlugin } from "./BlockquotePlugin";
+    import {
+        Strikethrough,
+        Subscript,
+        Superscript,
+        Table,
+        TaskList,
+    } from "@lezer/markdown";
     import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
@@ -45,6 +55,77 @@
         editorView.focus();
     }
 
+    function insertTaskList() {
+        const taskListTemplate = `- [ ] `;
+        const pos = editorView.state.selection.main.head;
+        const line = editorView.state.doc.lineAt(pos);
+        const lineStart = line.from;
+
+        editorView.dispatch({
+            changes: { from: lineStart, insert: taskListTemplate },
+            selection: { anchor: lineStart + taskListTemplate.length },
+        });
+
+        hideContextMenu();
+        editorView.focus();
+    }
+
+    function insertSuperscript() {
+        const selection = editorView.state.selection.main;
+        const selectedText = editorView.state.doc.sliceString(
+            selection.from,
+            selection.to
+        );
+
+        const superscriptText = selectedText ? `^${selectedText}^` : `^^`;
+
+        hideContextMenu();
+
+        editorView.dispatch({
+            changes: {
+                from: selection.from,
+                to: selection.to,
+                insert: superscriptText,
+            },
+            selection: selectedText
+                ? {
+                      anchor: selection.from,
+                      head: selection.from + superscriptText.length,
+                  }
+                : { anchor: selection.from + 1, head: selection.from + 1 },
+        });
+
+        editorView.focus();
+    }
+
+    function insertSubscript() {
+        const selection = editorView.state.selection.main;
+        const selectedText = editorView.state.doc.sliceString(
+            selection.from,
+            selection.to
+        );
+
+        const subscriptText = selectedText ? `~${selectedText}~` : `~~`;
+
+        hideContextMenu();
+
+        editorView.dispatch({
+            changes: {
+                from: selection.from,
+                to: selection.to,
+                insert: subscriptText,
+            },
+            selection: selectedText
+                ? {
+                      anchor: selection.from,
+                      head: selection.from + subscriptText.length,
+                  }
+                : { anchor: selection.from + 1, head: selection.from + 1 },
+        });
+
+        editorView.focus();
+    }
+
     function hideContextMenu() {
         showContextMenu = false;
     }
@@ -61,6 +142,7 @@
             { tag: tags.monospace, class: "md-code-inline" },
             { tag: tags.quote, class: "md-quote" },
             { tag: tags.list, class: "md-list-item" },
+            { tag: tags.strikethrough, class: "md-strikethrough" },
         ]);
 
         const indentUnitExtension = indentUnit.of("    "); // 4 spaces
@@ -68,11 +150,23 @@
         const state = EditorState.create({
             doc: content,
             extensions: [
-                markdown({ extensions: [Table] }),
+                markdown({
+                    extensions: [
+                        Table,
+                        Strikethrough,
+                        TaskList,
+                        Superscript,
+                        Subscript,
+                    ],
+                }), // Don't use GFM because it hides the links
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
                 tableRendererPlugin(),
+                taskListPlugin(),
+                subAndSuperscriptPlugin(),
+                separatorLinePlugin(),
+                blockquotePlugin(),
                 EditorView.lineWrapping,
                 basicSetup,
                 keymap.of([indentWithTab]),
@@ -115,6 +209,14 @@
             }
         });
     });
+
+    const contextMenuItems = [
+        { text: "Insert Superscript", action: insertSuperscript },
+        { text: "Insert Subscript", action: insertSubscript },
+        { text: "---", action: null },
+        { text: "Insert Table", action: insertTable },
+        { text: "Insert Task List", action: insertTaskList },
+    ];
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
@@ -125,9 +227,15 @@
         bind:this={contextMenu}
         style="left: {contextMenuX}px; top: {contextMenuY}px;"
     >
-        <button class="context-menu-item" onclick={insertTable}>
-            Insert Table
-        </button>
+        {#each contextMenuItems as item}
+            {#if item.text === "---"}
+                <div class="context-menu-separator"></div>
+            {:else}
+                <button class="context-menu-item" onclick={item.action}>
+                    {item.text}
+                </button>
+            {/if}
+        {/each}
     </div>
 {/if}
 
