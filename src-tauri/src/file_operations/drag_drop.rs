@@ -5,19 +5,35 @@ use crate::{
     state::AppState,
 };
 use std::{path::PathBuf, sync::Mutex};
-use tauri::{DragDropEvent, Manager, Window};
+use tauri::{DragDropEvent, Emitter, Manager, Window};
 
 /// Handles drag and drop events for files and folders
 pub fn drop_handler(window: &Window, event: &DragDropEvent) -> Result<(), String> {
     match event {
         // Handle file drops
         DragDropEvent::Drop { paths, .. } => {
+            // Check if user is logged in
+            {
+                let app_state = window.state::<Mutex<AppState>>();
+                let state = app_state.lock().unwrap();
+                if !state.is_logged_in() {
+                    window.emit("error", "Log in first").unwrap();
+                    return Ok(());
+                }
+            }
+
             for path in paths {
                 // Check if it's a folder that can be opened
                 if can_open_path(path) {
-                    open_from_path(path, window)?;
+                    if let Err(err) = open_from_path(path, window) {
+                        let error_msg = format!("Failed to open '{}':\n{}", path.display(), err);
+                        window.emit("error", error_msg).unwrap();
+                    }
                 } else {
-                    handle_path(path, window)?;
+                    if let Err(err) = handle_path(path, window) {
+                        let error_msg = format!("Failed to handle '{}':\n{}", path.display(), err);
+                        window.emit("error", error_msg).unwrap();
+                    }
                 }
             }
         }

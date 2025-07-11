@@ -53,6 +53,10 @@ impl AppState {
         self.key.ok_or("Log in first")
     }
 
+    pub fn is_logged_in(&self) -> bool {
+        self.key.is_some()
+    }
+
     /// Check if an item is opened by its path
     /// Returns the ID of the opened item if it exists, otherwise returns None
     pub fn is_opened(&self, path: String) -> Option<String> {
