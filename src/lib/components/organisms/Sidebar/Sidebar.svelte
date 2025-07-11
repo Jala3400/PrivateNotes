@@ -159,6 +159,7 @@
         flex-direction: column;
         gap: 0.8em;
         overflow: auto;
+        padding-right: 8px;
     }
 
     .empty-state {
