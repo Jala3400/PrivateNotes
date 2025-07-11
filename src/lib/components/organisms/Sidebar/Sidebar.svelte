@@ -93,6 +93,9 @@
 
         // Close the item
         try {
+            // On the back end this will emit an "item-closed" event
+            // which will be listened to in the Sidebar component to remove the item
+            // and on the NoteEditor component to reset the editor
             await invoke("close_item", { id });
         } catch (error) {
             throwCustomError(
