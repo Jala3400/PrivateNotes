@@ -74,7 +74,7 @@
 .md-separator::before {
     content: "";
     display: block;
-    background-color: var(--border-color-light);
+    background-color: var(--border-color-dark);
     height: 2px !important;
     width: 100%;
 }
@@ -206,7 +206,7 @@
 .cm-gutters {
     background-color: transparent !important;
     color: var(--text-muted) !important;
-    border-right: 1px solid var(--border-color-light) !important;
+    border-right: 1px solid var(--border-color-dark) !important;
 }
 
 .cm-gutterElement {
@@ -253,7 +253,7 @@
 }
 
 .cm-focused .cm-matchingBracket {
-    background-color: color-mix(in srgb, var(--main-color), transparent 50%) !important;
+    background-color: color-mix(in srgb, var(--main-color), transparent 80%) !important;
 }
 
 /* Panels */
@@ -263,7 +263,7 @@
 }
 
 .cm-panels-bottom {
-    border-top: 1px solid var(--border-color-light) !important;
+    border-top: 1px solid var(--border-color-dark) !important;
 }
 
 .cm-panel {
@@ -274,14 +274,14 @@
     background-color: var(--background-dark-light) !important;
     color: var(--text-primary) !important;
     border-radius: var(--border-radius-small) !important;
-    border: 1px solid var(--border-color-light) !important;
+    border: 1px solid var(--border-color-dark) !important;
 }
 
 .cm-button {
     background-color: var(--background-dark-light) !important;
     background-image: none !important;
     color: var(--text-primary) !important;
-    border: 1px solid var(--border-color-light) !important;
+    border: 1px solid var(--border-color-dark) !important;
     border-radius: var(--border-radius-small) !important;
     padding: 0.25em 0.5em !important;
     transition: background var(--transition) !important;
@@ -295,7 +295,7 @@
 .cm-tooltip {
     background-color: var(--background-dark-light) !important;
     color: var(--text-primary) !important;
-    border: 1px solid var(--border-color-light) !important;
+    border: 1px solid var(--border-color-dark) !important;
     border-radius: var(--border-radius-small) !important;
     overflow: hidden !important;
 }
@@ -309,7 +309,7 @@
     background-color: var(--background-dark-light) !important;
     color: var(--text-primary) !important;
     border-radius: var(--border-radius-small) !important;
-    border-color: var(--border-color-light) !important;
+    border-color: var(--border-color-dark) !important;
 }
 
 /* Smooth transitions for live preview */
@@ -357,7 +357,7 @@
 }
 
 .md-table td {
-    border: 1px solid var(--border-color-light);
+    border: 1px solid var(--border-color-dark);
 }
 
 .md-table th:focus,
@@ -400,7 +400,7 @@
 
 .table-button:hover {
     opacity: 1;
-    border: 1px solid var(--border-color-light);
+    border: 1px solid var(--border-color-dark);
 }
 
 .table-button.add-row-btn {
@@ -421,7 +421,7 @@
     flex-direction: column;
     padding: 0.25em;
     background-color: var(--background-dark-light);
-    border: 1px solid var(--border-color-light);
+    border: 1px solid var(--border-color-dark);
     border-radius: var(--border-radius-medium);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1000;
@@ -466,6 +466,6 @@
 
 .context-menu-separator {
     height: 1px;
-    background-color: var(--border-color-light);
+    background-color: var(--border-color-dark);
     margin: 0.3em;
 }
