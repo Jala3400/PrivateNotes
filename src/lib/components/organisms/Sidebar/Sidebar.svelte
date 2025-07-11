@@ -145,7 +145,7 @@
         padding: 1em;
         background-color: var(--background-dark-light);
         overflow: hidden;
-        border-right: 1px solid var(--border-color-light);
+        border-right: 1px solid var(--border-color-dark);
     }
 
     .sidebar.collapsed {

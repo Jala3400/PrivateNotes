@@ -15,7 +15,7 @@
     --scrollbar: hsl(0, 0%, 20%);
     --scrollbar-light: hsl(0, 0%, 25%);
 
-    --border-color-light: hsl(0, 0%, 20%);
+    --border-color-dark: hsl(0, 0%, 20%);
     --border-color: hsl(0, 0%, 25%);
 
     --popup-color: rgba(0, 0, 0, 0.9);
