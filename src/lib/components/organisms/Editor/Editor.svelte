@@ -17,6 +17,7 @@
     import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
     import { separatorLinePlugin } from "./SeparatorLinePlugin";
     import { blockquotePlugin } from "./BlockquotePlugin";
+    import { vim } from "@replit/codemirror-vim";
     import {
         Strikethrough,
         Subscript,
@@ -150,6 +151,7 @@
         const state = EditorState.create({
             doc: content,
             extensions: [
+                vim(),
                 markdown({
                     extensions: [
                         Table,

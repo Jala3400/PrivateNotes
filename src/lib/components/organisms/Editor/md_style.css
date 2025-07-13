@@ -469,3 +469,12 @@
     background-color: var(--border-color-dark);
     margin: 0.3em;
 }
+
+/* Vim plugin styles */
+.cm-vimCursorLayer .cm-fat-cursor {
+    background: var(--main-color-dark);
+}
+
+.ͼo:not(.cm-focused) .cm-fat-cursor {
+    outline: solid 1px var(--main-color);
+}
