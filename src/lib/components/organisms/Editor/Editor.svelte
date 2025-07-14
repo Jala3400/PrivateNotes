@@ -176,8 +176,6 @@
             { tag: tags.strikethrough, class: "md-strikethrough" },
         ]);
 
-        const indentUnitExtension = indentUnit.of("    "); // 4 spaces
-
         function createExtensions() {
             const extensions = [
                 markdown({
@@ -197,9 +195,7 @@
                 subAndSuperscriptPlugin(),
                 separatorLinePlugin(),
                 blockquotePlugin(),
-                EditorView.lineWrapping,
-                // Individual basicSetup components
-                lineNumbers(),
+                // Basic editor features
                 highlightSpecialChars(),
                 history(),
                 drawSelection(),
@@ -208,27 +204,57 @@
                 indentOnInput(),
                 syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
                 bracketMatching(),
-                closeBrackets(),
-                autocompletion(),
                 rectangularSelection(),
                 highlightActiveLine(),
                 highlightActiveLineGutter(),
-                highlightSelectionMatches(),
-                foldGutter(),
-                indentOnInput(),
-                keymap.of([
-                    indentWithTab,
-                    ...defaultKeymap,
-                    ...historyKeymap,
-                    ...foldKeymap,
-                    ...completionKeymap,
-                    ...closeBracketsKeymap,
-                    ...searchKeymap,
-                ]),
-                indentUnitExtension,
             ];
 
-            // Conditionally add vim mode based on editorConfig
+            // Conditionally add features based on editorConfig
+            if ($editorConfig.lineNumbers) {
+                extensions.push(lineNumbers());
+            }
+
+            if ($editorConfig.lineWrapping) {
+                extensions.push(EditorView.lineWrapping);
+            }
+
+            if ($editorConfig.autoCloseBrackets) {
+                extensions.push(closeBrackets());
+                extensions.push(autocompletion());
+            }
+
+            if ($editorConfig.highlightSelectionMatches) {
+                extensions.push(highlightSelectionMatches());
+            }
+
+            if ($editorConfig.foldGutter) {
+                extensions.push(foldGutter());
+            }
+
+            // Create keymap array based on config
+            const keymaps = [
+                indentWithTab,
+                ...defaultKeymap,
+                ...historyKeymap,
+                ...completionKeymap,
+                ...searchKeymap,
+            ];
+
+            if ($editorConfig.autoCloseBrackets) {
+                keymaps.push(...closeBracketsKeymap);
+            }
+
+            if ($editorConfig.foldGutter) {
+                keymaps.push(...foldKeymap);
+            }
+
+            extensions.push(keymap.of(keymaps));
+
+            // Set tab size/indent unit
+            const tabSize = $editorConfig.tabSize || 4;
+            extensions.push(indentUnit.of(" ".repeat(tabSize)));
+
+            // Conditionally add vim mode
             if ($editorConfig.vimMode) {
                 extensions.unshift(vim());
             }

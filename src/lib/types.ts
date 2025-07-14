@@ -14,5 +14,11 @@ export interface noteIds {
 }
 
 export interface EditorConfig {
-    vimMode?: boolean;
+    vimMode: boolean;
+    lineNumbers: boolean;
+    lineWrapping: boolean;
+    autoCloseBrackets: boolean;
+    highlightSelectionMatches: boolean;
+    foldGutter: boolean;
+    tabSize: number;
 }

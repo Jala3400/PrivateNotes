@@ -38,6 +38,56 @@
                     />
                     Vim mode
                 </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        bind:checked={$editorConfig.lineNumbers}
+                    />
+                    Line numbers
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        bind:checked={$editorConfig.foldGutter}
+                    />
+                    Code folding gutter
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        bind:checked={$editorConfig.lineWrapping}
+                    />
+                    Line wrapping
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        bind:checked={$editorConfig.autoCloseBrackets}
+                    />
+                    Auto-close brackets
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        bind:checked={$editorConfig.highlightSelectionMatches}
+                    />
+                    Highlight selection matches
+                </label>
+
+                <div class="number-input-container">
+                    <label for="tab-size">Tab size:</label>
+                    <input
+                        id="tab-size"
+                        type="number"
+                        min="0"
+                        bind:value={$editorConfig.tabSize}
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -51,6 +101,7 @@
         color: var(--text-color);
         min-width: 300px;
         max-width: 90%;
+        max-height: 90%;
         margin: auto;
     }
 
@@ -70,7 +121,41 @@
         gap: 0.5em;
     }
 
+    .config-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75em;
+        width: 100%;
+    }
+
     label {
         user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        cursor: pointer;
+    }
+
+    .number-input-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+
+    .number-input-container label {
+        cursor: default;
+    }
+
+    input[type="number"] {
+        width: 5em;
+        padding: 0.25em;
+        border: 1px solid var(--main-color);
+        border-radius: var(--border-radius-small);
+        background-color: var(--background-dark-lighter);
+        color: var(--text-color);
+    }
+
+    input[type="checkbox"] {
+        cursor: pointer;
     }
 </style>
