@@ -1,5 +1,9 @@
 <script lang="ts">
-    import { editorConfig } from "$lib/stores/editorConfig";
+    import {
+        editorConfig,
+        editorConfigDescription,
+    } from "$lib/stores/editorConfig";
+    import ConfigSection from "$lib/components/molecules/ConfigSection.svelte";
 
     interface Props {
         open: boolean;
@@ -28,68 +32,11 @@
         onclick={(e) => e.stopPropagation()}
         role="presentation"
     >
-        <div class="config-section">
-            <h2>Editor Configuration</h2>
-            <div class="config-options">
-                <label>
-                    <input
-                        type="checkbox"
-                        bind:checked={$editorConfig.vimMode}
-                    />
-                    Vim mode
-                </label>
-
-                <label>
-                    <input
-                        type="checkbox"
-                        bind:checked={$editorConfig.lineNumbers}
-                    />
-                    Line numbers
-                </label>
-
-                <label>
-                    <input
-                        type="checkbox"
-                        bind:checked={$editorConfig.foldGutter}
-                    />
-                    Code folding gutter
-                </label>
-
-                <label>
-                    <input
-                        type="checkbox"
-                        bind:checked={$editorConfig.lineWrapping}
-                    />
-                    Line wrapping
-                </label>
-
-                <label>
-                    <input
-                        type="checkbox"
-                        bind:checked={$editorConfig.autoCloseBrackets}
-                    />
-                    Auto-close brackets
-                </label>
-
-                <label>
-                    <input
-                        type="checkbox"
-                        bind:checked={$editorConfig.highlightSelectionMatches}
-                    />
-                    Highlight selection matches
-                </label>
-
-                <div class="number-input-container">
-                    <label for="tab-size">Tab size:</label>
-                    <input
-                        id="tab-size"
-                        type="number"
-                        min="0"
-                        bind:value={$editorConfig.tabSize}
-                    />
-                </div>
-            </div>
-        </div>
+        <ConfigSection
+            title="Editor Configuration"
+            optionsDescription={editorConfigDescription}
+            bind:configOptions={$editorConfig}
+        />
     </div>
 </dialog>
 
@@ -112,50 +59,5 @@
     #config-content {
         padding: 1em;
         padding-top: 0.6em;
-    }
-
-    .config-section {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5em;
-    }
-
-    .config-options {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75em;
-        width: 100%;
-    }
-
-    label {
-        user-select: none;
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-        cursor: pointer;
-    }
-
-    .number-input-container {
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-    }
-
-    .number-input-container label {
-        cursor: default;
-    }
-
-    input[type="number"] {
-        width: 5em;
-        padding: 0.25em;
-        border: 1px solid var(--main-color);
-        border-radius: var(--border-radius-small);
-        background-color: var(--background-dark-lighter);
-        color: var(--text-color);
-    }
-
-    input[type="checkbox"] {
-        cursor: pointer;
     }
 </style>

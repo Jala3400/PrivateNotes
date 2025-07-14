@@ -207,6 +207,7 @@
                 rectangularSelection(),
                 highlightActiveLine(),
                 highlightActiveLineGutter(),
+                highlightSelectionMatches(),
             ];
 
             // Conditionally add features based on editorConfig
@@ -221,10 +222,6 @@
             if ($editorConfig.autoCloseBrackets) {
                 extensions.push(closeBrackets());
                 extensions.push(autocompletion());
-            }
-
-            if ($editorConfig.highlightSelectionMatches) {
-                extensions.push(highlightSelectionMatches());
             }
 
             if ($editorConfig.foldGutter) {

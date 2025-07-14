@@ -13,12 +13,21 @@ export interface NoteIds {
     parentId: string;
 }
 
-export interface EditorConfig {
-    vimMode: boolean;
-    lineNumbers: boolean;
-    lineWrapping: boolean;
-    autoCloseBrackets: boolean;
-    highlightSelectionMatches: boolean;
-    foldGutter: boolean;
-    tabSize: number;
+export type ConfigOptionsDescription = [
+    string,
+    EditorConfigOption,
+    OptionType
+][];
+export type ConfigOptions = Record<string, any>;
+
+export interface EditorConfigOption<T = any> {
+    label: string;
+    defaultValue?: T;
+    min?: number; // Optional for number types
+    max?: number; // Optional for number types
+}
+
+export enum OptionType {
+    BOOLEAN,
+    NUMBER,
 }
