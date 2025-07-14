@@ -155,6 +155,7 @@
         width: 0;
         overflow: hidden;
         padding: 0;
+        border: none;
     }
 
     .sidebar-content {
