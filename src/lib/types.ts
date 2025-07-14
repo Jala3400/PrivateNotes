@@ -8,7 +8,7 @@ export interface FileSystemItem {
     collapsed: boolean;
 }
 
-export interface noteIds {
+export interface NoteIds {
     id: string;
     parentId: string;
 }
