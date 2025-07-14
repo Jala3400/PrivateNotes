@@ -1,14 +1,43 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { EditorView, keymap } from "@codemirror/view";
+    import {
+        drawSelection,
+        dropCursor,
+        EditorView,
+        highlightActiveLine,
+        highlightActiveLineGutter,
+        highlightSpecialChars,
+        keymap,
+        lineNumbers,
+        rectangularSelection,
+    } from "@codemirror/view";
     import { EditorState, StateEffect } from "@codemirror/state";
     import { markdown } from "@codemirror/lang-markdown";
-    import { basicSetup } from "codemirror";
     import {
+        foldGutter,
+        indentOnInput,
+        bracketMatching,
+        foldKeymap,
         syntaxHighlighting,
         HighlightStyle,
         indentUnit,
+        defaultHighlightStyle,
     } from "@codemirror/language";
+    import {
+        history,
+        defaultKeymap,
+        historyKeymap,
+    } from "@codemirror/commands";
+    import {
+        searchKeymap,
+        highlightSelectionMatches,
+    } from "@codemirror/search";
+    import {
+        autocompletion,
+        completionKeymap,
+        closeBrackets,
+        closeBracketsKeymap,
+    } from "@codemirror/autocomplete";
     import { classHighlighter, tags } from "@lezer/highlight";
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import { indentWithTab } from "@codemirror/commands";
@@ -159,7 +188,7 @@
                         Superscript,
                         Subscript,
                     ],
-                }), // Don't use GFM because it hides the links
+                }),
                 syntaxHighlighting(classHighlighter),
                 syntaxHighlighting(markdownHighlighting),
                 selectedLinePlugin(),
@@ -169,8 +198,33 @@
                 separatorLinePlugin(),
                 blockquotePlugin(),
                 EditorView.lineWrapping,
-                basicSetup,
-                keymap.of([indentWithTab]),
+                // Individual basicSetup components
+                lineNumbers(),
+                highlightSpecialChars(),
+                history(),
+                drawSelection(),
+                dropCursor(),
+                EditorState.allowMultipleSelections.of(true),
+                indentOnInput(),
+                syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+                bracketMatching(),
+                closeBrackets(),
+                autocompletion(),
+                rectangularSelection(),
+                highlightActiveLine(),
+                highlightActiveLineGutter(),
+                highlightSelectionMatches(),
+                foldGutter(),
+                indentOnInput(),
+                keymap.of([
+                    indentWithTab,
+                    ...defaultKeymap,
+                    ...historyKeymap,
+                    ...foldKeymap,
+                    ...completionKeymap,
+                    ...closeBracketsKeymap,
+                    ...searchKeymap,
+                ]),
                 indentUnitExtension,
             ];
 
