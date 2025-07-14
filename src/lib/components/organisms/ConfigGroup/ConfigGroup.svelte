@@ -16,7 +16,8 @@
 </script>
 
 <div class="config-group">
-    <h1>{title}</h1>
+    <h1 class="group-title">{title}</h1>
+    <hr class="separator" />
     <div class="config-sections">
         {#each optionsDescription as [title, section]}
             <ConfigSection
@@ -33,13 +34,20 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.75em;
+    }
+
+    .separator {
+        width: 100%;
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 0.5em 0 1em 0;
+        opacity: 1;
     }
 
     .config-sections {
         display: flex;
         flex-direction: column;
-        gap: 0.5em;
+        gap: 0.8em;
         width: 100%;
     }
 </style>

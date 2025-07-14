@@ -8,22 +8,22 @@
     let { label, value = $bindable(), ...restProps }: Props = $props();
 </script>
 
-<div class="number-input-container">
-    <label>
-        {label}:
-        <input type="number" bind:value {...restProps} />
-    </label>
-</div>
+<label>
+    {label}:
+    <input type="number" bind:value {...restProps} />
+</label>
 
 <style>
-    .number-input-container {
+    label {
+        user-select: none;
         display: flex;
         align-items: center;
         gap: 0.5em;
+        cursor: pointer;
     }
 
-    .number-input-container label {
-        cursor: default;
+    label:hover {
+        text-decoration: underline;
     }
 
     input[type="number"] {
@@ -31,7 +31,12 @@
         padding: 0.25em;
         border: 1px solid var(--main-color);
         border-radius: var(--border-radius-small);
-        background-color: var(--background-dark-lighter);
+        background-color: var(--background-dark-light);
         color: var(--text-color);
+    }
+
+    input[type="number"]:focus {
+        background-color: var(--background-dark-lighter);
+        outline: none;
     }
 </style>

@@ -22,6 +22,10 @@
         cursor: pointer;
     }
 
+    label:hover {
+        text-decoration: underline;
+    }
+
     input[type="checkbox"] {
         cursor: pointer;
     }

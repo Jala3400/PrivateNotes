@@ -26,7 +26,12 @@
     }
 </script>
 
-<dialog bind:this={modalElement} onclick={closeModal} class="dialog-container">
+<dialog
+    bind:this={modalElement}
+    onclick={closeModal}
+    onclose={closeModal}
+    class="dialog-container"
+>
     <div
         id="config-content"
         onclick={(e) => e.stopPropagation()}
@@ -43,12 +48,10 @@
 <style>
     .dialog-container {
         border-radius: var(--border-radius-medium);
-        border: 2px solid var(--main-color);
+        border: 1px solid var(--border-color);
         background-color: var(--background-dark);
         color: var(--text-color);
-        min-width: 300px;
-        max-width: 90%;
-        max-height: 90%;
+        width: clamp(20em, 80%, 40em);
         margin: auto;
     }
 
@@ -57,7 +60,7 @@
     }
 
     #config-content {
-        padding: 1em;
-        padding-top: 0.6em;
+        padding: 1.3em;
+        padding-top: 0.85em;
     }
 </style>

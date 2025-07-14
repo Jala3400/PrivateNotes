@@ -52,7 +52,7 @@
     .config-options {
         display: flex;
         flex-direction: column;
-        gap: 0.75em;
+        gap: 0.3em;
         width: 100%;
     }
 </style>
