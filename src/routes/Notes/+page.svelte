@@ -1,7 +1,7 @@
 <script>
     import NoteEditor from "$lib/components/templates/NoteEditor/NoteEditor.svelte";
-    import Sidebar from "$lib/components/organisms/Sidebar/Sidebar.svelte";
-    import Toolsbar from "$lib/components/organisms/Toolsbar/Toolsbar.svelte";
+    import Sidebar from "$lib/components/templates/Sidebar/Sidebar.svelte";
+    import Toolsbar from "$lib/components/templates/Toolsbar/Toolsbar.svelte";
 
     let sidebar_collapsed = $state(false);
 </script>
