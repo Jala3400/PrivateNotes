@@ -9,10 +9,10 @@
     import { ask } from "@tauri-apps/plugin-dialog";
 
     interface Props {
-        sidebar_collapsed?: boolean;
+        sidebarCollapsed?: boolean;
     }
 
-    let { sidebar_collapsed = $bindable(false) }: Props = $props();
+    let { sidebarCollapsed = $bindable(false) }: Props = $props();
 
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;
@@ -117,7 +117,7 @@
     }
 </script>
 
-<div class="sidebar" class:collapsed={sidebar_collapsed}>
+<div class="sidebar" class:collapsed={sidebarCollapsed}>
     <div class="sidebar-header">
         <h2>Opened Items</h2>
     </div>

@@ -1,23 +1,27 @@
 <script>
+    import ConfigModal from "$lib/components/templates/ConfigModal/ConfigModal.svelte";
     import NoteEditor from "$lib/components/templates/NoteEditor/NoteEditor.svelte";
     import Sidebar from "$lib/components/templates/Sidebar/Sidebar.svelte";
     import Toolsbar from "$lib/components/templates/Toolsbar/Toolsbar.svelte";
 
-    let sidebar_collapsed = $state(false);
+    let sidebarCollapsed = $state(false);
+    let openConfigModal = $state(false);
 </script>
 
 <div
     class="app-layout"
-    style="--sidebar-width: {sidebar_collapsed
+    style="--sidebar-width: {sidebarCollapsed
         ? '0'
         : 'clamp(10em, 30%, 20em)'};"
 >
-    <Toolsbar bind:sidebar_collapsed />
-    <Sidebar {sidebar_collapsed} />
+    <Toolsbar bind:sidebarCollapsed bind:openConfigModal />
+    <Sidebar {sidebarCollapsed} />
     <div class="main-content">
         <NoteEditor />
     </div>
 </div>
+
+<ConfigModal bind:open={openConfigModal} />
 
 <style>
     .app-layout {

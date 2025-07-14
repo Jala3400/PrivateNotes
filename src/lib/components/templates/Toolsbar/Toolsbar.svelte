@@ -4,10 +4,14 @@
     import { throwCustomError } from "$lib/error";
 
     interface Props {
-        sidebar_collapsed?: boolean;
+        sidebarCollapsed?: boolean;
+        openConfigModal: boolean;
     }
 
-    let { sidebar_collapsed = $bindable(false) }: Props = $props();
+    let {
+        sidebarCollapsed = $bindable(false),
+        openConfigModal = $bindable(),
+    }: Props = $props();
 
     let tools = [
         {
@@ -33,10 +37,11 @@
     <div class="top-toolsbar">
         <ToolButton
             name="Toggle Sidebar"
-            icon={sidebar_collapsed ? ">" : "<"}
-            onClick={() => (sidebar_collapsed = !sidebar_collapsed)}
+            icon={sidebarCollapsed ? ">" : "<"}
+            onClick={() => (sidebarCollapsed = !sidebarCollapsed)}
         />
     </div>
+
     <div class="main-toolsbar">
         {#each tools as tool}
             <ToolButton
@@ -45,6 +50,14 @@
                 onClick={tool.action}
             />
         {/each}
+    </div>
+
+    <div class="bottom-toolsbar">
+        <ToolButton
+            name="Settings"
+            icon="⚙️"
+            onClick={() => (openConfigModal = true)}
+        />
     </div>
 </div>
 
@@ -77,8 +90,20 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5em;
+        flex: 1;
 
         width: 100%;
+        padding: 0.5em;
+    }
+
+    .bottom-toolsbar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5em;
+
+        width: 100%;
+        border-top: 1px solid var(--border-color-dark);
         padding: 0.5em;
     }
 </style>
