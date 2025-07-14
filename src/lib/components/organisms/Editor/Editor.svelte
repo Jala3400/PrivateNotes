@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { EditorView, keymap } from "@codemirror/view";
-    import { EditorState } from "@codemirror/state";
+    import { EditorState, StateEffect } from "@codemirror/state";
     import { markdown } from "@codemirror/lang-markdown";
     import { basicSetup } from "codemirror";
     import {
@@ -25,6 +25,7 @@
         Table,
         TaskList,
     } from "@lezer/markdown";
+    import { editorConfig } from "$lib/stores/editorConfig";
     import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
@@ -148,10 +149,8 @@
 
         const indentUnitExtension = indentUnit.of("    "); // 4 spaces
 
-        const state = EditorState.create({
-            doc: content,
-            extensions: [
-                vim(),
+        function createExtensions() {
+            const extensions = [
                 markdown({
                     extensions: [
                         Table,
@@ -173,7 +172,28 @@
                 basicSetup,
                 keymap.of([indentWithTab]),
                 indentUnitExtension,
-            ],
+            ];
+
+            // Conditionally add vim mode based on editorConfig
+            if ($editorConfig.vimMode) {
+                extensions.unshift(vim());
+            }
+
+            return extensions;
+        }
+
+        let state = EditorState.create({
+            doc: content,
+            extensions: createExtensions(),
+        });
+
+        // Watch for editorConfig changes and reconfigure extensions
+        $effect(() => {
+            if (editorView) {
+                editorView.dispatch({
+                    effects: [StateEffect.reconfigure.of(createExtensions())],
+                });
+            }
         });
 
         editorView = new EditorView({

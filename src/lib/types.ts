@@ -12,3 +12,7 @@ export interface noteIds {
     id: string;
     parentId: string;
 }
+
+export interface EditorConfig {
+    vimMode?: boolean;
+}
