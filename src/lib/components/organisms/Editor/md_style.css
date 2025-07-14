@@ -234,7 +234,8 @@
 /* Search and selection Match Highlighting */
 .cm-searchMatch,
 .cm-selectionMatch,
-.cm-matchingBracket {
+.cm-matchingBracket,
+.cm-nonmatchingBracket {
     display: inline-block;
     border-radius: var(--border-radius-small);
 }
