@@ -3,7 +3,7 @@
         editorConfig,
         editorConfigDescription,
     } from "$lib/stores/editorConfig";
-    import ConfigSection from "$lib/components/molecules/ConfigSection.svelte";
+    import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
 
     interface Props {
         open: boolean;
@@ -32,7 +32,7 @@
         onclick={(e) => e.stopPropagation()}
         role="presentation"
     >
-        <ConfigSection
+        <ConfigGroup
             title="Editor Configuration"
             optionsDescription={editorConfigDescription}
             bind:configOptions={$editorConfig}

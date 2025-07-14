@@ -13,14 +13,13 @@ export interface NoteIds {
     parentId: string;
 }
 
-export type ConfigOptionsDescription = [
-    string,
-    EditorConfigOption,
-    OptionType
-][];
+export type ConfigGroup = [string, ConfigSection][];
+
+export type ConfigSection = [string, ConfigOption, OptionType][];
+
 export type ConfigOptions = Record<string, any>;
 
-export interface EditorConfigOption<T = any> {
+export interface ConfigOption<T = any> {
     label: string;
     defaultValue?: T;
     min?: number; // Optional for number types
