@@ -15,7 +15,18 @@ export const appearanceConfigDescription: ConfigGroup = [
                 {
                     label: "Font Family",
                     defaultValue: "Segoe UI",
-                    options: ["Segoe UI", "Roboto", "Arial", "Monospace"],
+                    options: [
+                        "Segoe UI",
+                        "Monospace",
+                        "Arial",
+                        "Helvetica",
+                        "Roboto",
+                        "sans-serif",
+                        "Courier New",
+                        "Times New Roman",
+                        "Georgia",
+                        "Comic Sans MS"
+                    ],
                 },
                 OptionType.SELECT,
             ],
