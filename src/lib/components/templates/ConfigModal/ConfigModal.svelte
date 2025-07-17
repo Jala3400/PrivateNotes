@@ -32,7 +32,7 @@
         open = false;
     }
 
-    const configs = $state([
+    const configs = $derived([
         {
             name: "Appearance",
             config: $appearanceConfig,
