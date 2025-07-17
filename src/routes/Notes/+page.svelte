@@ -4,8 +4,20 @@
     import Sidebar from "$lib/components/templates/Sidebar/Sidebar.svelte";
     import Toolsbar from "$lib/components/templates/Toolsbar/Toolsbar.svelte";
     import { appearanceConfig } from "$lib/stores/appearanceConfig";
+    import CommandPalette from "$lib/components/organisms/CommandPalette/CommandPalette.svelte";
 
     let openConfigModal = $state(false);
+    let openCommandPalette = $state(false);
+
+    // Open command palette with Ctrl+P or Cmd+P
+    if (typeof window !== "undefined") {
+        window.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
+                e.preventDefault();
+                openCommandPalette = true;
+            }
+        });
+    }
 </script>
 
 <div
@@ -22,6 +34,7 @@
 </div>
 
 <ConfigModal bind:open={openConfigModal} />
+<CommandPalette bind:open={openCommandPalette} />
 
 <style>
     .app-layout {

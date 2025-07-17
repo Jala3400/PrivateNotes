@@ -32,3 +32,10 @@ export enum OptionType {
     NUMBER,
     SELECT,
 }
+
+export interface Command {
+    name: string;
+    pattern: RegExp;
+    requireArgs?: boolean;
+    execute: (args: string[]) => void;
+}
