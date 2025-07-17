@@ -63,7 +63,18 @@
                 break;
             case "Tab":
                 e.preventDefault();
-                inputValue = filtered()[selected]?.name ?? inputValue;
+                const currentName = filtered()[selected]?.name ?? "";
+                const inputWords = inputValue.split(" ");
+                const nameWords = currentName.split(" ");
+
+                if (inputWords.length < nameWords.length) {
+                    const prefix = inputWords.slice(0, -1);
+                    const nextWord = nameWords[inputWords.length - 1];
+                    inputValue = [...prefix, nextWord].join(" ");
+                } else {
+                    inputValue = nameWords.join(" ");
+                }
+
                 break;
         }
     }
