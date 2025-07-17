@@ -25,7 +25,7 @@ export const appearanceConfigDescription: ConfigGroup = [
                         "Courier New",
                         "Times New Roman",
                         "Georgia",
-                        "Comic Sans MS"
+                        "Comic Sans MS",
                     ],
                 },
                 OptionType.SELECT,

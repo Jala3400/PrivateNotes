@@ -32,20 +32,30 @@
         open = false;
     }
 
-    const configs = $derived([
+    const configs = $state([
         {
             name: "Appearance",
             config: $appearanceConfig,
             description: appearanceConfigDescription,
             setConfig: setAppearanceConfig,
+            getConfig: () => $appearanceConfig,
         },
         {
             name: "Editor",
             config: $editorConfig,
             description: editorConfigDescription,
             setConfig: setEditorConfig,
+            getConfig: () => $editorConfig,
         },
     ]);
+
+    $effect(() => {
+        if ($appearanceConfig && $editorConfig) {
+            for (const config of configs) {
+                config.config = config.getConfig();
+            }
+        }
+    });
 
     let currentOpen = $state(0);
 </script>
