@@ -178,24 +178,29 @@
 
         function createExtensions() {
             const extensions = [
-                markdown({
-                    extensions: [
-                        Table,
-                        Strikethrough,
-                        TaskList,
-                        Superscript,
-                        Subscript,
-                    ],
-                }),
-                syntaxHighlighting(classHighlighter),
-                syntaxHighlighting(markdownHighlighting),
-                selectedLinePlugin(),
-                tableRendererPlugin(),
-                taskListPlugin(),
-                subAndSuperscriptPlugin(),
-                separatorLinePlugin(),
-                blockquotePlugin(),
+                // Only render custom markdown plugins if renderMd is enabled
+                ...($editorConfig.renderMd
+                    ? [
+                          markdown({
+                              extensions: [
+                                  Table,
+                                  Strikethrough,
+                                  TaskList,
+                                  Superscript,
+                                  Subscript,
+                              ],
+                          }),
+                          syntaxHighlighting(classHighlighter),
+                          syntaxHighlighting(markdownHighlighting),
+                          tableRendererPlugin(),
+                          taskListPlugin(),
+                          subAndSuperscriptPlugin(),
+                          separatorLinePlugin(),
+                          blockquotePlugin(),
+                      ]
+                    : []),
                 // Basic editor features
+                selectedLinePlugin(),
                 highlightSpecialChars(),
                 history(),
                 drawSelection(),

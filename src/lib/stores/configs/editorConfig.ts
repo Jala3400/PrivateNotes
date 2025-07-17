@@ -11,6 +11,11 @@ export const editorConfigDescription: ConfigGroup = [
                 OptionType.NUMBER,
             ],
             [
+                "renderMd",
+                { label: "Render Markdown", defaultValue: true },
+                OptionType.BOOLEAN,
+            ],
+            [
                 "lineWrapping",
                 { label: "Line Wrapping", defaultValue: true },
                 OptionType.BOOLEAN,
