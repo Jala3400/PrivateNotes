@@ -1,6 +1,7 @@
 <script lang="ts">
     import { throwCustomError } from "$lib/error";
-    import { commandList, type Command } from "$lib/stores/commandList";
+    import { commandList } from "$lib/stores/commandList";
+    import type { Command } from "$lib/types";
 
     let { open = $bindable() } = $props();
     let modalElement: HTMLDialogElement;
@@ -11,7 +12,9 @@
         inputValue
             ? $commandList.filter(
                   (cmd) =>
-                      cmd.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+                      cmd.name
+                          .toLowerCase()
+                          .includes(inputValue.toLowerCase()) ||
                       cmd.pattern.test(inputValue)
               )
             : $commandList
