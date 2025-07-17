@@ -3,7 +3,7 @@
     import { throwCustomError } from "$lib/error";
     import { onDestroy, onMount } from "svelte";
     import "../app.css";
-    import { appearanceConfig } from "$lib/stores/appearanceConfig";
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
 
     let { children } = $props();
 

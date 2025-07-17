@@ -2,11 +2,11 @@ import { writable } from "svelte/store";
 import {
     editorConfigDescription,
     editorConfig,
-} from "./editorConfig";
+} from "./configs/editorConfig";
 import {
     appearanceConfigDescription,
     appearanceConfig,
-} from "./appearanceConfig";
+} from "./configs/appearanceConfig";
 import { OptionType, type Command, type ConfigOptions } from "$lib/types";
 
 // List all configuration groups here

@@ -54,7 +54,7 @@
         Table,
         TaskList,
     } from "@lezer/markdown";
-    import { editorConfig } from "$lib/stores/editorConfig";
+    import { editorConfig } from "$lib/stores/configs/editorConfig";
     import "./md_style.css";
 
     let editorContainer: HTMLDivElement;

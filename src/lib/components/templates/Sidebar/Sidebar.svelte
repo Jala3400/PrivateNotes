@@ -7,7 +7,7 @@
     import { throwCustomError } from "$lib/error";
     import { currentNote } from "$lib/stores/currentNote";
     import { ask } from "@tauri-apps/plugin-dialog";
-    import { appearanceConfig } from "$lib/stores/appearanceConfig"; // <-- import the store
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig"; // <-- import the store
 
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;

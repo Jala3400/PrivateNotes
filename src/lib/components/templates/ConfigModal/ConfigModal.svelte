@@ -3,13 +3,13 @@
         editorConfig,
         editorConfigDescription,
         setEditorConfig,
-    } from "$lib/stores/editorConfig";
+    } from "$lib/stores/configs/editorConfig";
     import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
     import {
         appearanceConfig,
         appearanceConfigDescription,
         setAppearanceConfig,
-    } from "$lib/stores/appearanceConfig";
+    } from "$lib/stores/configs/appearanceConfig";
     import ConfigGroupTab from "$lib/components/atoms/ConfigGroupTab.svelte";
 
     interface Props {
