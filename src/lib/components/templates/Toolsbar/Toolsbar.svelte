@@ -2,16 +2,13 @@
     import { invoke } from "@tauri-apps/api/core";
     import ToolButton from "$lib/components/atoms/ToolButton.svelte";
     import { throwCustomError } from "$lib/error";
+    import { appearanceConfig } from "$lib/stores/appearanceConfig"; // Import your store
 
     interface Props {
-        sidebarCollapsed?: boolean;
         openConfigModal: boolean;
     }
 
-    let {
-        sidebarCollapsed = $bindable(false),
-        openConfigModal = $bindable(),
-    }: Props = $props();
+    let { openConfigModal = $bindable() }: Props = $props();
 
     let tools = [
         {
@@ -20,7 +17,6 @@
             action: async () => {
                 try {
                     await invoke("reset_app");
-                    // Navigate to login page after resetting the state
                     window.location.replace("/");
                 } catch (error) {
                     throwCustomError(
@@ -37,8 +33,10 @@
     <div class="top-toolsbar">
         <ToolButton
             name="Toggle Sidebar"
-            icon={sidebarCollapsed ? ">" : "<"}
-            onClick={() => (sidebarCollapsed = !sidebarCollapsed)}
+            icon={$appearanceConfig.sidebarCollapsed ? ">" : "<"}
+            onClick={() =>
+                ($appearanceConfig.sidebarCollapsed =
+                    !$appearanceConfig.sidebarCollapsed)}
         />
     </div>
 

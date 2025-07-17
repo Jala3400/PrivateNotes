@@ -24,9 +24,11 @@ export interface ConfigOption<T = any> {
     defaultValue?: T;
     min?: number; // Optional for number types
     max?: number; // Optional for number types
+    options?: T[]; // Optional for select types
 }
 
 export enum OptionType {
     BOOLEAN,
     NUMBER,
+    SELECT,
 }

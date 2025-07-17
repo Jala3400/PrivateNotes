@@ -7,12 +7,7 @@
     import { throwCustomError } from "$lib/error";
     import { currentNote } from "$lib/stores/currentNote";
     import { ask } from "@tauri-apps/plugin-dialog";
-
-    interface Props {
-        sidebarCollapsed?: boolean;
-    }
-
-    let { sidebarCollapsed = $bindable(false) }: Props = $props();
+    import { appearanceConfig } from "$lib/stores/appearanceConfig"; // <-- import the store
 
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;
@@ -117,7 +112,7 @@
     }
 </script>
 
-<div class="sidebar" class:collapsed={sidebarCollapsed}>
+<div class="sidebar" class:collapsed={$appearanceConfig.sidebarCollapsed}>
     <div class="sidebar-header">
         <h2>Opened Items</h2>
     </div>

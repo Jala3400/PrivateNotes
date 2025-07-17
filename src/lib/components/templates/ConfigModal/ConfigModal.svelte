@@ -4,6 +4,11 @@
         editorConfigDescription,
     } from "$lib/stores/editorConfig";
     import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
+    import {
+        appearanceConfig,
+        appearanceConfigDescription,
+    } from "$lib/stores/appearanceConfig";
+    import ConfigGroupTab from "$lib/components/atoms/ConfigGroupTab.svelte";
 
     interface Props {
         open: boolean;
@@ -24,6 +29,21 @@
     function closeModal() {
         open = false;
     }
+
+    const configs = $state([
+        {
+            name: "Appearance",
+            config: $appearanceConfig,
+            description: appearanceConfigDescription,
+        },
+        {
+            name: "Editor",
+            config: $editorConfig,
+            description: editorConfigDescription,
+        },
+    ]);
+
+    let currentOpen = $state(0);
 </script>
 
 <dialog
@@ -37,11 +57,32 @@
         onclick={(e) => e.stopPropagation()}
         role="presentation"
     >
-        <ConfigGroup
-            title="Editor Configuration"
-            optionsDescription={editorConfigDescription}
-            bind:configOptions={$editorConfig}
-        />
+        <div id="config-group-list">
+            {#each configs as config, index}
+                <ConfigGroupTab
+                    open={index === currentOpen}
+                    onclick={() => (currentOpen = index)}
+                    title={config.name}
+                />
+            {/each}
+        </div>
+
+        <div class="config-group-container">
+            {#if currentOpen === 0}
+                <ConfigGroup
+                    title={configs[currentOpen].name + " Configuration"}
+                    optionsDescription={configs[currentOpen].description}
+                    bind:configOptions={$appearanceConfig}
+                />
+            {/if}
+            {#if currentOpen === 1}
+                <ConfigGroup
+                    title={configs[currentOpen].name + " Configuration"}
+                    optionsDescription={configs[currentOpen].description}
+                    bind:configOptions={$editorConfig}
+                />
+            {/if}
+        </div>
     </div>
 </dialog>
 
@@ -52,6 +93,7 @@
         background-color: var(--background-dark);
         color: var(--text-color);
         width: clamp(20em, 80%, 40em);
+        height: clamp(20em, 80%, 30em);
         margin: auto;
     }
 
@@ -60,6 +102,19 @@
     }
 
     #config-content {
+        display: grid;
+        grid-template-columns: clamp(10em, 20%, 15em) auto;
+        height: 100%;
+    }
+
+    #config-group-list {
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border-color);
+        background-color: var(--background-dark-light);
+    }
+
+    .config-group-container {
         padding: 1.3em;
         padding-top: 0.85em;
     }

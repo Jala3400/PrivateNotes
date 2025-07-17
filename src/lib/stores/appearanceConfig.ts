@@ -1,0 +1,45 @@
+import { OptionType, type ConfigGroup, type ConfigOptions } from "$lib/types";
+import { writable } from "svelte/store";
+
+export const appearanceConfigDescription: ConfigGroup = [
+    [
+        "Theme",
+        [
+            [
+                "fontSize",
+                { label: "Font Size", defaultValue: 16, min: 10, max: 32 },
+                OptionType.NUMBER,
+            ],
+            [
+                "fontFamily",
+                {
+                    label: "Font Family",
+                    defaultValue: "sans-serif",
+                    options: ["sans-serif", "serif", "monospace"],
+                },
+                OptionType.SELECT,
+            ],
+        ],
+    ],
+
+    [
+        "Layout",
+        [
+            [
+                "sidebarCollapsed",
+                { label: "Sidebar Collapsed", defaultValue: false },
+                OptionType.BOOLEAN,
+            ],
+        ],
+    ],
+];
+
+const initialAppearanceConfig = Object.fromEntries(
+    appearanceConfigDescription
+        .flatMap(([_, options]) => options)
+        .map(([key, value]) => [key, value.defaultValue])
+);
+
+export const appearanceConfig = writable<ConfigOptions>(
+    initialAppearanceConfig
+);
