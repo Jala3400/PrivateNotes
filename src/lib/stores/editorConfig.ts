@@ -58,3 +58,7 @@ const initialConfig = Object.fromEntries(
 );
 
 export const editorConfig = writable<ConfigOptions>(initialConfig);
+
+export function setEditorConfig(newConfig: ConfigOptions) {
+    editorConfig.set(newConfig);
+}

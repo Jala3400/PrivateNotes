@@ -6,12 +6,14 @@
         title: string;
         optionsDescription: ConfigGroup;
         configOptions: ConfigOptions;
+        onChange: (newConfig: ConfigOptions) => void;
     }
 
     let {
         title,
         optionsDescription,
         configOptions = $bindable(),
+        onChange,
     }: Props = $props();
 </script>
 
@@ -24,6 +26,7 @@
                 {title}
                 optionsDescription={section}
                 bind:configOptions
+                {onChange}
             />
         {/each}
     </div>

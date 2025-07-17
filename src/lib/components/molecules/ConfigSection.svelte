@@ -11,12 +11,14 @@
         title: string;
         optionsDescription: ConfigSection;
         configOptions: ConfigOptions;
+        onChange: (newConfig: ConfigOptions) => void;
     }
 
     let {
         title,
         optionsDescription,
         configOptions = $bindable(),
+        onChange,
     }: Props = $props();
 </script>
 
@@ -28,6 +30,7 @@
                 <CheckboxOption
                     label={option.label}
                     bind:checked={configOptions[key]}
+                    oninput={() => onChange(configOptions)}
                 />
             {:else if type === OptionType.NUMBER}
                 <NumberOption
@@ -35,6 +38,7 @@
                     bind:value={configOptions[key]}
                     min={option.min}
                     max={option.max}
+                    oninput={() => onChange(configOptions)}
                 />
             {/if}
         {/each}

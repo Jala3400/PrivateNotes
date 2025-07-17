@@ -43,3 +43,7 @@ const initialAppearanceConfig = Object.fromEntries(
 export const appearanceConfig = writable<ConfigOptions>(
     initialAppearanceConfig
 );
+
+export function setAppearanceConfig(newConfig: ConfigOptions) {
+    appearanceConfig.set(newConfig);
+}

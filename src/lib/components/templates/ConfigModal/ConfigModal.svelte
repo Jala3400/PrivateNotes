@@ -2,11 +2,13 @@
     import {
         editorConfig,
         editorConfigDescription,
+        setEditorConfig,
     } from "$lib/stores/editorConfig";
     import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
     import {
         appearanceConfig,
         appearanceConfigDescription,
+        setAppearanceConfig,
     } from "$lib/stores/appearanceConfig";
     import ConfigGroupTab from "$lib/components/atoms/ConfigGroupTab.svelte";
 
@@ -35,11 +37,13 @@
             name: "Appearance",
             config: $appearanceConfig,
             description: appearanceConfigDescription,
+            setConfig: setAppearanceConfig,
         },
         {
             name: "Editor",
             config: $editorConfig,
             description: editorConfigDescription,
+            setConfig: setEditorConfig,
         },
     ]);
 
@@ -68,20 +72,12 @@
         </div>
 
         <div class="config-group-container">
-            {#if currentOpen === 0}
-                <ConfigGroup
-                    title={configs[currentOpen].name + " Configuration"}
-                    optionsDescription={configs[currentOpen].description}
-                    bind:configOptions={$appearanceConfig}
-                />
-            {/if}
-            {#if currentOpen === 1}
-                <ConfigGroup
-                    title={configs[currentOpen].name + " Configuration"}
-                    optionsDescription={configs[currentOpen].description}
-                    bind:configOptions={$editorConfig}
-                />
-            {/if}
+            <ConfigGroup
+                title={configs[currentOpen].name + " Configuration"}
+                optionsDescription={configs[currentOpen].description}
+                bind:configOptions={configs[currentOpen].config}
+                onChange={configs[currentOpen].setConfig}
+            />
         </div>
     </div>
 </dialog>
