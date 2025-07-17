@@ -1,6 +1,7 @@
 <script lang="ts">
     import CheckboxOption from "$lib/components/atoms/CheckboxOption.svelte";
     import NumberOption from "$lib/components/atoms/NumberOption.svelte";
+    import SelectOption from "../atoms/SelectOption.svelte";
     import {
         OptionType,
         type ConfigOptions,
@@ -38,6 +39,13 @@
                     bind:value={configOptions[key]}
                     min={option.min}
                     max={option.max}
+                    oninput={() => onChange(configOptions)}
+                />
+            {:else if type === OptionType.SELECT}
+                <SelectOption
+                    label={option.label}
+                    bind:value={configOptions[key]}
+                    options={option.options ?? []}
                     oninput={() => onChange(configOptions)}
                 />
             {/if}
