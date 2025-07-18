@@ -1,13 +1,11 @@
 import { writable } from "svelte/store";
-import {
-    editorConfigDescription,
-    editorConfig,
-} from "./configs/editorConfig";
+import { editorConfigDescription, editorConfig } from "./configs/editorConfig";
 import {
     appearanceConfigDescription,
     appearanceConfig,
 } from "./configs/appearanceConfig";
 import { OptionType, type Command, type ConfigOptions } from "$lib/types";
+import { get } from "svelte/store";
 
 // List all configuration groups here
 const configGroups = [
@@ -88,3 +86,30 @@ const allCommands = configGroups.flatMap((group) =>
 );
 
 export const commandList = writable<Command[]>(allCommands);
+
+export function runCommandList(script: string): void {
+    const normalizedScript = script.replace(/\r\n|\r/g, "\n");
+    const commands = normalizedScript
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+    for (const command of commands) {
+        runCommand(command);
+    }
+}
+
+export function runCommand(command: string): void {
+    const currentCommands = get(commandList);
+    const matchedCommand = currentCommands.find((cmd) =>
+        cmd.pattern.test(command)
+    );
+
+    if (matchedCommand) {
+        const args = command.match(matchedCommand.pattern);
+        if (args) {
+            matchedCommand.execute(args);
+        } else {
+            matchedCommand.execute([]);
+        }
+    }
+}

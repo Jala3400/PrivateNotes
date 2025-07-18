@@ -4,10 +4,12 @@
     import { onDestroy, onMount } from "svelte";
     import "../app.css";
     import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
+    import { runCommandList as runCommandScript } from "$lib/stores/commandList";
 
     let { children } = $props();
 
-    let unlisten: (() => void) | undefined;
+    let unlistenCustomError: (() => void) | undefined;
+    let unlistenRcOpen: (() => void) | undefined;
 
     $effect(() => {
         if ($appearanceConfig) {
@@ -23,16 +25,20 @@
     });
 
     onMount(async () => {
-        unlisten = await listen("error", async (event) => {
+        unlistenCustomError = await listen("error", async (event) => {
             // Handle error events
             throwCustomError(event.payload as string);
+        });
+
+        unlistenRcOpen = await listen("rc-opened", async (event) => {
+            // Handle rc-opened events
+            runCommandScript(event.payload as string);
         });
     });
 
     onDestroy(() => {
-        if (unlisten) {
-            unlisten();
-        }
+        unlistenCustomError?.();
+        unlistenRcOpen?.();
     });
 </script>
 
