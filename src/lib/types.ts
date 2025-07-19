@@ -1,3 +1,5 @@
+import type { Writable } from "svelte/store";
+
 export interface FileSystemItem {
     id: string;
     parentId: string;
@@ -13,11 +15,18 @@ export interface NoteIds {
     parentId: string;
 }
 
-export type ConfigGroup = [string, ConfigSection][];
+export type ConfigGroupDescription = [string, ConfigSection][];
 
 export type ConfigSection = [string, ConfigOption, OptionType][];
 
 export type ConfigOptions = Record<string, any>;
+
+export interface ConfigGroup {
+    name: string;
+    store: Writable<ConfigOptions>;
+    description: ConfigGroupDescription;
+    setter: (newConfig: ConfigOptions) => void;
+}
 
 export interface ConfigOption<T = any> {
     label: string;

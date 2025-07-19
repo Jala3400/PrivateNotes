@@ -1,10 +1,10 @@
 <script lang="ts">
     import ConfigSection from "$lib/components/molecules/ConfigSection.svelte";
-    import { type ConfigGroup, type ConfigOptions } from "$lib/types";
+    import { type ConfigGroupDescription, type ConfigOptions } from "$lib/types";
 
     interface Props {
         title: string;
-        optionsDescription: ConfigGroup;
+        optionsDescription: ConfigGroupDescription;
         configOptions: ConfigOptions;
         onChange: (newConfig: ConfigOptions) => void;
     }

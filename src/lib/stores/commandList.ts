@@ -3,13 +3,13 @@ import { configGroupList } from "./configGroups";
 import {
     OptionType,
     type Command,
-    type ConfigGroup,
+    type ConfigGroupDescription,
     type ConfigOptions,
 } from "$lib/types";
 import { get } from "svelte/store";
 
 function makeCommandsFromConfig(
-    configDescription: ConfigGroup,
+    configDescription: ConfigGroupDescription,
     getConfig: ConfigOptions
 ) {
     const commands: Command[] = [];

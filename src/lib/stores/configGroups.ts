@@ -1,3 +1,4 @@
+import type { ConfigGroup } from "$lib/types";
 import {
     appearanceConfig,
     appearanceConfigDescription,
@@ -10,7 +11,7 @@ import {
 } from "./configs/editorConfig";
 
 // Unified config group list
-export const configGroupList = [
+export const configGroupList: ConfigGroup[] = [
     {
         name: "Appearance",
         store: appearanceConfig,

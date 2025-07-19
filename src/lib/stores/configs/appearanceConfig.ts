@@ -1,7 +1,7 @@
-import { OptionType, type ConfigGroup, type ConfigOptions } from "$lib/types";
+import { OptionType, type ConfigGroupDescription, type ConfigOptions } from "$lib/types";
 import { writable } from "svelte/store";
 
-export const appearanceConfigDescription: ConfigGroup = [
+export const appearanceConfigDescription: ConfigGroupDescription = [
     [
         "Theme",
         [
