@@ -5,11 +5,13 @@
     import "../app.css";
     import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
     import { runCommandList as runCommandScript } from "$lib/stores/commandList";
+    import { loadConfigFile } from "$lib/stores/configGroups";
 
     let { children } = $props();
 
     let unlistenCustomError: (() => void) | undefined;
     let unlistenRcOpen: (() => void) | undefined;
+    let unlistenConfigOpen: (() => void) | undefined;
 
     $effect(() => {
         if ($appearanceConfig) {
@@ -34,11 +36,22 @@
             // Handle rc-opened events
             runCommandScript(event.payload as string);
         });
+
+        unlistenConfigOpen = await listen("config-opened", async (event) => {
+            // Handle config-opened events
+            loadConfigFile(
+                JSON.parse(event.payload as string) as Record<
+                    string,
+                    Record<string, any>
+                >
+            );
+        });
     });
 
     onDestroy(() => {
         unlistenCustomError?.();
         unlistenRcOpen?.();
+        unlistenConfigOpen?.();
     });
 </script>
 

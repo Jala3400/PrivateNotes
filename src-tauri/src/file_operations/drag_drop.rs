@@ -1,7 +1,7 @@
 use crate::{
     file_operations::{
-        rc_ops::open_rc_from_path, encryption_ops::handle_path, folder_ops::open_folder,
-        note_ops::open_note_from_path,
+        encryption_ops::handle_path, folder_ops::open_folder, note_ops::open_note_from_path,
+        rc_ops::open_config_from_path,
     },
     state::AppState,
 };
@@ -24,8 +24,8 @@ pub fn drop_handler(window: &Window, event: &DragDropEvent) -> Result<(), String
             }
 
             for path in paths {
-                if is_rc_file(path) {
-                    if let Err(err) = open_rc_from_path(path, window) {
+                if is_config_file(path) {
+                    if let Err(err) = open_config_from_path(path, window) {
                         let error_msg =
                             format!("Failed to open rc file '{}':\n{}", path.display(), err);
                         window.emit("error", error_msg).unwrap();
@@ -75,8 +75,10 @@ pub fn can_open_file(file_path: &PathBuf) -> bool {
 }
 
 /// Checks if a file is a config file
-pub fn is_rc_file(file_path: &PathBuf) -> bool {
-    file_path.extension().map_or(false, |ext| ext == "lockdrc")
+pub fn is_config_file(file_path: &PathBuf) -> bool {
+    file_path
+        .extension()
+        .map_or(false, |ext| ext == "lockdrc" || ext == "lockdfg")
 }
 
 /// Opens a file or folder based on its path

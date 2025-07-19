@@ -13,13 +13,11 @@ const configGroups = [
         name: "editorConfig",
         description: editorConfigDescription,
         store: editorConfig,
-        // setter: setEditorConfig,
     },
     {
         name: "appearanceConfig",
         description: appearanceConfigDescription,
         store: appearanceConfig,
-        // setter: setAppearanceConfig,
     },
 ];
 
