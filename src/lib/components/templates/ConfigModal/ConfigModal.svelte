@@ -1,16 +1,8 @@
 <script lang="ts">
-    import {
-        editorConfig,
-        editorConfigDescription,
-        setEditorConfig,
-    } from "$lib/stores/configs/editorConfig";
     import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
-    import {
-        appearanceConfig,
-        appearanceConfigDescription,
-        setAppearanceConfig,
-    } from "$lib/stores/configs/appearanceConfig";
     import ConfigGroupTab from "$lib/components/atoms/ConfigGroupTab.svelte";
+    import { configGroupList } from "$lib/stores/configGroups";
+    import { get } from "svelte/store";
 
     interface Props {
         open: boolean;
@@ -32,32 +24,21 @@
         open = false;
     }
 
-    const configs = $state([
-        {
-            name: "Appearance",
-            config: $appearanceConfig,
-            description: appearanceConfigDescription,
-            setConfig: setAppearanceConfig,
-            getConfig: () => $appearanceConfig,
-        },
-        {
-            name: "Editor",
-            config: $editorConfig,
-            description: editorConfigDescription,
-            setConfig: setEditorConfig,
-            getConfig: () => $editorConfig,
-        },
-    ]);
+    let currentOpen = $state(0);
+    let currentStore = $derived(configGroupList[currentOpen].store);
+    let currentSetter = $derived(configGroupList[currentOpen].setter);
+    let unListener: () => void;
+
+    // svelte-ignore state_referenced_locally
+    let currentConfig = $state(get(currentStore));
 
     $effect(() => {
-        if ($appearanceConfig && $editorConfig) {
-            for (const config of configs) {
-                config.config = config.getConfig();
-            }
-        }
+        unListener?.();
+        currentConfig = get(currentStore);
+        unListener = currentStore.subscribe((value) => {
+            currentConfig = value;
+        });
     });
-
-    let currentOpen = $state(0);
 </script>
 
 <dialog
@@ -72,7 +53,7 @@
         role="presentation"
     >
         <div id="config-group-list">
-            {#each configs as config, index}
+            {#each configGroupList as config, index}
                 <ConfigGroupTab
                     open={index === currentOpen}
                     onclick={() => (currentOpen = index)}
@@ -83,10 +64,10 @@
 
         <div class="config-group-container">
             <ConfigGroup
-                title={configs[currentOpen].name + " Configuration"}
-                optionsDescription={configs[currentOpen].description}
-                bind:configOptions={configs[currentOpen].config}
-                onChange={configs[currentOpen].setConfig}
+                title={configGroupList[currentOpen].name + " Configuration"}
+                optionsDescription={configGroupList[currentOpen].description}
+                bind:configOptions={currentConfig}
+                onChange={currentSetter}
             />
         </div>
     </div>

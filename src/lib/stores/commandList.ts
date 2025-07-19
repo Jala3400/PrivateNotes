@@ -1,28 +1,15 @@
 import { writable } from "svelte/store";
-import { editorConfigDescription, editorConfig } from "./configs/editorConfig";
+import { configGroupList } from "./configGroups";
 import {
-    appearanceConfigDescription,
-    appearanceConfig,
-} from "./configs/appearanceConfig";
-import { OptionType, type Command, type ConfigOptions } from "$lib/types";
+    OptionType,
+    type Command,
+    type ConfigGroup,
+    type ConfigOptions,
+} from "$lib/types";
 import { get } from "svelte/store";
 
-// List all configuration groups here
-const configGroups = [
-    {
-        name: "editorConfig",
-        description: editorConfigDescription,
-        store: editorConfig,
-    },
-    {
-        name: "appearanceConfig",
-        description: appearanceConfigDescription,
-        store: appearanceConfig,
-    },
-];
-
 function makeCommandsFromConfig(
-    configDescription: typeof editorConfigDescription,
+    configDescription: ConfigGroup,
     getConfig: ConfigOptions
 ) {
     const commands: Command[] = [];
@@ -79,7 +66,7 @@ function makeCommandsFromConfig(
 }
 
 // Generate commands for all config groups
-const allCommands = configGroups.flatMap((group) =>
+const allCommands = configGroupList.flatMap((group) =>
     makeCommandsFromConfig(group.description, group.store)
 );
 
