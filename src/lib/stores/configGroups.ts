@@ -21,7 +21,7 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
 async function saveDefaultConfig(config: Record<string, Record<string, any>>) {
     try {
         const content = JSON.stringify(config);
-        await invoke("save_default_config", { content });
+        await invoke("save_initial_config", { content });
     } catch (error) {
         throwCustomError(
             "Failed to save default configuration " + error,

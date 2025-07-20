@@ -182,7 +182,7 @@ pub fn save_note_as(
 
 #[tauri::command]
 /// Returns the contents of the default configuration file.
-pub fn get_default_config(app_handle: AppHandle) -> Result<String, String> {
+pub fn get_initial_config(app_handle: AppHandle) -> Result<String, String> {
     let app_dir = app_handle
         .path()
         .app_config_dir()
@@ -206,7 +206,7 @@ pub fn get_default_config(app_handle: AppHandle) -> Result<String, String> {
 
 #[tauri::command]
 /// Saves the default configuration file with the provided content.
-pub fn save_default_config(
+pub fn save_initial_config(
     content: &str,
     app_handle: AppHandle,
 ) -> Result<(), String> {

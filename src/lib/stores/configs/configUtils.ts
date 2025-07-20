@@ -15,7 +15,7 @@ export function optionsFromSections(sections: ConfigurationSection[]): Options {
 
 export const initialConfig = await (async () => {
     try {
-        const initialConfig: string = await invoke("get_default_config");
+        const initialConfig: string = await invoke("get_initial_config");
         return initialConfig
             ? (JSON.parse(initialConfig) as Record<string, Record<string, any>>)
             : {};
