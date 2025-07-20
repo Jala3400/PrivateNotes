@@ -30,8 +30,8 @@ export interface ConfigurationSection {
 }
 
 export interface ConfigOption<T = any> {
+    name: string;
     key: string;
-    label: string;
     defaultValue?: T;
     min?: number; // Optional for number types
     max?: number; // Optional for number types

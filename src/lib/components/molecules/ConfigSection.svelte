@@ -23,13 +23,13 @@
         {#each section.options as option}
             {#if option.type === OptionType.BOOLEAN}
                 <CheckboxOption
-                    label={option.label}
+                    label={option.name}
                     bind:checked={configOptions[option.key]}
                     oninput={() => onChange(configOptions)}
                 />
             {:else if option.type === OptionType.NUMBER}
                 <NumberOption
-                    label={option.label}
+                    label={option.name}
                     bind:value={configOptions[option.key]}
                     min={option.min}
                     max={option.max}
@@ -37,7 +37,7 @@
                 />
             {:else if option.type === OptionType.SELECT}
                 <SelectOption
-                    label={option.label}
+                    label={option.name}
                     bind:value={configOptions[option.key]}
                     options={option.options ?? []}
                     oninput={() => onChange(configOptions)}

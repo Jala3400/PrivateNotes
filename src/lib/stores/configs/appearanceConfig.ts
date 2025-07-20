@@ -12,7 +12,7 @@ export const appearanceConfigSections: ConfigurationSection[] = [
         options: [
             {
                 key: "fontSize",
-                label: "Font Size",
+                name: "Font Size",
                 defaultValue: 16,
                 min: 10,
                 max: 32,
@@ -20,7 +20,7 @@ export const appearanceConfigSections: ConfigurationSection[] = [
             },
             {
                 key: "fontFamily",
-                label: "Font Family",
+                name: "Font Family",
                 defaultValue: "Segoe UI",
                 options: [
                     "Segoe UI",
@@ -43,7 +43,7 @@ export const appearanceConfigSections: ConfigurationSection[] = [
         options: [
             {
                 key: "sidebarCollapsed",
-                label: "Sidebar Collapsed",
+                name: "Sidebar Collapsed",
                 defaultValue: false,
                 type: OptionType.BOOLEAN,
             },

@@ -12,20 +12,20 @@ export const editorConfigSections: ConfigurationSection[] = [
         options: [
             {
                 key: "tabSize",
-                label: "Tab Size",
+                name: "Tab Size",
                 defaultValue: 4,
                 min: 0,
                 type: OptionType.NUMBER,
             },
             {
                 key: "renderMd",
-                label: "Render Markdown",
+                name: "Render Markdown",
                 defaultValue: true,
                 type: OptionType.BOOLEAN,
             },
             {
                 key: "lineWrapping",
-                label: "Line Wrapping",
+                name: "Line Wrapping",
                 defaultValue: true,
                 type: OptionType.BOOLEAN,
             },
@@ -36,13 +36,13 @@ export const editorConfigSections: ConfigurationSection[] = [
         options: [
             {
                 key: "lineNumbers",
-                label: "Line Numbers",
+                name: "Line Numbers",
                 defaultValue: true,
                 type: OptionType.BOOLEAN,
             },
             {
                 key: "foldGutter",
-                label: "Fold Gutter",
+                name: "Fold Gutter",
                 defaultValue: true,
                 type: OptionType.BOOLEAN,
             },
@@ -53,13 +53,13 @@ export const editorConfigSections: ConfigurationSection[] = [
         options: [
             {
                 key: "autoCloseBrackets",
-                label: "Auto Close Brackets",
+                name: "Auto Close Brackets",
                 defaultValue: true,
                 type: OptionType.BOOLEAN,
             },
             {
                 key: "vimMode",
-                label: "Vim Mode",
+                name: "Vim Mode",
                 defaultValue: false,
                 type: OptionType.BOOLEAN,
             },
