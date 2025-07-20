@@ -20,7 +20,7 @@
                     window.location.replace("/");
                 } catch (error) {
                     throwCustomError(
-                        "Failed to reset the app" + String(error),
+                        "Failed to reset the app " + error,
                         "An error occurred while trying to reset the app. Please try again."
                     );
                 }

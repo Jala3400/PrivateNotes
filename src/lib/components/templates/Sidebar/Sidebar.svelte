@@ -7,7 +7,7 @@
     import { throwCustomError } from "$lib/error";
     import { currentNote } from "$lib/stores/currentNote";
     import { ask } from "@tauri-apps/plugin-dialog";
-    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig"; // <-- import the store
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
 
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;
@@ -26,7 +26,7 @@
             });
         } catch (error) {
             throwCustomError(
-                "Failed to load opened items" + String(error),
+                "Failed to load opened items " + error,
                 "An error occurred while trying to load the opened items."
             );
         }
@@ -94,7 +94,7 @@
             await invoke("close_item", { id });
         } catch (error) {
             throwCustomError(
-                "Failed to close item" + String(error),
+                "Failed to close item " + error,
                 "An error occurred while trying to close the item."
             );
         }
@@ -105,7 +105,7 @@
             await invoke("open_note_from_id", { id, parentId });
         } catch (error) {
             throwCustomError(
-                "Failed to open note" + String(error),
+                "Failed to open note " + error,
                 "An error occurred while trying to open the note."
             );
         }

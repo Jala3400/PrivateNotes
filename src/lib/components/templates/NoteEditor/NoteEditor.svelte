@@ -45,7 +45,7 @@
             showSaveNotification();
         } catch (error) {
             throwCustomError(
-                "Failed to save note: " + String(error),
+                "Failed to save note: " + error,
                 "An error occurred while trying to save the note."
             );
         } finally {
@@ -81,7 +81,7 @@
             }
         } catch (error) {
             throwCustomError(
-                "Failed to save note: " + String(error),
+                "Failed to save note: " + error,
                 "An error occurred while trying to save a copy of the note."
             );
         } finally {
@@ -114,7 +114,7 @@
             showSaveNotification();
         } catch (error) {
             throwCustomError(
-                "Failed to save note as: " + String(error),
+                "Failed to save note as: " + error,
                 "An error occurred while trying to save the note as a new file."
             );
         } finally {
