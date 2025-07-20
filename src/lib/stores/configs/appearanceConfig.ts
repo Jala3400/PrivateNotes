@@ -2,11 +2,12 @@ import {
     OptionType,
     type Options,
     type ConfigurationSection,
+    type ConfigurationGroup,
 } from "$lib/types";
 import { writable } from "svelte/store";
-import { optionsFromSections } from "./configUtils";
+import { initialConfig, optionsFromSections } from "./configUtils";
 
-export const appearanceConfigSections: ConfigurationSection[] = [
+const appearanceConfigSections: ConfigurationSection[] = [
     {
         name: "Theme",
         options: [
@@ -53,8 +54,21 @@ export const appearanceConfigSections: ConfigurationSection[] = [
 
 const initialAppearanceConfig = optionsFromSections(appearanceConfigSections);
 
-export const appearanceConfig = writable<Options>(initialAppearanceConfig);
+const appearanceKey = "appearance";
 
-export function setAppearanceConfig(newConfig: Options) {
+export const appearanceConfig = writable<Options>({
+    ...initialAppearanceConfig,
+    ...initialConfig[appearanceKey],
+});
+
+function setAppearanceConfig(newConfig: Options) {
     appearanceConfig.set(newConfig);
 }
+
+export const appearanceConfigGroup: ConfigurationGroup = {
+    name: "Appearance",
+    key: appearanceKey,
+    store: appearanceConfig,
+    sections: appearanceConfigSections,
+    setter: setAppearanceConfig,
+};

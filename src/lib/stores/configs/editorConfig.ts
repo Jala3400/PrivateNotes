@@ -1,12 +1,13 @@
 import {
     OptionType,
+    type ConfigurationGroup,
     type ConfigurationSection,
     type Options,
 } from "$lib/types";
 import { writable } from "svelte/store";
-import { optionsFromSections } from "./configUtils";
+import { initialConfig, optionsFromSections } from "./configUtils";
 
-export const editorConfigSections: ConfigurationSection[] = [
+const editorConfigSections: ConfigurationSection[] = [
     {
         name: "General",
         options: [
@@ -67,10 +68,23 @@ export const editorConfigSections: ConfigurationSection[] = [
     },
 ];
 
-const initialConfig = optionsFromSections(editorConfigSections);
+const initialEditorConfig = optionsFromSections(editorConfigSections);
 
-export const editorConfig = writable<Options>(initialConfig);
+const editorKey = "editor";
 
-export function setEditorConfig(newConfig: Options) {
+export const editorConfig = writable<Options>({
+    ...initialEditorConfig,
+    ...initialConfig[editorKey],
+});
+
+function setEditorConfig(newConfig: Options) {
     editorConfig.set(newConfig);
 }
+
+export const editorConfigGroup: ConfigurationGroup = {
+    name: "Editor",
+    key: editorKey,
+    store: editorConfig,
+    sections: editorConfigSections,
+    setter: setEditorConfig,
+};

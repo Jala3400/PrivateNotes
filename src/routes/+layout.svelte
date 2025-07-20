@@ -47,25 +47,6 @@
                 >
             );
         });
-
-        // Load initial configuration
-        try {
-            const initialConfig: string = await invoke("get_default_config");
-
-            if (initialConfig) {
-                loadConfigFile(
-                    JSON.parse(initialConfig) as Record<
-                        string,
-                        Record<string, any>
-                    >
-                );
-            }
-        } catch (error) {
-            throwCustomError(
-                "Failed to load initial configuration: " + error,
-                "An error occurred while loading the initial configuration."
-            );
-        }
     });
 
     onDestroy(() => {

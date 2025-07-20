@@ -1,31 +1,13 @@
 import type { ConfigurationGroup } from "$lib/types";
 import { invoke } from "@tauri-apps/api/core";
-import {
-    appearanceConfig,
-    appearanceConfigSections,
-    setAppearanceConfig,
-} from "./configs/appearanceConfig";
-import {
-    editorConfig,
-    editorConfigSections,
-    setEditorConfig,
-} from "./configs/editorConfig";
+import { appearanceConfigGroup } from "./configs/appearanceConfig";
+import { editorConfigGroup } from "./configs/editorConfig";
 import { throwCustomError } from "$lib/error";
 
 // Unified config group list
 export const configGroupList: ConfigurationGroup[] = [
-    {
-        name: "Appearance",
-        store: appearanceConfig,
-        sections: appearanceConfigSections,
-        setter: setAppearanceConfig,
-    },
-    {
-        name: "Editor",
-        store: editorConfig,
-        sections: editorConfigSections,
-        setter: setEditorConfig,
-    },
+    appearanceConfigGroup,
+    editorConfigGroup,
 ];
 
 function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
@@ -50,9 +32,9 @@ async function saveDefaultConfig(config: Record<string, Record<string, any>>) {
 
 const debouncedSaveDefaultConfig = debounce(saveDefaultConfig, 300);
 
+// Build defaultConfig object from configGroupList sections
 const defaultConfig: Record<string, Record<string, any>> = {};
 
-// Build defaultConfig object from configGroupList sections
 for (const group of configGroupList) {
     const defaults: Record<string, any> = {};
     for (const section of group.sections) {
@@ -60,15 +42,20 @@ for (const group of configGroupList) {
             defaults[option.key] = option.defaultValue;
         }
     }
-    defaultConfig[group.name] = defaults;
+    defaultConfig[group.key] = defaults;
 }
 
+// Subscribe to each store and track only changed values
 const changedConfig: Record<string, Record<string, any>> = {};
 
-// Subscribe to each store and track only changed values
 for (const group of configGroupList) {
-    const defaults = defaultConfig[group.name];
+    const defaults = defaultConfig[group.key];
+    let isFirstTime = true;
     group.store.subscribe((value) => {
+        if (isFirstTime) {
+            isFirstTime = false;
+            return; // Skip first run to avoid initial save
+        }
         const changed: Record<string, any> = {};
         for (const key in value) {
             if (value[key] !== defaults[key]) {
@@ -77,9 +64,9 @@ for (const group of configGroupList) {
         }
 
         if (Object.keys(changed).length > 0) {
-            changedConfig[group.name] = changed;
+            changedConfig[group.key] = changed;
         } else {
-            delete changedConfig[group.name];
+            delete changedConfig[group.key];
         }
 
         debouncedSaveDefaultConfig(changedConfig);
