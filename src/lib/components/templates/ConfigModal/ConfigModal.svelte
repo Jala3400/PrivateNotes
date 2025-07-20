@@ -34,7 +34,9 @@
 
     $effect(() => {
         unListener?.();
-        currentConfig = get(currentStore);
+
+        // When you a subscription is started the callback is executed immediately
+        // so currentConfig is set to the current value of the store
         unListener = currentStore.subscribe((value) => {
             currentConfig = value;
         });
