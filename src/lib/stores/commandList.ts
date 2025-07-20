@@ -71,7 +71,7 @@ const allCommands = configGroupList.flatMap((group) =>
 
 export const commandList = writable<Command[]>(allCommands);
 
-export function runCommandList(script: string): void {
+export function runCommandScript(script: string): void {
     const normalizedScript = script.replace(/\r\n|\r/g, "\n");
     const commands = normalizedScript
         .split("\n")
