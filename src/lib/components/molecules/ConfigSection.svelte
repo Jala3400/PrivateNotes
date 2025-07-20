@@ -25,7 +25,7 @@
                 <CheckboxOption
                     label={option.name}
                     bind:checked={configOptions[option.key]}
-                    oninput={() => onChange(configOptions)}
+                    onchange={() => onChange(configOptions)}
                 />
             {:else if option.type === OptionType.NUMBER}
                 <NumberOption
@@ -33,14 +33,14 @@
                     bind:value={configOptions[option.key]}
                     min={option.min}
                     max={option.max}
-                    oninput={() => onChange(configOptions)}
+                    onchange={() => onChange(configOptions)}
                 />
             {:else if option.type === OptionType.SELECT}
                 <SelectOption
                     label={option.name}
                     bind:value={configOptions[option.key]}
                     options={option.options ?? []}
-                    oninput={() => onChange(configOptions)}
+                    onchange={() => onChange(configOptions)}
                 />
             {/if}
         {/each}
