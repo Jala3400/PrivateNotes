@@ -4,6 +4,7 @@ import {
     type ConfigurationSection,
 } from "$lib/types";
 import { writable } from "svelte/store";
+import { optionsFromSections } from "./configUtils";
 
 export const appearanceConfigSections: ConfigurationSection[] = [
     {
@@ -50,11 +51,7 @@ export const appearanceConfigSections: ConfigurationSection[] = [
     },
 ];
 
-const initialAppearanceConfig = Object.fromEntries(
-    appearanceConfigSections
-        .flatMap((group) => group.options)
-        .map((option) => [option.key, option.defaultValue])
-);
+const initialAppearanceConfig = optionsFromSections(appearanceConfigSections);
 
 export const appearanceConfig = writable<Options>(initialAppearanceConfig);
 

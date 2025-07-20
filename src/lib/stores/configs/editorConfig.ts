@@ -4,6 +4,7 @@ import {
     type Options,
 } from "$lib/types";
 import { writable } from "svelte/store";
+import { optionsFromSections } from "./configUtils";
 
 export const editorConfigSections: ConfigurationSection[] = [
     {
@@ -66,11 +67,7 @@ export const editorConfigSections: ConfigurationSection[] = [
     },
 ];
 
-const initialConfig = Object.fromEntries(
-    editorConfigSections
-        .flatMap((group) => group.options)
-        .map((option) => [option.key, option.defaultValue])
-);
+const initialConfig = optionsFromSections(editorConfigSections);
 
 export const editorConfig = writable<Options>(initialConfig);
 
