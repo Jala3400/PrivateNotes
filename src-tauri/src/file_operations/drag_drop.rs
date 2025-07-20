@@ -1,7 +1,7 @@
 use crate::{
     file_operations::{
         encryption_ops::handle_path, folder_ops::open_folder, note_ops::open_note_from_path,
-        rc_ops::open_config_from_path,
+        config_ops::open_config_from_path,
     },
     state::AppState,
 };
