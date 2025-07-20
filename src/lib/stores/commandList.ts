@@ -3,18 +3,15 @@ import { configGroupList } from "./configGroups";
 import {
     OptionType,
     type Command,
-    type ConfigGroupDescription,
-    type ConfigOptions,
+    type ConfigurationGroup,
+    type Options,
 } from "$lib/types";
 import { get } from "svelte/store";
 
-function makeCommandsFromConfig(
-    configDescription: ConfigGroupDescription,
-    getConfig: ConfigOptions
-) {
+function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
     const commands: Command[] = [];
-    for (const [section, options] of configDescription) {
-        for (const [key, option, type] of options) {
+    for (const section of group.sections) {
+        for (const { key, type } of section.options) {
             if (type === OptionType.NUMBER) {
                 commands.push({
                     name: `set ${key} `,
@@ -22,9 +19,9 @@ function makeCommandsFromConfig(
                     requireArgs: true,
                     execute: (args: string[]) => {
                         const value = Number(args[0]);
-                        getConfig.update((cfg: ConfigOptions) => {
-                            const newCfg = { ...cfg, [key]: value };
-                            return newCfg;
+                        store.update((cfg: Options) => {
+                            cfg[key] = value;
+                            return cfg;
                         });
                     },
                 });
@@ -33,29 +30,31 @@ function makeCommandsFromConfig(
                     name: `enable ${key}`,
                     pattern: new RegExp(`^enable ${key}$`, "i"),
                     execute: () => {
-                        getConfig.update((cfg: ConfigOptions) => {
-                            const newCfg = { ...cfg, [key]: true };
-                            return newCfg;
+                        store.update((cfg: Options) => {
+                            cfg[key] = true;
+                            return cfg;
                         });
                     },
                 });
+
                 commands.push({
                     name: `disable ${key}`,
                     pattern: new RegExp(`^disable ${key}$`, "i"),
                     execute: () => {
-                        getConfig.update((cfg: ConfigOptions) => {
-                            const newCfg = { ...cfg, [key]: false };
-                            return newCfg;
+                        store.update((cfg: Options) => {
+                            cfg[key] = false;
+                            return cfg;
                         });
                     },
                 });
+
                 commands.push({
                     name: `toggle ${key}`,
                     pattern: new RegExp(`^toggle ${key}$`, "i"),
                     execute: () => {
-                        getConfig.update((cfg: ConfigOptions) => {
-                            const newCfg = { ...cfg, [key]: !cfg[key] };
-                            return newCfg;
+                        store.update((cfg: Options) => {
+                            cfg[key] = !cfg[key];
+                            return cfg;
                         });
                     },
                 });
@@ -67,7 +66,7 @@ function makeCommandsFromConfig(
 
 // Generate commands for all config groups
 const allCommands = configGroupList.flatMap((group) =>
-    makeCommandsFromConfig(group.description, group.store)
+    makeCommandsFromGroup(group, group.store)
 );
 
 export const commandList = writable<Command[]>(allCommands);

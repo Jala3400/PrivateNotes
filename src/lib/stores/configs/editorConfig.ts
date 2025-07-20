@@ -1,69 +1,79 @@
-import { OptionType, type ConfigGroupDescription, type ConfigOptions } from "$lib/types";
+import {
+    OptionType,
+    type ConfigurationSection,
+    type Options,
+} from "$lib/types";
 import { writable } from "svelte/store";
 
-export const editorConfigDescription: ConfigGroupDescription = [
-    [
-        "General",
-        [
-            [
-                "tabSize",
-                { label: "Tab Size", defaultValue: 4, min: 0 },
-                OptionType.NUMBER,
-            ],
-            [
-                "renderMd",
-                { label: "Render Markdown", defaultValue: true },
-                OptionType.BOOLEAN,
-            ],
-            [
-                "lineWrapping",
-                { label: "Line Wrapping", defaultValue: true },
-                OptionType.BOOLEAN,
-            ],
+export const editorConfigSections: ConfigurationSection[] = [
+    {
+        name: "General",
+        options: [
+            {
+                key: "tabSize",
+                label: "Tab Size",
+                defaultValue: 4,
+                min: 0,
+                type: OptionType.NUMBER,
+            },
+            {
+                key: "renderMd",
+                label: "Render Markdown",
+                defaultValue: true,
+                type: OptionType.BOOLEAN,
+            },
+            {
+                key: "lineWrapping",
+                label: "Line Wrapping",
+                defaultValue: true,
+                type: OptionType.BOOLEAN,
+            },
         ],
-    ],
-
-    [
-        "Gutter",
-        [
-            [
-                "lineNumbers",
-                { label: "Line Numbers", defaultValue: true },
-                OptionType.BOOLEAN,
-            ],
-            [
-                "foldGutter",
-                { label: "Fold Gutter", defaultValue: true },
-                OptionType.BOOLEAN,
-            ],
+    },
+    {
+        name: "Gutter",
+        options: [
+            {
+                key: "lineNumbers",
+                label: "Line Numbers",
+                defaultValue: true,
+                type: OptionType.BOOLEAN,
+            },
+            {
+                key: "foldGutter",
+                label: "Fold Gutter",
+                defaultValue: true,
+                type: OptionType.BOOLEAN,
+            },
         ],
-    ],
-
-    [
-        "Features",
-        [
-            [
-                "autoCloseBrackets",
-                { label: "Auto Close Brackets", defaultValue: true },
-                OptionType.BOOLEAN,
-            ],
-            [
-                "vimMode",
-                { label: "Vim Mode", defaultValue: false },
-                OptionType.BOOLEAN,
-            ],
+    },
+    {
+        name: "Features",
+        options: [
+            {
+                key: "autoCloseBrackets",
+                label: "Auto Close Brackets",
+                defaultValue: true,
+                type: OptionType.BOOLEAN,
+            },
+            {
+                key: "vimMode",
+                label: "Vim Mode",
+                defaultValue: false,
+                type: OptionType.BOOLEAN,
+            },
         ],
-    ],
+    },
 ];
 
 const initialConfig = Object.fromEntries(
-    editorConfigDescription
-        .flatMap(([_, options]) => options)
-        .map(([key, value]) => [key, value.defaultValue])
+    editorConfigSections
+        .flatMap((group) => group.options)
+        .map((option) => [option.key, option.defaultValue])
 );
 
-export const editorConfig = writable<ConfigOptions>(initialConfig);
+export const editorConfig = writable<Options>(initialConfig);
 
-export function setEditorConfig(newConfig: ConfigOptions) {
+export function setEditorConfig(newConfig: Options) {
     editorConfig.set(newConfig);
 }

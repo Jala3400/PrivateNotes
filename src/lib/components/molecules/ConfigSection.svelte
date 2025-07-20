@@ -4,47 +4,41 @@
     import SelectOption from "../atoms/SelectOption.svelte";
     import {
         OptionType,
-        type ConfigOptions,
-        type ConfigSection,
+        type Options,
+        type ConfigurationSection,
     } from "$lib/types";
 
     interface Props {
-        title: string;
-        optionsDescription: ConfigSection;
-        configOptions: ConfigOptions;
-        onChange: (newConfig: ConfigOptions) => void;
+        section: ConfigurationSection;
+        configOptions: Options;
+        onChange: (newConfig: Options) => void;
     }
 
-    let {
-        title,
-        optionsDescription,
-        configOptions = $bindable(),
-        onChange,
-    }: Props = $props();
+    let { section, configOptions = $bindable(), onChange }: Props = $props();
 </script>
 
 <div class="config-section">
-    <h2>{title}</h2>
+    <h2>{section.name}</h2>
     <div class="config-options">
-        {#each optionsDescription as [key, option, type]}
-            {#if type === OptionType.BOOLEAN}
+        {#each section.options as option}
+            {#if option.type === OptionType.BOOLEAN}
                 <CheckboxOption
                     label={option.label}
-                    bind:checked={configOptions[key]}
+                    bind:checked={configOptions[option.key]}
                     oninput={() => onChange(configOptions)}
                 />
-            {:else if type === OptionType.NUMBER}
+            {:else if option.type === OptionType.NUMBER}
                 <NumberOption
                     label={option.label}
-                    bind:value={configOptions[key]}
+                    bind:value={configOptions[option.key]}
                     min={option.min}
                     max={option.max}
                     oninput={() => onChange(configOptions)}
                 />
-            {:else if type === OptionType.SELECT}
+            {:else if option.type === OptionType.SELECT}
                 <SelectOption
                     label={option.label}
-                    bind:value={configOptions[key]}
+                    bind:value={configOptions[option.key]}
                     options={option.options ?? []}
                     oninput={() => onChange(configOptions)}
                 />

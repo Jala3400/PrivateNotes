@@ -1,27 +1,27 @@
-import type { ConfigGroup } from "$lib/types";
+import type { ConfigurationGroup } from "$lib/types";
 import {
     appearanceConfig,
-    appearanceConfigDescription,
+    appearanceConfigSections,
     setAppearanceConfig,
 } from "./configs/appearanceConfig";
 import {
     editorConfig,
-    editorConfigDescription,
+    editorConfigSections,
     setEditorConfig,
 } from "./configs/editorConfig";
 
 // Unified config group list
-export const configGroupList: ConfigGroup[] = [
+export const configGroupList: ConfigurationGroup[] = [
     {
         name: "Appearance",
         store: appearanceConfig,
-        description: appearanceConfigDescription,
+        sections: appearanceConfigSections,
         setter: setAppearanceConfig,
     },
     {
         name: "Editor",
         store: editorConfig,
-        description: editorConfigDescription,
+        sections: editorConfigSections,
         setter: setEditorConfig,
     },
 ];

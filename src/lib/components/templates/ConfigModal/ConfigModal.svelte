@@ -65,7 +65,7 @@
         <div class="config-group-container">
             <ConfigGroup
                 title={configGroupList[currentOpen].name + " Configuration"}
-                optionsDescription={configGroupList[currentOpen].description}
+                sections={configGroupList[currentOpen].sections}
                 bind:configOptions={currentConfig}
                 onChange={currentSetter}
             />

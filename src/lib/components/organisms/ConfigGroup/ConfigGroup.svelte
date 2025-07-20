@@ -1,17 +1,20 @@
 <script lang="ts">
     import ConfigSection from "$lib/components/molecules/ConfigSection.svelte";
-    import { type ConfigGroupDescription, type ConfigOptions } from "$lib/types";
+    import {
+        type ConfigurationSection,
+        type Options,
+    } from "$lib/types";
 
     interface Props {
         title: string;
-        optionsDescription: ConfigGroupDescription;
-        configOptions: ConfigOptions;
-        onChange: (newConfig: ConfigOptions) => void;
+        sections: ConfigurationSection[];
+        configOptions: Options;
+        onChange: (newConfig: Options) => void;
     }
 
     let {
         title,
-        optionsDescription,
+        sections,
         configOptions = $bindable(),
         onChange,
     }: Props = $props();
@@ -21,11 +24,10 @@
     <h1 class="group-title">{title}</h1>
     <hr class="separator" />
     <div class="config-sections">
-        {#each optionsDescription as [title, section]}
+        {#each sections as section}
             <ConfigSection
-                {title}
-                optionsDescription={section}
-                bind:configOptions
+                section={section}
+                bind:configOptions={configOptions}
                 {onChange}
             />
         {/each}

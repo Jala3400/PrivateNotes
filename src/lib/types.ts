@@ -15,25 +15,28 @@ export interface NoteIds {
     parentId: string;
 }
 
-export type ConfigGroupDescription = [string, ConfigSection][];
+export type Options = Record<string, any>;
 
-export type ConfigSection = [string, ConfigOption, OptionType][];
-
-export type ConfigOptions = Record<string, any>;
-
-export interface ConfigGroup {
+export interface ConfigurationGroup {
     name: string;
-    store: Writable<ConfigOptions>;
-    description: ConfigGroupDescription;
-    setter: (newConfig: ConfigOptions) => void;
+    store: Writable<Options>;
+    sections: ConfigurationSection[];
+    setter: (newConfig: Options) => void;
+}
+
+export interface ConfigurationSection {
+    name: string;
+    options: ConfigOption[];
 }
 
 export interface ConfigOption<T = any> {
+    key: string;
     label: string;
     defaultValue?: T;
     min?: number; // Optional for number types
     max?: number; // Optional for number types
     options?: T[]; // Optional for select types
+    type: OptionType;
 }
 
 export enum OptionType {
