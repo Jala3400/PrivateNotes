@@ -8,8 +8,8 @@ mod state;
 
 use crate::file_operations::{
     commands::{
-        close_item, get_default_config, get_opened_items, open_note_from_id, save_note,
-        save_note_as, save_note_copy,
+        close_item, get_default_config, get_opened_items, open_note_from_id, save_default_config,
+        save_note, save_note_as, save_note_copy,
     },
     drag_drop::drop_handler,
 };
@@ -44,7 +44,8 @@ pub fn run() {
             close_item,
             open_note_from_id,
             reset_app,
-            get_default_config
+            get_default_config,
+            save_default_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

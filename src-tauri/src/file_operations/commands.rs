@@ -203,3 +203,27 @@ pub fn get_default_config(app_handle: AppHandle) -> Result<String, String> {
     std::fs::read_to_string(&config_path)
         .map_err(|e| format!("Failed to read default config file: {}", e))
 }
+
+#[tauri::command]
+/// Saves the default configuration file with the provided content.
+pub fn save_default_config(
+    content: &str,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    let app_dir = app_handle
+        .path()
+        .app_config_dir()
+        .map_err(|_| "Failed to get app config base directory")?;
+
+    // Always create the app config directory, even if it already exists
+    std::fs::create_dir_all(&app_dir)
+        .map_err(|e| format!("Failed to create app config directory: {}", e))?;
+
+    let config_path = app_dir.join(".lockdfg");
+
+    // Write the provided content to the config file
+    std::fs::write(&config_path, content)
+        .map_err(|e| format!("Failed to write default config file: {}", e))?;
+
+    Ok(())
+}
