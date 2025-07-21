@@ -57,16 +57,23 @@ export async function saveNoteCopyEvent(
     }
 }
 
-export async function renameCurrentNoteOp(noteId: string, newTitle: string) {
+export async function renameNoteEvent(
+    noteId: string,
+    parentId: string,
+    newTitle: string
+) {
     try {
         await invoke("rename_note", {
             id: noteId,
+            parentId: parentId,
             newTitle: newTitle,
         });
+        return true;
     } catch (error) {
         throwCustomError(
             "Failed to rename note: " + error,
             "An error occurred while trying to rename the note."
         );
+        return false;
     }
 }

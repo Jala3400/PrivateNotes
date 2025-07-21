@@ -3,6 +3,7 @@
         saveNoteEvent,
         saveNoteCopyEvent,
         saveNoteAsEvent,
+        renameNoteEvent,
     } from "./noteOperations";
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
@@ -92,6 +93,29 @@
         });
     }
 
+    function renameCurrentNote() {
+        enqueueSave(async () => {
+            isSaving = true;
+
+            const noteId = $currentNote?.id;
+            const parentId = $currentNote?.parentId;
+            if (!noteId || !parentId) {
+                // If there's no current note, we can't rename it
+                return;
+            }
+
+            let tempTitle = title;
+            if (title.trim().length === 0) {
+                tempTitle = "Untitled Note";
+            }
+
+            const result = await renameNoteEvent(noteId, parentId, tempTitle);
+            if (result) showSaveNotification();
+
+            isSaving = false;
+        });
+    }
+
     function handlekeydown(event: KeyboardEvent) {
         // Save note on Ctrl+S
         const noteId = $currentNote?.id;
@@ -164,6 +188,7 @@
         type="text"
         placeholder="Note Title"
         bind:value={title}
+        onchange={renameCurrentNote}
         disabled={isSaving}
         autocomplete="off"
     />

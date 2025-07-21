@@ -181,6 +181,39 @@ pub fn save_note_copy(
 }
 
 #[tauri::command]
+pub fn rename_note(
+    id: &str,
+    parent_id: &str,
+    new_title: &str,
+    app_state: State<Mutex<AppState>>,
+    window: Window,
+) -> Result<(), String> {
+    let mut state = app_state.lock().unwrap();
+    let note_path = state.get_path_from_id(id).ok_or("Note not found")?;
+
+    // Get the parent directory of the note
+    let binding = PathBuf::from(&note_path);
+    let parent_dir = binding.parent().ok_or("Invalid note path")?;
+
+    // Create the new file name with the new title
+    let new_file_name = format!("{}.lockd", new_title);
+    let new_file_path = parent_dir.join(&new_file_name);
+
+    // Rename the file
+    std::fs::rename(note_path, &new_file_path)
+        .map_err(|e| format!("Failed to rename note: {}", e))?;
+
+    // Update the state with the new path
+    state.update_note_path(id, new_file_path.to_string_lossy().to_string());
+
+    window
+        .emit("note-renamed", (id, parent_id, new_file_name))
+        .map_err(|e| format!("Failed to emit event: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
 /// Returns the contents of the default configuration file.
 pub fn get_initial_config(app_handle: AppHandle) -> Result<String, String> {
     let app_dir = app_handle
