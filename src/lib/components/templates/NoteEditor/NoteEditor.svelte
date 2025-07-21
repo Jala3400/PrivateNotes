@@ -13,6 +13,24 @@
     let showNotification = $state(false);
     let editorRef = $state<Editor>();
 
+    // Save queue
+    let saveQueue: (() => Promise<void>)[] = [];
+    let processingQueue = false;
+
+    async function processQueue() {
+        if (processingQueue) return;
+        processingQueue = true;
+        while (saveQueue.length > 0) {
+            await saveQueue.shift()!();
+        }
+        processingQueue = false;
+    }
+
+    function enqueueSave(fn: () => Promise<void>) {
+        saveQueue.push(fn);
+        processQueue();
+    }
+
     function showSaveNotification() {
         showNotification = true;
         setTimeout(() => {
@@ -20,106 +38,90 @@
         }, 2000);
     }
 
-    async function saveNote(noteContent: string) {
-        let tempTitle = title;
-        if (title.trim().length === 0) {
-            tempTitle = "Untitled Note";
-        }
+    function saveNote(noteContent: string) {
+        enqueueSave(async () => {
+            isSaving = true;
 
-        // Prevent multiple save operations
-        if (isSaving) {
-            console.warn("Save operation already in progress");
-            return;
-        }
-
-        isSaving = true;
-
-        // Call the Tauri command to save the note
-        try {
-            await invoke("save_note", {
-                id: $currentNote?.id,
-                content: noteContent,
-            });
-
-            // It always saves the note unless an error occurs
-            showSaveNotification();
-        } catch (error) {
-            throwCustomError(
-                "Failed to save note: " + error,
-                "An error occurred while trying to save the note."
-            );
-        } finally {
-            isSaving = false;
-        }
-    }
-
-    async function saveNoteCopy(noteContent: string) {
-        let tempTitle = title;
-        if (title.trim().length === 0) {
-            tempTitle = "Untitled Note";
-        }
-
-        // Prevent multiple save operations
-        if (isSaving) {
-            console.warn("Save operation already in progress");
-            return;
-        }
-
-        isSaving = true;
-
-        // Call the Tauri command to save the note
-        try {
-            if (
-                await invoke("save_note_copy", {
-                    id: $currentNote?.id,
-                    title: tempTitle,
-                    content: noteContent,
-                })
-            ) {
-                // The user can cancel the save operation
-                showSaveNotification();
+            let tempTitle = title;
+            if (title.trim().length === 0) {
+                tempTitle = "Untitled Note";
             }
-        } catch (error) {
-            throwCustomError(
-                "Failed to save note: " + error,
-                "An error occurred while trying to save a copy of the note."
-            );
-        } finally {
-            isSaving = false;
-        }
+
+            try {
+                await invoke("save_note", {
+                    id: $currentNote?.id,
+                    content: noteContent,
+                });
+                showSaveNotification();
+            } catch (error) {
+                throwCustomError(
+                    "Failed to save note: " + error,
+                    "An error occurred while trying to save the note."
+                );
+            } finally {
+                isSaving = false;
+            }
+        });
     }
 
-    async function saveNoteAs(noteContent: string) {
-        let tempTitle = title;
-        if (title.trim().length === 0) {
-            tempTitle = "Untitled Note";
-        }
+    function saveNoteCopy(noteContent: string) {
+        enqueueSave(async () => {
+            isSaving = true;
 
-        // Prevent multiple save operations
-        if (isSaving) {
-            console.warn("Save operation already in progress");
-            return;
-        }
+            let tempTitle = title;
+            if (title.trim().length === 0) {
+                tempTitle = "Untitled Note";
+            }
 
-        isSaving = true;
+            try {
+                if (
+                    await invoke("save_note_copy", {
+                        id: $currentNote?.id,
+                        title: tempTitle,
+                        content: noteContent,
+                    })
+                ) {
+                    showSaveNotification();
+                }
+            } catch (error) {
+                throwCustomError(
+                    "Failed to save note: " + error,
+                    "An error occurred while trying to save a copy of the note."
+                );
+            } finally {
+                isSaving = false;
+            }
+        });
+    }
 
-        // Call the Tauri command to save the note as a new file
-        try {
-            await invoke("save_note_as", {
-                id: $currentNote?.id,
-                title: tempTitle,
-                content: noteContent,
-            });
+    function saveNoteAs(noteContent: string) {
+        enqueueSave(async () => {
+            isSaving = true;
 
-            showSaveNotification();
-        } catch (error) {
-            throwCustomError(
-                "Failed to save note as: " + error,
-                "An error occurred while trying to save the note as a new file."
-            );
-        } finally {
-            isSaving = false;
-        }
+            let tempTitle = title;
+            if (title.trim().length === 0) {
+                tempTitle = "Untitled Note";
+            }
+
+            try {
+                if (
+                    await invoke("save_note_as", {
+                        id: $currentNote?.id,
+                        title: tempTitle,
+                        content: noteContent,
+                    })
+                ) {
+                    showSaveNotification();
+                }
+            } catch (error) {
+                throwCustomError(
+                    "Failed to save note as: " + error,
+                    "An error occurred while trying to save the note as a new file."
+                );
+            } finally {
+                isSaving = false;
+            }
+        });
     }
 
     function handlekeydown(event: KeyboardEvent) {
