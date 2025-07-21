@@ -171,13 +171,13 @@
 
         padding: 1em;
         background-color: var(--background-dark-light);
-        overflow: hidden;
         border-right: 1px solid var(--border-color-dark);
+
+        overflow: hidden;
     }
 
     .sidebar.collapsed {
         width: 0;
-        overflow: hidden;
         padding: 0;
         border: none;
     }

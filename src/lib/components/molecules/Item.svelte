@@ -133,11 +133,15 @@
         border-radius: var(--border-radius-small);
         font-size: 1em;
         flex: 1;
+        overflow: hidden;
     }
 
     .item-name {
         font-weight: 500;
         color: var(--text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .close-btn {
