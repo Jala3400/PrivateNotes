@@ -81,8 +81,10 @@
         border: 1px solid var(--border-color);
         background-color: var(--background-dark);
         color: var(--text-color);
-        width: clamp(20em, 80%, 40em);
-        height: clamp(20em, 80%, 30em);
+        width: 80%;
+        max-width: 50em;
+        height: 80%;
+        max-height: 40em;
         margin: auto;
     }
 
