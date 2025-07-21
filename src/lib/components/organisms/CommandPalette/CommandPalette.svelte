@@ -82,16 +82,19 @@
 
     function runCommand(cmd: Command) {
         const match = trimmedInputValue.match(cmd.pattern);
-        const args = match ? match.slice(1) : [];
+
+        // the first element of match is the full match, the rest are captured groups
+        const args = match?.slice(1) ?? [];
 
         if (cmd.requireArgs && !args.length) {
             throwCustomError(
                 "Not enough arguments for command " + cmd.name,
                 "Missing arguments for command " + cmd.name
             );
+        } else {
+            cmd.execute(args);
         }
 
-        cmd.execute(args);
         open = false;
         inputValue = "";
     }

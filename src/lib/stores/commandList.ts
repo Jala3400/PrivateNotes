@@ -1,4 +1,3 @@
-import { writable } from "svelte/store";
 import { configGroupList } from "./configGroups";
 import {
     OptionType,
@@ -6,7 +5,6 @@ import {
     type ConfigurationGroup,
     type Options,
 } from "$lib/types";
-import { get } from "svelte/store";
 
 function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
     const commands: Command[] = [];
@@ -76,19 +74,23 @@ export function runCommandScript(script: string): void {
         .map((line) => line.trim())
         .filter(Boolean);
     for (const command of commands) {
-        runCommand(command);
+        runCommandByName(command);
     }
 }
 
-export function runCommand(command: string): void {
+export function runCommandByName(command: string): void {
     const matchedCommand = commandList.find((cmd) => cmd.pattern.test(command));
 
-    if (matchedCommand) {
-        const args = command.match(matchedCommand.pattern);
-        if (args) {
-            matchedCommand.execute(args);
-        } else {
-            matchedCommand.execute([]);
-        }
+    if (!matchedCommand) {
+        console.warn("Command not found: " + command);
+        return;
+    }
+
+    const args = command.match(matchedCommand.pattern)?.slice(1) ?? [];
+
+    if (matchedCommand.requireArgs && !args?.length) {
+        console.warn("Not enough arguments for command " + matchedCommand.name);
+    } else {
+        matchedCommand.execute(args);
     }
 }
