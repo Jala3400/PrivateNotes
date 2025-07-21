@@ -20,8 +20,9 @@ export type Options = Record<string, any>;
 export interface ConfigurationGroup {
     name: string;
     key: string;
-    store: Writable<Options>;
     sections: ConfigurationSection[];
+    defaults: Options;
+    store: Writable<Options>;
     setter: (newConfig: Options) => void;
 }
 

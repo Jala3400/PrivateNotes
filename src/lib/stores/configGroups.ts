@@ -32,24 +32,10 @@ async function saveDefaultConfig(config: Record<string, Record<string, any>>) {
 
 const debouncedSaveDefaultConfig = debounce(saveDefaultConfig, 300);
 
-// Build defaultConfig object from configGroupList sections
-const defaultConfig: Record<string, Record<string, any>> = {};
-
-for (const group of configGroupList) {
-    const defaults: Record<string, any> = {};
-    for (const section of group.sections) {
-        for (const option of section.options) {
-            defaults[option.key] = option.defaultValue;
-        }
-    }
-    defaultConfig[group.key] = defaults;
-}
-
 // Subscribe to each store and track only changed values
 const changedConfig: Record<string, Record<string, any>> = {};
 
 for (const group of configGroupList) {
-    const defaults = defaultConfig[group.key];
     let isFirstTime = true;
     group.store.subscribe((value) => {
         if (isFirstTime) {
@@ -58,7 +44,7 @@ for (const group of configGroupList) {
         }
         const changed: Record<string, any> = {};
         for (const key in value) {
-            if (value[key] !== defaults[key]) {
+            if (value[key] !== group.defaults[key]) {
                 changed[key] = value[key];
             }
         }

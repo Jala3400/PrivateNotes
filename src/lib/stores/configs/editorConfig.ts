@@ -68,12 +68,12 @@ const editorConfigSections: ConfigurationSection[] = [
     },
 ];
 
-const initialEditorConfig = optionsFromSections(editorConfigSections);
+const defaultEditorConfig = optionsFromSections(editorConfigSections);
 
 const editorKey = "editor";
 
 export const editorConfig = writable<Options>({
-    ...initialEditorConfig,
+    ...defaultEditorConfig,
     ...initialConfig[editorKey],
 });
 
@@ -84,7 +84,8 @@ function setEditorConfig(newConfig: Options) {
 export const editorConfigGroup: ConfigurationGroup = {
     name: "Editor",
     key: editorKey,
-    store: editorConfig,
     sections: editorConfigSections,
+    defaults: defaultEditorConfig,
+    store: editorConfig,
     setter: setEditorConfig,
 };

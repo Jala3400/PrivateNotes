@@ -52,12 +52,12 @@ const appearanceConfigSections: ConfigurationSection[] = [
     },
 ];
 
-const initialAppearanceConfig = optionsFromSections(appearanceConfigSections);
+const defaultAppearanceConfig = optionsFromSections(appearanceConfigSections);
 
 const appearanceKey = "appearance";
 
 export const appearanceConfig = writable<Options>({
-    ...initialAppearanceConfig,
+    ...defaultAppearanceConfig,
     ...initialConfig[appearanceKey],
 });
 
@@ -68,7 +68,8 @@ function setAppearanceConfig(newConfig: Options) {
 export const appearanceConfigGroup: ConfigurationGroup = {
     name: "Appearance",
     key: appearanceKey,
-    store: appearanceConfig,
     sections: appearanceConfigSections,
+    defaults: defaultAppearanceConfig,
+    store: appearanceConfig,
     setter: setAppearanceConfig,
 };
