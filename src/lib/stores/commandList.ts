@@ -65,11 +65,9 @@ function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
 }
 
 // Generate commands for all config groups
-const allCommands = configGroupList.flatMap((group) =>
+export const commandList = configGroupList.flatMap((group) =>
     makeCommandsFromGroup(group, group.store)
 );
-
-export const commandList = writable<Command[]>(allCommands);
 
 export function runCommandScript(script: string): void {
     const normalizedScript = script.replace(/\r\n|\r/g, "\n");
@@ -83,10 +81,7 @@ export function runCommandScript(script: string): void {
 }
 
 export function runCommand(command: string): void {
-    const currentCommands = get(commandList);
-    const matchedCommand = currentCommands.find((cmd) =>
-        cmd.pattern.test(command)
-    );
+    const matchedCommand = commandList.find((cmd) => cmd.pattern.test(command));
 
     if (matchedCommand) {
         const args = command.match(matchedCommand.pattern);

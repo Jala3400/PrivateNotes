@@ -9,16 +9,16 @@
     let trimmedInputValue = $derived(inputValue.trim());
     let selected = $state(0);
 
-    const filtered = $derived(() =>
+    const filtered = $derived(
         inputValue
-            ? $commandList.filter(
+            ? commandList.filter(
                   (cmd) =>
                       cmd.name
                           .toLowerCase()
                           .includes(trimmedInputValue.toLowerCase()) ||
                       cmd.pattern.test(trimmedInputValue)
               )
-            : $commandList
+            : commandList
     );
 
     $effect(() => {
@@ -30,7 +30,7 @@
     });
 
     $effect(() => {
-        if (selected >= filtered().length) selected = 0;
+        if (selected >= filtered.length) selected = 0;
     });
 
     function closeModal() {
@@ -38,7 +38,7 @@
     }
 
     function handleKeydown(e: KeyboardEvent) {
-        const len = filtered().length;
+        const len = filtered.length;
         if (!len) return;
 
         switch (e.key) {
@@ -52,11 +52,11 @@
                 break;
             case "Enter":
                 e.preventDefault();
-                const cmd = filtered()[selected];
+                const cmd = filtered[selected];
                 if (trimmedInputValue.match(cmd.pattern) || !cmd.requireArgs) {
-                    runCommand(filtered()[selected]);
+                    runCommand(filtered[selected]);
                 } else {
-                    inputValue = filtered()[selected]?.name ?? inputValue;
+                    inputValue = filtered[selected]?.name ?? inputValue;
                 }
                 break;
             case "Escape":
@@ -64,7 +64,7 @@
                 break;
             case "Tab":
                 e.preventDefault();
-                const currentName = filtered()[selected]?.name ?? "";
+                const currentName = filtered[selected]?.name ?? "";
                 const inputWords = inputValue.split(" ");
                 const nameWords = currentName.split(" ");
 
@@ -118,7 +118,7 @@
             autofocus={true}
         />
         <div class="palette-list">
-            {#each filtered() as cmd, i}
+            {#each filtered as cmd, i}
                 <button
                     class:selected={i === selected}
                     onclick={() => runCommand(cmd as Command)}
@@ -127,7 +127,7 @@
                     {cmd.name}
                 </button>
             {/each}
-            {#if !filtered().length}
+            {#if !filtered.length}
                 <p class="no-match">No matching commands</p>
             {/if}
         </div>
