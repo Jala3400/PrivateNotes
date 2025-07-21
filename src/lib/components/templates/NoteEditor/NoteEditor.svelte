@@ -1,9 +1,12 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
+    import {
+        saveNoteEvent,
+        saveNoteCopyEvent,
+        saveNoteAsEvent,
+    } from "./noteOperations";
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
-    import { throwCustomError } from "$lib/error";
     import { currentNote } from "$lib/stores/currentNote";
 
     let content = $state("");
@@ -38,33 +41,18 @@
         }, 2000);
     }
 
-    function saveNote(noteContent: string) {
+    function saveNote(noteId: string, noteContent: string) {
         enqueueSave(async () => {
             isSaving = true;
 
-            let tempTitle = title;
-            if (title.trim().length === 0) {
-                tempTitle = "Untitled Note";
-            }
+            const result = await saveNoteEvent(noteId, noteContent);
+            if (result) showSaveNotification();
 
-            try {
-                await invoke("save_note", {
-                    id: $currentNote?.id,
-                    content: noteContent,
-                });
-                showSaveNotification();
-            } catch (error) {
-                throwCustomError(
-                    "Failed to save note: " + error,
-                    "An error occurred while trying to save the note."
-                );
-            } finally {
-                isSaving = false;
-            }
+            isSaving = false;
         });
     }
 
-    function saveNoteCopy(noteContent: string) {
+    function saveNoteAs(noteId: string | undefined, noteContent: string) {
         enqueueSave(async () => {
             isSaving = true;
 
@@ -73,28 +61,18 @@
                 tempTitle = "Untitled Note";
             }
 
-            try {
-                if (
-                    await invoke("save_note_copy", {
-                        id: $currentNote?.id,
-                        title: tempTitle,
-                        content: noteContent,
-                    })
-                ) {
-                    showSaveNotification();
-                }
-            } catch (error) {
-                throwCustomError(
-                    "Failed to save note: " + error,
-                    "An error occurred while trying to save a copy of the note."
-                );
-            } finally {
-                isSaving = false;
-            }
+            const result = await saveNoteAsEvent(
+                noteId,
+                tempTitle,
+                noteContent
+            );
+            if (result) showSaveNotification();
+
+            isSaving = false;
         });
     }
 
-    function saveNoteAs(noteContent: string) {
+    function saveNoteCopy(noteId: string | undefined, noteContent: string) {
         enqueueSave(async () => {
             isSaving = true;
 
@@ -103,41 +81,32 @@
                 tempTitle = "Untitled Note";
             }
 
-            try {
-                if (
-                    await invoke("save_note_as", {
-                        id: $currentNote?.id,
-                        title: tempTitle,
-                        content: noteContent,
-                    })
-                ) {
-                    showSaveNotification();
-                }
-            } catch (error) {
-                throwCustomError(
-                    "Failed to save note as: " + error,
-                    "An error occurred while trying to save the note as a new file."
-                );
-            } finally {
-                isSaving = false;
-            }
+            const result = await saveNoteCopyEvent(
+                noteId,
+                tempTitle,
+                noteContent
+            );
+            if (result) showSaveNotification();
+
+            isSaving = false;
         });
     }
 
     function handlekeydown(event: KeyboardEvent) {
         // Save note on Ctrl+S
+        const noteId = $currentNote?.id;
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
             const currentContent = editorRef?.getContent() || "";
-            if (!$currentNote?.id) {
-                saveNoteAs(currentContent);
+            if (noteId) {
+                saveNote(noteId, currentContent);
             } else {
-                saveNote(currentContent);
+                saveNoteAs(noteId, currentContent);
             }
         } else if (event.ctrlKey && event.key === "g") {
             event.preventDefault();
             const currentContent = editorRef?.getContent() || "";
-            saveNoteCopy(currentContent);
+            saveNoteCopy(noteId, currentContent);
         }
     }
 
