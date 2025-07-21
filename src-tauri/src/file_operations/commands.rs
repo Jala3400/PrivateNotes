@@ -204,7 +204,11 @@ pub fn rename_note(
         .map_err(|e| format!("Failed to rename note: {}", e))?;
 
     // Update the state with the new path
-    state.update_note_path(id, new_file_path.to_string_lossy().to_string());
+    state.update_note_path(
+        id,
+        new_file_path.to_string_lossy().to_string(),
+        new_file_name.clone(),
+    );
 
     window
         .emit("note-renamed", (id, parent_id, new_file_name))
