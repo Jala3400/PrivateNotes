@@ -15,7 +15,7 @@ function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
             if (type === OptionType.NUMBER) {
                 commands.push({
                     name: `set ${key} `,
-                    pattern: new RegExp(`^set ${key} (\\d+) *$`, "i"),
+                    pattern: new RegExp(`^set\\s+${key}\\s+(\\d+)$`, "i"),
                     requireArgs: true,
                     execute: (args: string[]) => {
                         const value = Number(args[0]);
@@ -28,7 +28,7 @@ function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
             } else if (type === OptionType.BOOLEAN) {
                 commands.push({
                     name: `enable ${key}`,
-                    pattern: new RegExp(`^enable ${key}$`, "i"),
+                    pattern: new RegExp(`^enable\\s+${key}$`, "i"),
                     execute: () => {
                         store.update((cfg: Options) => {
                             cfg[key] = true;
@@ -39,7 +39,7 @@ function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
 
                 commands.push({
                     name: `disable ${key}`,
-                    pattern: new RegExp(`^disable ${key}$`, "i"),
+                    pattern: new RegExp(`^disable\\s+${key}$`, "i"),
                     execute: () => {
                         store.update((cfg: Options) => {
                             cfg[key] = false;
@@ -50,7 +50,7 @@ function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
 
                 commands.push({
                     name: `toggle ${key}`,
-                    pattern: new RegExp(`^toggle ${key}$`, "i"),
+                    pattern: new RegExp(`^toggle\\s+${key}$`, "i"),
                     execute: () => {
                         store.update((cfg: Options) => {
                             cfg[key] = !cfg[key];
