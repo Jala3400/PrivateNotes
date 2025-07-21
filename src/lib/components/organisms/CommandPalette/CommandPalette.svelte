@@ -6,6 +6,7 @@
     let { open = $bindable() } = $props();
     let modalElement: HTMLDialogElement;
     let inputValue = $state("");
+    let trimmedInputValue = $derived(inputValue.trim());
     let selected = $state(0);
 
     const filtered = $derived(() =>
@@ -14,8 +15,8 @@
                   (cmd) =>
                       cmd.name
                           .toLowerCase()
-                          .includes(inputValue.toLowerCase()) ||
-                      cmd.pattern.test(inputValue)
+                          .includes(trimmedInputValue.toLowerCase()) ||
+                      cmd.pattern.test(trimmedInputValue)
               )
             : $commandList
     );
@@ -52,7 +53,7 @@
             case "Enter":
                 e.preventDefault();
                 const cmd = filtered()[selected];
-                if (inputValue.match(cmd.pattern) || !cmd.requireArgs) {
+                if (trimmedInputValue.match(cmd.pattern) || !cmd.requireArgs) {
                     runCommand(filtered()[selected]);
                 } else {
                     inputValue = filtered()[selected]?.name ?? inputValue;
@@ -80,7 +81,7 @@
     }
 
     function runCommand(cmd: Command) {
-        const match = inputValue.match(cmd.pattern);
+        const match = trimmedInputValue.match(cmd.pattern);
         const args = match ? match.slice(1) : [];
 
         if (cmd.requireArgs && !args.length) {
