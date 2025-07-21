@@ -215,7 +215,10 @@
                 highlightSelectionMatches(),
             ];
 
-            // Conditionally add features based on editorConfig
+            if ($editorConfig.vimMode) {
+                extensions.unshift(vim());
+            }
+
             if ($editorConfig.lineNumbers) {
                 extensions.push(lineNumbers());
             }
@@ -235,6 +238,11 @@
 
             // Create keymap array based on config
             const keymaps = [
+                {
+                    key: "Ctrl-g",
+                    run: () => true,
+                    // It is used in the front end to save a copy of the note
+                },
                 indentWithTab,
                 ...defaultKeymap,
                 ...historyKeymap,
@@ -255,11 +263,6 @@
             // Set tab size/indent unit
             const tabSize = $editorConfig.tabSize || 4;
             extensions.push(indentUnit.of(" ".repeat(tabSize)));
-
-            // Conditionally add vim mode
-            if ($editorConfig.vimMode) {
-                extensions.unshift(vim());
-            }
 
             return extensions;
         }

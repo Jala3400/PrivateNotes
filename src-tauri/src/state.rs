@@ -120,6 +120,19 @@ impl AppState {
         self.id_to_path_map.remove(id);
     }
 
+    pub fn update_note_path(&mut self, id: &str, new_path: String, name: String) {
+        // Update path in id_to_path_map
+        if let Some(existing_path) = self.id_to_path_map.get_mut(id) {
+            *existing_path = new_path.clone();
+        }
+
+        // Update path and name in opened_items
+        if let Some(item) = self.opened_items.iter_mut().find(|item| item.id == id) {
+            item.path = new_path;
+            item.name = name;
+        }
+    }
+
     pub fn to_frontend_item(&self, item: &FileSystemItem) -> FileSystemItemFrontend {
         FileSystemItemFrontend {
             id: item.id.clone(),

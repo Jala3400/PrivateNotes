@@ -12,6 +12,7 @@
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;
     let unlistenItemClosed: UnlistenFn;
+    let unlistenItemRenamed: UnlistenFn;
 
     onMount(async () => {
         // Load initial opened items
@@ -52,21 +53,49 @@
                 // Insert at the found position
                 openedItems.splice(insertIndex, 0, item);
             }
-
-            // Trigger reactivity
-            openedItems = openedItems;
         });
 
         unlistenItemClosed = await listen("item-closed", (event) => {
             const itemId = event.payload;
             openedItems = openedItems.filter((f) => f.id !== itemId);
         });
+
+        unlistenItemRenamed = await listen("note-renamed", (event) => {
+            const [id, parentId, newTitle] = event.payload as [
+                string,
+                string,
+                string,
+            ];
+
+            const item = findItem(id, parentId, openedItems);
+
+            if (item) {
+                item.name = newTitle;
+            }
+        });
     });
 
     onDestroy(() => {
-        if (unlistenItemOpened) unlistenItemOpened();
-        if (unlistenItemClosed) unlistenItemClosed();
+        unlistenItemOpened?.();
+        unlistenItemClosed?.();
+        unlistenItemRenamed?.();
     });
+
+    // Recursively search for the item in openedItems and their children
+    function findItem(
+        id: string,
+        parentId: string,
+        items: FileSystemItem[]
+    ): FileSystemItem | undefined {
+        for (const item of items) {
+            if (item.id === id && item.parentId === parentId) return item;
+            if (item.children) {
+                const found = findItem(id, parentId, item.children);
+                if (found) return found;
+            }
+        }
+        return undefined;
+    }
 
     async function closeItem(id: string) {
         // Check if the current note is the one being closed
