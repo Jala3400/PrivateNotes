@@ -173,9 +173,8 @@
     });
 
     onDestroy(() => {
-        // Clean up the event listener when the component is destroyed
-        if (unlistenNoteOpened) unlistenNoteOpened();
-        if (unlistenItemClosed) unlistenItemClosed();
+        unlistenNoteOpened?.();
+        unlistenItemClosed?.();
     });
 </script>
 

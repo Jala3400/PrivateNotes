@@ -76,9 +76,9 @@
     });
 
     onDestroy(() => {
-        if (unlistenItemOpened) unlistenItemOpened();
-        if (unlistenItemClosed) unlistenItemClosed();
-        if (unlistenItemRenamed) unlistenItemRenamed();
+        unlistenItemOpened?.();
+        unlistenItemClosed?.();
+        unlistenItemRenamed?.();
     });
 
     // Recursively search for the item in openedItems and their children
