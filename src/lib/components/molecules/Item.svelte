@@ -31,7 +31,7 @@
             <button
                 class="item-title"
                 onclick={() => openNote(item.id, item.parentId || "")}
-                title="Open note"
+                title={item.name}
             >
                 <span class="item-name">{item.name}</span>
             </button>
@@ -41,7 +41,7 @@
                     e.stopPropagation();
                     closeItem(item.id, item.parentId);
                 }}
-                title="Close item"
+                title="Close '{item.name}'"
             >
                 ✕
             </button>
@@ -59,7 +59,7 @@
                     e.stopPropagation();
                     closeItem(item.id, item.parentId);
                 }}
-                title="Close item"
+                title="Close '{item.name}'"
             >
                 ✕
             </button>

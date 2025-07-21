@@ -25,6 +25,7 @@
                 onclick={() =>
                     item.isNote ? openNote(item.id, item.parentId) : null}
                 disabled={!item.isNote}
+                title={item.name}
             >
                 <span class="item-name">{item.name}</span>
             </button>
