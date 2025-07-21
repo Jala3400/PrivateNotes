@@ -22,10 +22,6 @@
         cursor: pointer;
     }
 
-    label:hover {
-        text-decoration: underline;
-    }
-
     input[type="number"] {
         width: 5em;
         padding: 0.25em;

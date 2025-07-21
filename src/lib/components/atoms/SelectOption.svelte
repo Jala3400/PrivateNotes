@@ -27,10 +27,6 @@
         cursor: pointer;
     }
 
-    label:hover {
-        text-decoration: underline;
-    }
-
     select {
         cursor: pointer;
         background-color: var(--background-dark-light);
