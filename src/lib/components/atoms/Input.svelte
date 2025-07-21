@@ -29,7 +29,7 @@
 <style>
     input {
         width: 100%;
-        padding: 8px;
+        padding: 0.5em;
 
         background-color: var(--background-dark-lighter);
         color: var(--text-color);

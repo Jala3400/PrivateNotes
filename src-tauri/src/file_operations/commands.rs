@@ -3,7 +3,7 @@ use crate::file_operations::note_ops::{open_note_and_emit, open_note_from_path};
 use crate::state::{AppState, FileSystemItemFrontend};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::{Emitter, State, Window};
+use tauri::{AppHandle, Emitter, Manager, State, Window};
 use tauri_plugin_dialog::DialogExt;
 
 /// Tauri command to get opened items
@@ -63,7 +63,7 @@ pub fn save_note_copy(
     title: &str,
     content: &str,
     app_state: State<Mutex<AppState>>,
-    app_handle: tauri::AppHandle,
+    app_handle: AppHandle,
 ) -> Result<bool, String> {
     // Get the encryption key
     let key = app_state.lock().unwrap().get_encryption_key()?;
@@ -137,7 +137,7 @@ pub fn save_note_as(
     title: &str,
     content: &str,
     app_state: State<Mutex<AppState>>,
-    app_handle: tauri::AppHandle,
+    app_handle: AppHandle,
     window: Window,
 ) -> Result<bool, String> {
     // Get the encryption key
@@ -178,4 +178,52 @@ pub fn save_note_as(
     } else {
         Ok(false)
     }
+}
+
+#[tauri::command]
+/// Returns the contents of the default configuration file.
+pub fn get_initial_config(app_handle: AppHandle) -> Result<String, String> {
+    let app_dir = app_handle
+        .path()
+        .app_config_dir()
+        .map_err(|_| "Failed to get app config base directory")?;
+
+    // Always create the app config directory, even if it already exists
+    std::fs::create_dir_all(&app_dir)
+        .map_err(|e| format!("Failed to create app config directory: {}", e))?;
+
+    let config_path = app_dir.join(".lockdfg");
+
+    // Create the config file with empty content if it doesn't exist
+    if !config_path.exists() {
+        std::fs::write(&config_path, "{}")
+            .map_err(|e| format!("Failed to create default config file: {}", e))?;
+    }
+
+    std::fs::read_to_string(&config_path)
+        .map_err(|e| format!("Failed to read default config file: {}", e))
+}
+
+#[tauri::command]
+/// Saves the default configuration file with the provided content.
+pub fn save_initial_config(
+    content: &str,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    let app_dir = app_handle
+        .path()
+        .app_config_dir()
+        .map_err(|_| "Failed to get app config base directory")?;
+
+    // Always create the app config directory, even if it already exists
+    std::fs::create_dir_all(&app_dir)
+        .map_err(|e| format!("Failed to create app config directory: {}", e))?;
+
+    let config_path = app_dir.join(".lockdfg");
+
+    // Write the provided content to the config file
+    std::fs::write(&config_path, content)
+        .map_err(|e| format!("Failed to write default config file: {}", e))?;
+
+    Ok(())
 }

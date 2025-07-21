@@ -7,12 +7,7 @@
     import { throwCustomError } from "$lib/error";
     import { currentNote } from "$lib/stores/currentNote";
     import { ask } from "@tauri-apps/plugin-dialog";
-
-    interface Props {
-        sidebar_collapsed?: boolean;
-    }
-
-    let { sidebar_collapsed = $bindable(false) }: Props = $props();
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
 
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;
@@ -31,7 +26,7 @@
             });
         } catch (error) {
             throwCustomError(
-                "Failed to load opened items" + String(error),
+                "Failed to load opened items " + error,
                 "An error occurred while trying to load the opened items."
             );
         }
@@ -99,7 +94,7 @@
             await invoke("close_item", { id });
         } catch (error) {
             throwCustomError(
-                "Failed to close item" + String(error),
+                "Failed to close item " + error,
                 "An error occurred while trying to close the item."
             );
         }
@@ -110,14 +105,14 @@
             await invoke("open_note_from_id", { id, parentId });
         } catch (error) {
             throwCustomError(
-                "Failed to open note" + String(error),
+                "Failed to open note " + error,
                 "An error occurred while trying to open the note."
             );
         }
     }
 </script>
 
-<div class="sidebar" class:collapsed={sidebar_collapsed}>
+<div class="sidebar" class:collapsed={$appearanceConfig.sidebarCollapsed}>
     <div class="sidebar-header">
         <h2>Opened Items</h2>
     </div>
@@ -155,6 +150,7 @@
         width: 0;
         overflow: hidden;
         padding: 0;
+        border: none;
     }
 
     .sidebar-content {

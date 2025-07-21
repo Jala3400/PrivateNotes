@@ -234,7 +234,8 @@
 /* Search and selection Match Highlighting */
 .cm-searchMatch,
 .cm-selectionMatch,
-.cm-matchingBracket {
+.cm-matchingBracket,
+.cm-nonmatchingBracket {
     display: inline-block;
     border-radius: var(--border-radius-small);
 }
@@ -268,6 +269,10 @@
 
 .cm-panel {
     padding: 0.5em !important;
+}
+
+.cm-vim-panel input {
+    color: var(--text-primary) !important;
 }
 
 .cm-textfield {
@@ -468,4 +473,13 @@
     height: 1px;
     background-color: var(--border-color-dark);
     margin: 0.3em;
+}
+
+/* Vim plugin styles */
+.cm-vimCursorLayer .cm-fat-cursor {
+    background: var(--main-color-dark);
+}
+
+.ͼo:not(.cm-focused) .cm-fat-cursor {
+    outline: solid 1px var(--main-color);
 }

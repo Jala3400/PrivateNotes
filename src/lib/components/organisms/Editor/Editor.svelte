@@ -1,14 +1,43 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { EditorView, keymap } from "@codemirror/view";
-    import { EditorState } from "@codemirror/state";
-    import { markdown } from "@codemirror/lang-markdown";
-    import { basicSetup } from "codemirror";
     import {
+        drawSelection,
+        dropCursor,
+        EditorView,
+        highlightActiveLine,
+        highlightActiveLineGutter,
+        highlightSpecialChars,
+        keymap,
+        lineNumbers,
+        rectangularSelection,
+    } from "@codemirror/view";
+    import { EditorState, StateEffect } from "@codemirror/state";
+    import { markdown } from "@codemirror/lang-markdown";
+    import {
+        foldGutter,
+        indentOnInput,
+        bracketMatching,
+        foldKeymap,
         syntaxHighlighting,
         HighlightStyle,
         indentUnit,
+        defaultHighlightStyle,
     } from "@codemirror/language";
+    import {
+        history,
+        defaultKeymap,
+        historyKeymap,
+    } from "@codemirror/commands";
+    import {
+        searchKeymap,
+        highlightSelectionMatches,
+    } from "@codemirror/search";
+    import {
+        autocompletion,
+        completionKeymap,
+        closeBrackets,
+        closeBracketsKeymap,
+    } from "@codemirror/autocomplete";
     import { classHighlighter, tags } from "@lezer/highlight";
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import { indentWithTab } from "@codemirror/commands";
@@ -17,6 +46,7 @@
     import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
     import { separatorLinePlugin } from "./SeparatorLinePlugin";
     import { blockquotePlugin } from "./BlockquotePlugin";
+    import { vim } from "@replit/codemirror-vim";
     import {
         Strikethrough,
         Subscript,
@@ -24,6 +54,7 @@
         Table,
         TaskList,
     } from "@lezer/markdown";
+    import { editorConfig } from "$lib/stores/configs/editorConfig";
     import "./md_style.css";
 
     let editorContainer: HTMLDivElement;
@@ -145,33 +176,106 @@
             { tag: tags.strikethrough, class: "md-strikethrough" },
         ]);
 
-        const indentUnitExtension = indentUnit.of("    "); // 4 spaces
-
-        const state = EditorState.create({
-            doc: content,
-            extensions: [
-                markdown({
-                    extensions: [
-                        Table,
-                        Strikethrough,
-                        TaskList,
-                        Superscript,
-                        Subscript,
-                    ],
-                }), // Don't use GFM because it hides the links
-                syntaxHighlighting(classHighlighter),
-                syntaxHighlighting(markdownHighlighting),
+        function createExtensions() {
+            const extensions = [
+                // Only render custom markdown plugins if renderMd is enabled
+                ...($editorConfig.renderMd
+                    ? [
+                          markdown({
+                              extensions: [
+                                  Table,
+                                  Strikethrough,
+                                  TaskList,
+                                  Superscript,
+                                  Subscript,
+                              ],
+                          }),
+                          syntaxHighlighting(classHighlighter),
+                          syntaxHighlighting(markdownHighlighting),
+                          tableRendererPlugin(),
+                          taskListPlugin(),
+                          subAndSuperscriptPlugin(),
+                          separatorLinePlugin(),
+                          blockquotePlugin(),
+                      ]
+                    : []),
+                // Basic editor features
                 selectedLinePlugin(),
-                tableRendererPlugin(),
-                taskListPlugin(),
-                subAndSuperscriptPlugin(),
-                separatorLinePlugin(),
-                blockquotePlugin(),
-                EditorView.lineWrapping,
-                basicSetup,
-                keymap.of([indentWithTab]),
-                indentUnitExtension,
-            ],
+                highlightSpecialChars(),
+                history(),
+                drawSelection(),
+                dropCursor(),
+                EditorState.allowMultipleSelections.of(true),
+                indentOnInput(),
+                syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+                bracketMatching(),
+                rectangularSelection(),
+                highlightActiveLine(),
+                highlightActiveLineGutter(),
+                highlightSelectionMatches(),
+            ];
+
+            // Conditionally add features based on editorConfig
+            if ($editorConfig.lineNumbers) {
+                extensions.push(lineNumbers());
+            }
+
+            if ($editorConfig.lineWrapping) {
+                extensions.push(EditorView.lineWrapping);
+            }
+
+            if ($editorConfig.autoCloseBrackets) {
+                extensions.push(closeBrackets());
+                extensions.push(autocompletion());
+            }
+
+            if ($editorConfig.foldGutter) {
+                extensions.push(foldGutter());
+            }
+
+            // Create keymap array based on config
+            const keymaps = [
+                indentWithTab,
+                ...defaultKeymap,
+                ...historyKeymap,
+                ...completionKeymap,
+                ...searchKeymap,
+            ];
+
+            if ($editorConfig.autoCloseBrackets) {
+                keymaps.push(...closeBracketsKeymap);
+            }
+
+            if ($editorConfig.foldGutter) {
+                keymaps.push(...foldKeymap);
+            }
+
+            extensions.push(keymap.of(keymaps));
+
+            // Set tab size/indent unit
+            const tabSize = $editorConfig.tabSize || 4;
+            extensions.push(indentUnit.of(" ".repeat(tabSize)));
+
+            // Conditionally add vim mode
+            if ($editorConfig.vimMode) {
+                extensions.unshift(vim());
+            }
+
+            return extensions;
+        }
+
+        let state = EditorState.create({
+            doc: content,
+            extensions: createExtensions(),
+        });
+
+        // Watch for editorConfig changes and reconfigure extensions
+        $effect(() => {
+            if (editorView) {
+                editorView.dispatch({
+                    effects: [StateEffect.reconfigure.of(createExtensions())],
+                });
+            }
         });
 
         editorView = new EditorView({

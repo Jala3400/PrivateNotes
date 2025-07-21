@@ -1,6 +1,7 @@
 use crate::{
     file_operations::{
         encryption_ops::handle_path, folder_ops::open_folder, note_ops::open_note_from_path,
+        config_ops::open_config_from_path,
     },
     state::AppState,
 };
@@ -23,15 +24,21 @@ pub fn drop_handler(window: &Window, event: &DragDropEvent) -> Result<(), String
             }
 
             for path in paths {
-                // Check if it's a folder that can be opened
-                if can_open_path(path) {
+                if is_config_file(path) {
+                    if let Err(err) = open_config_from_path(path, window) {
+                        let error_msg =
+                            format!("Failed to open rc file '{}':\n{}", path.display(), err);
+                        window.emit("error", error_msg).unwrap();
+                        continue;
+                    }
+                } else if can_open_path(path) {
                     if let Err(err) = open_from_path(path, window) {
                         let error_msg = format!("Failed to open '{}':\n{}", path.display(), err);
                         window.emit("error", error_msg).unwrap();
                     }
                 } else {
                     if let Err(err) = handle_path(path, window) {
-                        let error_msg = format!("Failed to handle '{}':\n{}", path.display(), err);
+                        let error_msg = format!("Failed to open '{}':\n{}", path.display(), err);
                         window.emit("error", error_msg).unwrap();
                     }
                 }
@@ -65,6 +72,13 @@ pub fn can_open_file(file_path: &PathBuf) -> bool {
     // Check if file has double extension (e.g., "document.txt.lockd")
     PathBuf::from(file_stem).extension().is_none()
         && file_path.extension() == Some("lockd".as_ref())
+}
+
+/// Checks if a file is a config file
+pub fn is_config_file(file_path: &PathBuf) -> bool {
+    file_path
+        .extension()
+        .map_or(false, |ext| ext == "lockdrc" || ext == "lockdfg")
 }
 
 /// Opens a file or folder based on its path
