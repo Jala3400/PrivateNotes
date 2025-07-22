@@ -1,12 +1,12 @@
+import { syntaxTree } from "@codemirror/language";
+import type { Extension, Range } from "@codemirror/state";
+import type { DecorationSet } from "@codemirror/view";
 import {
     Decoration,
     EditorView,
     ViewPlugin,
     ViewUpdate,
 } from "@codemirror/view";
-import type { DecorationSet } from "@codemirror/view";
-import type { Extension, Range } from "@codemirror/state";
-import { syntaxTree } from "@codemirror/language";
 
 /**
  * Simple plugin to add a class to selected lines

@@ -1,13 +1,13 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { invoke } from "@tauri-apps/api/core";
-    import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-    import type { FileSystemItem } from "$lib/types";
     import Item from "$lib/components/molecules/Item.svelte";
     import { throwCustomError } from "$lib/error";
-    import { currentNote } from "$lib/stores/currentNote";
-    import { ask } from "@tauri-apps/plugin-dialog";
     import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
+    import { currentNote } from "$lib/stores/currentNote";
+    import type { FileSystemItem } from "$lib/types";
+    import { invoke } from "@tauri-apps/api/core";
+    import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+    import { ask } from "@tauri-apps/plugin-dialog";
+    import { onDestroy, onMount } from "svelte";
 
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;

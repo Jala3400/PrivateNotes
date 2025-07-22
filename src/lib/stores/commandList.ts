@@ -1,10 +1,10 @@
-import { configGroupList } from "./configGroups";
 import {
     OptionType,
     type Command,
     type ConfigurationGroup,
     type Options,
 } from "$lib/types";
+import { configGroupList } from "./configGroups";
 
 function makeCommandsFromGroup(group: ConfigurationGroup, store: Options) {
     const commands: Command[] = [];

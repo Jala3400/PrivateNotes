@@ -1,3 +1,6 @@
+import { syntaxTree } from "@codemirror/language";
+import type { Extension, Range } from "@codemirror/state";
+import type { DecorationSet } from "@codemirror/view";
 import {
     Decoration,
     EditorView,
@@ -5,9 +8,6 @@ import {
     ViewUpdate,
     WidgetType,
 } from "@codemirror/view";
-import type { DecorationSet } from "@codemirror/view";
-import type { Extension, Range } from "@codemirror/state";
-import { syntaxTree } from "@codemirror/language";
 
 /**
  * Widget for rendering interactive checkboxes in task lists

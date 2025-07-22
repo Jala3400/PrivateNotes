@@ -1,6 +1,6 @@
 <script lang="ts">
-    import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
     import ConfigGroupTab from "$lib/components/atoms/ConfigGroupTab.svelte";
+    import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
     import { configGroupList } from "$lib/stores/configGroups";
     import { get } from "svelte/store";
 

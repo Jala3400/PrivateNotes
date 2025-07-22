@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
     import Input from "$lib/components/atoms/Input.svelte";
     import NeonButton from "$lib/components/atoms/NeonButton.svelte";
     import { throwCustomError } from "$lib/error";
+    import { invoke } from "@tauri-apps/api/core";
 
     let username = $state("");
     let passValid = $state(false);

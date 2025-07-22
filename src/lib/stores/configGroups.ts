@@ -1,8 +1,8 @@
+import { throwCustomError } from "$lib/error";
 import type { ConfigurationGroup } from "$lib/types";
 import { invoke } from "@tauri-apps/api/core";
 import { appearanceConfigGroup } from "./configs/appearanceConfig";
 import { editorConfigGroup } from "./configs/editorConfig";
-import { throwCustomError } from "$lib/error";
 
 // Unified config group list
 export const configGroupList: ConfigurationGroup[] = [

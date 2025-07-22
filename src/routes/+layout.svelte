@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
-    import { listen } from "@tauri-apps/api/event";
-    import { onDestroy, onMount } from "svelte";
     import { throwCustomError } from "$lib/error";
-    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
     import { runCommandScript } from "$lib/stores/commandList";
     import { loadConfigFile } from "$lib/stores/configGroups";
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
+    import { listen } from "@tauri-apps/api/event";
+    import { onDestroy, onMount } from "svelte";
     import "../app.css";
 
     let { children } = $props();

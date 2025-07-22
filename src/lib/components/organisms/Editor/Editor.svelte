@@ -1,5 +1,33 @@
 <script lang="ts">
-    import { onDestroy, onMount } from "svelte";
+    import { editorConfig } from "$lib/stores/configs/editorConfig";
+    import {
+        autocompletion,
+        closeBrackets,
+        closeBracketsKeymap,
+        completionKeymap,
+    } from "@codemirror/autocomplete";
+    import {
+        defaultKeymap,
+        history,
+        historyKeymap,
+        indentWithTab,
+    } from "@codemirror/commands";
+    import { markdown } from "@codemirror/lang-markdown";
+    import {
+        bracketMatching,
+        defaultHighlightStyle,
+        foldGutter,
+        foldKeymap,
+        HighlightStyle,
+        indentOnInput,
+        indentUnit,
+        syntaxHighlighting,
+    } from "@codemirror/language";
+    import {
+        highlightSelectionMatches,
+        searchKeymap,
+    } from "@codemirror/search";
+    import { EditorState, StateEffect } from "@codemirror/state";
     import {
         drawSelection,
         dropCursor,
@@ -11,42 +39,7 @@
         lineNumbers,
         rectangularSelection,
     } from "@codemirror/view";
-    import { EditorState, StateEffect } from "@codemirror/state";
-    import { markdown } from "@codemirror/lang-markdown";
-    import {
-        foldGutter,
-        indentOnInput,
-        bracketMatching,
-        foldKeymap,
-        syntaxHighlighting,
-        HighlightStyle,
-        indentUnit,
-        defaultHighlightStyle,
-    } from "@codemirror/language";
-    import {
-        history,
-        defaultKeymap,
-        historyKeymap,
-    } from "@codemirror/commands";
-    import {
-        searchKeymap,
-        highlightSelectionMatches,
-    } from "@codemirror/search";
-    import {
-        autocompletion,
-        completionKeymap,
-        closeBrackets,
-        closeBracketsKeymap,
-    } from "@codemirror/autocomplete";
     import { classHighlighter, tags } from "@lezer/highlight";
-    import { selectedLinePlugin } from "./SelectedLinePlugin";
-    import { indentWithTab } from "@codemirror/commands";
-    import { tableRendererPlugin } from "./TableRendererPlugin";
-    import { taskListPlugin } from "./TaskListPlugin";
-    import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
-    import { separatorLinePlugin } from "./SeparatorLinePlugin";
-    import { blockquotePlugin } from "./BlockquotePlugin";
-    import { vim } from "@replit/codemirror-vim";
     import {
         Strikethrough,
         Subscript,
@@ -54,8 +47,15 @@
         Table,
         TaskList,
     } from "@lezer/markdown";
-    import { editorConfig } from "$lib/stores/configs/editorConfig";
+    import { vim } from "@replit/codemirror-vim";
+    import { onDestroy, onMount } from "svelte";
+    import { blockquotePlugin } from "./BlockquotePlugin";
     import "./md_style.css";
+    import { selectedLinePlugin } from "./SelectedLinePlugin";
+    import { separatorLinePlugin } from "./SeparatorLinePlugin";
+    import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
+    import { tableRendererPlugin } from "./TableRendererPlugin";
+    import { taskListPlugin } from "./TaskListPlugin";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;

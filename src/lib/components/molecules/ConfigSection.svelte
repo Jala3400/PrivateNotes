@@ -1,13 +1,13 @@
 <script lang="ts">
     import CheckboxOption from "$lib/components/atoms/CheckboxOption.svelte";
     import NumberOption from "$lib/components/atoms/NumberOption.svelte";
-    import SelectOption from "../atoms/SelectOption.svelte";
     import {
         OptionType,
-        type Options,
-        type ConfigurationSection,
         type ConfigOption,
+        type ConfigurationSection,
+        type Options,
     } from "$lib/types";
+    import SelectOption from "../atoms/SelectOption.svelte";
 
     interface Props {
         section: ConfigurationSection;

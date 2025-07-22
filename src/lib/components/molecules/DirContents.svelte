@@ -1,7 +1,7 @@
 <script lang="ts">
-    import Directory from "./Directory.svelte";
-    import type { FileSystemItem } from "$lib/types";
     import { currentNote } from "$lib/stores/currentNote";
+    import type { FileSystemItem } from "$lib/types";
+    import Directory from "./Directory.svelte";
 
     interface Props {
         items: FileSystemItem[];
