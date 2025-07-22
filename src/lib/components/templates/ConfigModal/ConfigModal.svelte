@@ -94,7 +94,7 @@
 
     #config-content {
         display: grid;
-        grid-template-columns: clamp(10em, 20%, 15em) auto;
+        grid-template-columns: clamp(7em, 20%, 15em) auto;
         height: 100%;
     }
 
