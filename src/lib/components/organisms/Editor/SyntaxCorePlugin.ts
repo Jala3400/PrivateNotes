@@ -11,7 +11,8 @@ import {
 // Import handlers from each plugin
 import { decorateBlockquote } from "./BlockquotePlugin";
 import { decorateSeparatorLine } from "./SeparatorLinePlugin";
-import { decorateSubAndSuperscript } from "./SubAndSuperscriptPlugin";
+import { decorateSubscript } from "./SubscriptPlugin";
+import { decorateSuperscript } from "./SuperscriptPlugin";
 import { decorateTaskList } from "./TaskListPlugin";
 
 export function syntaxCorePlugin(): Extension {
@@ -44,12 +45,10 @@ export function syntaxCorePlugin(): Extension {
                                 decorateSeparatorLine(node, view, decorations);
                                 break;
                             case "Superscript":
+                                decorateSuperscript(node, view, decorations);
+                                break;
                             case "Subscript":
-                                decorateSubAndSuperscript(
-                                    node,
-                                    view,
-                                    decorations
-                                );
+                                decorateSubscript(node, view, decorations);
                                 break;
                             case "QuoteMark":
                                 decorateBlockquote(node, view, decorations);
@@ -57,7 +56,6 @@ export function syntaxCorePlugin(): Extension {
                             case "Task":
                                 decorateTaskList(node, view, decorations);
                                 break;
-                            // Add more cases as needed
                         }
                     },
                 });
