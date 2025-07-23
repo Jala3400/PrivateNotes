@@ -9,11 +9,11 @@ import {
 } from "@codemirror/view";
 
 // Import handlers from each plugin
-import { decorateBlockquote } from "./BlockquotePlugin";
-import { decorateSeparatorLine } from "./SeparatorLinePlugin";
-import { decorateSubscript } from "./SubscriptPlugin";
-import { decorateSuperscript } from "./SuperscriptPlugin";
-import { decorateTaskList } from "./TaskListPlugin";
+import { decorateBlockquote } from "./CoreDecorations/BlockquotePlugin";
+import { decorateSeparatorLine } from "./CoreDecorations/SeparatorLinePlugin";
+import { decorateSubscript } from "./CoreDecorations/SubscriptPlugin";
+import { decorateSuperscript } from "./CoreDecorations/SuperscriptPlugin";
+import { decorateTaskList } from "./CoreDecorations/TaskListPlugin";
 
 export function syntaxCorePlugin(): Extension {
     return ViewPlugin.fromClass(
