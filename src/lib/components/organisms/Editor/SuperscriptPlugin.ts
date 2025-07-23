@@ -3,7 +3,7 @@ import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 
 /**
- * Handler for superscript nodes
+ * Function to style superscript text in the editor
  */
 export function decorateSuperscript(
     node: any,

@@ -3,7 +3,7 @@ import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 
 /**
- * Plugin to add a class to selected lines
+ * Function to style separator lines in the editor
  */
 
 // Handler for the core plugin

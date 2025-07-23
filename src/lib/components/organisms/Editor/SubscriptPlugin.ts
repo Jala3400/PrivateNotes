@@ -3,7 +3,7 @@ import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 
 /**
- * Handler for subscript nodes
+ * Function to style subscript text in the editor
  */
 export function decorateSubscript(
     node: any,

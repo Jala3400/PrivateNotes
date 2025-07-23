@@ -3,7 +3,7 @@ import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 
 /**
- * Plugin to apply blockquote styling to quoted lines
+ * Function to style blockquote text in the editor
  */
 
 // Handler for the core plugin
