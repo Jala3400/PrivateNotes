@@ -19,6 +19,7 @@
             collapsed = !collapsed;
             item.collapsed = collapsed;
         }}
+        title={item.name}
     >
         <span class="expand-icon">
             {collapsed ? "▶" : "▼"}

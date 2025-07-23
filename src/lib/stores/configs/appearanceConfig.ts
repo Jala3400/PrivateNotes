@@ -1,8 +1,8 @@
 import {
     OptionType,
-    type Options,
-    type ConfigurationSection,
     type ConfigurationGroup,
+    type ConfigurationSection,
+    type Options,
 } from "$lib/types";
 import { writable } from "svelte/store";
 import { initialConfig, optionsFromSections } from "./configUtils";

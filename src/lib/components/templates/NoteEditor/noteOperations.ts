@@ -1,5 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import { throwCustomError } from "$lib/error";
+import { invoke } from "@tauri-apps/api/core";
 
 export async function saveNoteEvent(noteId: string, noteContent: string) {
     try {

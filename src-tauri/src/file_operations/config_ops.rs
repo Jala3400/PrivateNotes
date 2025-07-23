@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-
 use tauri::{Emitter, Window};
 
 pub fn open_config_from_path(file_path: &PathBuf, window: &Window) -> Result<(), String> {

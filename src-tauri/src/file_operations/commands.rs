@@ -206,6 +206,7 @@ pub fn rename_note(
     // Update the state with the new path
     state.update_note_path(
         id,
+        parent_id,
         new_file_path.to_string_lossy().to_string(),
         new_file_name.clone(),
     );

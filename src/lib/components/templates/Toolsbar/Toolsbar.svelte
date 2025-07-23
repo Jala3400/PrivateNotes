@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
     import ToolButton from "$lib/components/atoms/ToolButton.svelte";
     import { throwCustomError } from "$lib/error";
-    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig"; // Import your store
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
+    import { invoke } from "@tauri-apps/api/core";
+ // Import your store
 
     interface Props {
         openConfigModal: boolean;

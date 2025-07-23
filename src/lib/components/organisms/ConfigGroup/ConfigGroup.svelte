@@ -1,9 +1,6 @@
 <script lang="ts">
     import ConfigSection from "$lib/components/molecules/ConfigSection.svelte";
-    import {
-        type ConfigurationSection,
-        type Options,
-    } from "$lib/types";
+    import { type ConfigurationSection, type Options } from "$lib/types";
 
     interface Props {
         title: string;
@@ -25,11 +22,7 @@
     <hr class="separator" />
     <div class="config-sections">
         {#each sections as section}
-            <ConfigSection
-                section={section}
-                bind:configOptions={configOptions}
-                {onChange}
-            />
+            <ConfigSection {section} bind:configOptions {onChange} />
         {/each}
     </div>
 </div>

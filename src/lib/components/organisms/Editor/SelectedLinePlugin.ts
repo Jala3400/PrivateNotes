@@ -1,6 +1,6 @@
-import { Decoration, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
-import type { DecorationSet } from "@codemirror/view";
 import type { Extension, Range } from "@codemirror/state";
+import type { DecorationSet } from "@codemirror/view";
+import { Decoration, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
 /**
  * Simple plugin to add a class to selected lines

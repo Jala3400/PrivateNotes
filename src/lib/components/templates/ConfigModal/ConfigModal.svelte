@@ -1,6 +1,6 @@
 <script lang="ts">
-    import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
     import ConfigGroupTab from "$lib/components/atoms/ConfigGroupTab.svelte";
+    import ConfigGroup from "$lib/components/organisms/ConfigGroup/ConfigGroup.svelte";
     import { configGroupList } from "$lib/stores/configGroups";
     import { get } from "svelte/store";
 
@@ -81,8 +81,10 @@
         border: 1px solid var(--border-color);
         background-color: var(--background-dark);
         color: var(--text-color);
-        width: clamp(20em, 80%, 40em);
-        height: clamp(20em, 80%, 30em);
+        width: 80%;
+        max-width: 50em;
+        height: 80%;
+        max-height: 40em;
         margin: auto;
     }
 
@@ -92,7 +94,7 @@
 
     #config-content {
         display: grid;
-        grid-template-columns: clamp(10em, 20%, 15em) auto;
+        grid-template-columns: clamp(7em, 20%, 15em) auto;
         height: 100%;
     }
 

@@ -120,17 +120,39 @@ impl AppState {
         self.id_to_path_map.remove(id);
     }
 
-    pub fn update_note_path(&mut self, id: &str, new_path: String, name: String) {
+    pub fn update_note_path(&mut self, id: &str, parent_id: &str, new_path: String, name: String) {
         // Update path in id_to_path_map
         if let Some(existing_path) = self.id_to_path_map.get_mut(id) {
             *existing_path = new_path.clone();
         }
 
         // Update path and name in opened_items
-        if let Some(item) = self.opened_items.iter_mut().find(|item| item.id == id) {
+        if let Some(item) = self.get_item_from_id(id, parent_id) {
             item.path = new_path;
             item.name = name;
         }
+    }
+
+    pub fn find_item_mut<'a>(
+        items: &'a mut [FileSystemItem],
+        id: &str,
+        parent_id: &str,
+    ) -> Option<&'a mut FileSystemItem> {
+        for item in items {
+            if item.id == id && item.parent_id == parent_id {
+                return Some(item);
+            }
+            if let Some(children) = item.children.as_mut() {
+                if let Some(found) = Self::find_item_mut(children, id, parent_id) {
+                    return Some(found);
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_item_from_id(&mut self, id: &str, parent_id: &str) -> Option<&mut FileSystemItem> {
+        Self::find_item_mut(&mut self.opened_items, id, parent_id)
     }
 
     pub fn to_frontend_item(&self, item: &FileSystemItem) -> FileSystemItemFrontend {

@@ -8,7 +8,8 @@ mod state;
 
 use crate::file_operations::{
     commands::{
-        close_item, get_initial_config, get_opened_items, open_note_from_id, rename_note, save_initial_config, save_note, save_note_as, save_note_copy
+        close_item, get_initial_config, get_opened_items, open_note_from_id, rename_note,
+        save_initial_config, save_note, save_note_as, save_note_copy,
     },
     drag_drop::drop_handler,
 };

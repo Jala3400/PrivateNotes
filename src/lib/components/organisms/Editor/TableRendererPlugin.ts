@@ -1,10 +1,9 @@
-import { Decoration, WidgetType, EditorView } from "@codemirror/view";
-import { RangeSet, StateField } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
-import { keymap } from "@codemirror/view";
+import { RangeSet, StateField } from "@codemirror/state";
+import { Decoration, EditorView, keymap, WidgetType } from "@codemirror/view";
 
-import type { DecorationSet } from "@codemirror/view";
 import type { EditorState, Extension, Range } from "@codemirror/state";
+import type { DecorationSet } from "@codemirror/view";
 
 class TableWidget extends WidgetType {
     rendered: string;

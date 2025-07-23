@@ -8,7 +8,11 @@
     let { open = $bindable(), title, ...restProps }: Props = $props();
 </script>
 
-<div class="config-group-tab" {...restProps} class:open>{title}</div>
+<div class="config-group-tab" {...restProps} class:open {title}>
+    <span class="config-group-title">
+        {title}
+    </span>
+</div>
 
 <style>
     .config-group-tab {
@@ -18,6 +22,7 @@
         cursor: pointer;
         user-select: none;
         color: var(--text-color);
+        overflow: hidden;
     }
 
     .config-group-tab.open {
@@ -26,5 +31,11 @@
 
     .config-group-tab:hover {
         background-color: var(--background-dark-lighter);
+    }
+
+    .config-group-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>

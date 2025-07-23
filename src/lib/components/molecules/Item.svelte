@@ -31,7 +31,7 @@
             <button
                 class="item-title"
                 onclick={() => openNote(item.id, item.parentId || "")}
-                title="Open note"
+                title={item.name}
             >
                 <span class="item-name">{item.name}</span>
             </button>
@@ -41,7 +41,7 @@
                     e.stopPropagation();
                     closeItem(item.id, item.parentId);
                 }}
-                title="Close item"
+                title="Close '{item.name}'"
             >
                 ✕
             </button>
@@ -59,7 +59,7 @@
                     e.stopPropagation();
                     closeItem(item.id, item.parentId);
                 }}
-                title="Close item"
+                title="Close '{item.name}'"
             >
                 ✕
             </button>
@@ -133,11 +133,15 @@
         border-radius: var(--border-radius-small);
         font-size: 1em;
         flex: 1;
+        overflow: hidden;
     }
 
     .item-name {
         font-weight: 500;
         color: var(--text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .close-btn {

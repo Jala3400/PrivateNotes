@@ -1,14 +1,14 @@
 <script lang="ts">
-    import {
-        saveNoteEvent,
-        saveNoteCopyEvent,
-        saveNoteAsEvent,
-        renameNoteEvent,
-    } from "./noteOperations";
-    import { listen } from "@tauri-apps/api/event";
-    import { onDestroy, onMount } from "svelte";
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
     import { currentNote } from "$lib/stores/currentNote";
+    import { listen } from "@tauri-apps/api/event";
+    import { onDestroy, onMount } from "svelte";
+    import {
+        renameNoteEvent,
+        saveNoteAsEvent,
+        saveNoteCopyEvent,
+        saveNoteEvent,
+    } from "./noteOperations";
 
     let content = $state("");
     let title = $state("");

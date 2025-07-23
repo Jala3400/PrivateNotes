@@ -1,10 +1,10 @@
 <script lang="ts">
+    import CommandPalette from "$lib/components/organisms/CommandPalette/CommandPalette.svelte";
     import ConfigModal from "$lib/components/templates/ConfigModal/ConfigModal.svelte";
     import NoteEditor from "$lib/components/templates/NoteEditor/NoteEditor.svelte";
     import Sidebar from "$lib/components/templates/Sidebar/Sidebar.svelte";
     import Toolsbar from "$lib/components/templates/Toolsbar/Toolsbar.svelte";
     import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
-    import CommandPalette from "$lib/components/organisms/CommandPalette/CommandPalette.svelte";
 
     let openConfigModal = $state(false);
     let openCommandPalette = $state(false);
