@@ -22,12 +22,11 @@ class TableWidget extends WidgetType {
 
     // Checks if this widget should be rerendered
     eq(widget: TableWidget): boolean {
-        // Don't rerender if currently editing
-        // Otherwise the cells loses focus
-        if (this.isEditing || widget.isEditing) return true;
+        // Don't rerender if currently editing or the table loses focus
         return (
-            this.source === widget.source &&
-            this.tablePosition === widget.tablePosition
+            this.isEditing ||
+            (this.source === widget.source &&
+                this.tablePosition === widget.tablePosition)
         );
     }
 
