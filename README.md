@@ -74,6 +74,8 @@ También se pueden abrir carpetas, pero estas deben tener dentro otra carpeta ll
 Para guardar la nota se pulsa `ctrl + s`.
 Para guardar una copia se pulsa `ctrl + g`. Después de guardar una copia se puede seguir editando la nota actual, pero la copia no se actualizará.
 
+Cambiar el título de la nota cambia el nombre del archivo automáticamente.
+
 ### Encriptar archivos
 
 También se pueden encriptar archivos que no sean notas con esta aplicación.
