@@ -6,21 +6,39 @@ import type { EditorState, Extension, Range } from "@codemirror/state";
 import type { DecorationSet } from "@codemirror/view";
 
 class TableWidget extends WidgetType {
-    rendered: string;
     private editorView: EditorView | null = null;
     public tablePosition: { from: number; to: number } | null = null;
     public isEditing: boolean = false;
 
     constructor(public source: string, from: number, to: number) {
         super();
-
         this.tablePosition = { from, to };
+    }
 
-        // Split the source into lines and render as HTML table
-        const lines = source.split("\n");
+    // Sets the editor context for this widget
+    setEditorContext(editorView: EditorView | null) {
+        this.editorView = editorView;
+    }
+
+    // Checks if this widget should be rerendered
+    eq(widget: TableWidget): boolean {
+        // Don't rerender if currently editing
+        // Otherwise the cells loses focus
+        if (this.isEditing || widget.isEditing) return true;
+        return (
+            this.source === widget.source &&
+            this.tablePosition === widget.tablePosition
+        );
+    }
+
+    // Converts the widget to a DOM element
+    toDOM(): HTMLElement {
+        let content = document.createElement("div");
+        content.className = "cm-table-widget";
+
+        // Generate the HTML table from the source
+        const lines = this.source.split("\n");
         let html = '<table class="md-table">';
-
-        // For each line, create a table row
         for (let rowIndex = 0; rowIndex < lines.length; rowIndex++) {
             const line = lines[rowIndex];
             const trimmed = line.trim();
@@ -50,30 +68,7 @@ class TableWidget extends WidgetType {
         }
 
         html += "</table>";
-        this.rendered = html;
-    }
-
-    // Sets the editor context for this widget
-    setEditorContext(editorView: EditorView | null) {
-        this.editorView = editorView;
-    }
-
-    // Checks if this widget should be rerendered
-    eq(widget: TableWidget): boolean {
-        // Don't rerender if currently editing
-        // Otherwise the cells loses focus
-        if (this.isEditing || widget.isEditing) return true;
-        return (
-            this.source === widget.source &&
-            this.tablePosition === widget.tablePosition
-        );
-    }
-
-    // Converts the widget to a DOM element
-    toDOM(): HTMLElement {
-        let content = document.createElement("div");
-        content.className = "cm-table-widget";
-        content.innerHTML = this.rendered;
+        content.innerHTML = html;
 
         // Store reference to this widget instance
         // Used to pass the editor context later
