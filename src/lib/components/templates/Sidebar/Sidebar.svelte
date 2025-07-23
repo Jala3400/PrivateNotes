@@ -1,22 +1,18 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { invoke } from "@tauri-apps/api/core";
-    import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-    import type { FileSystemItem } from "$lib/types";
     import Item from "$lib/components/molecules/Item.svelte";
     import { throwCustomError } from "$lib/error";
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
     import { currentNote } from "$lib/stores/currentNote";
+    import type { FileSystemItem } from "$lib/types";
+    import { invoke } from "@tauri-apps/api/core";
+    import { listen, type UnlistenFn } from "@tauri-apps/api/event";
     import { ask } from "@tauri-apps/plugin-dialog";
-
-    interface Props {
-        sidebar_collapsed?: boolean;
-    }
-
-    let { sidebar_collapsed = $bindable(false) }: Props = $props();
+    import { onDestroy, onMount } from "svelte";
 
     let openedItems: FileSystemItem[] = $state([]);
     let unlistenItemOpened: UnlistenFn;
     let unlistenItemClosed: UnlistenFn;
+    let unlistenItemRenamed: UnlistenFn;
 
     onMount(async () => {
         // Load initial opened items
@@ -31,7 +27,7 @@
             });
         } catch (error) {
             throwCustomError(
-                "Failed to load opened items" + String(error),
+                "Failed to load opened items " + error,
                 "An error occurred while trying to load the opened items."
             );
         }
@@ -57,21 +53,49 @@
                 // Insert at the found position
                 openedItems.splice(insertIndex, 0, item);
             }
-
-            // Trigger reactivity
-            openedItems = openedItems;
         });
 
         unlistenItemClosed = await listen("item-closed", (event) => {
             const itemId = event.payload;
             openedItems = openedItems.filter((f) => f.id !== itemId);
         });
+
+        unlistenItemRenamed = await listen("note-renamed", (event) => {
+            const [id, parentId, newTitle] = event.payload as [
+                string,
+                string,
+                string,
+            ];
+
+            const item = findItem(id, parentId, openedItems);
+
+            if (item) {
+                item.name = newTitle;
+            }
+        });
     });
 
     onDestroy(() => {
-        if (unlistenItemOpened) unlistenItemOpened();
-        if (unlistenItemClosed) unlistenItemClosed();
+        unlistenItemOpened?.();
+        unlistenItemClosed?.();
+        unlistenItemRenamed?.();
     });
+
+    // Recursively search for the item in openedItems and their children
+    function findItem(
+        id: string,
+        parentId: string,
+        items: FileSystemItem[]
+    ): FileSystemItem | undefined {
+        for (const item of items) {
+            if (item.id === id && item.parentId === parentId) return item;
+            if (item.children) {
+                const found = findItem(id, parentId, item.children);
+                if (found) return found;
+            }
+        }
+        return undefined;
+    }
 
     async function closeItem(id: string) {
         // Check if the current note is the one being closed
@@ -99,7 +123,7 @@
             await invoke("close_item", { id });
         } catch (error) {
             throwCustomError(
-                "Failed to close item" + String(error),
+                "Failed to close item " + error,
                 "An error occurred while trying to close the item."
             );
         }
@@ -110,14 +134,14 @@
             await invoke("open_note_from_id", { id, parentId });
         } catch (error) {
             throwCustomError(
-                "Failed to open note" + String(error),
+                "Failed to open note " + error,
                 "An error occurred while trying to open the note."
             );
         }
     }
 </script>
 
-<div class="sidebar" class:collapsed={sidebar_collapsed}>
+<div class="sidebar" class:collapsed={$appearanceConfig.sidebarCollapsed}>
     <div class="sidebar-header">
         <h2>Opened Items</h2>
     </div>
@@ -147,14 +171,15 @@
 
         padding: 1em;
         background-color: var(--background-dark-light);
-        overflow: hidden;
         border-right: 1px solid var(--border-color-dark);
+
+        overflow: hidden;
     }
 
     .sidebar.collapsed {
         width: 0;
-        overflow: hidden;
         padding: 0;
+        border: none;
     }
 
     .sidebar-content {

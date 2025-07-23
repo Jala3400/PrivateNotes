@@ -1,10 +1,14 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
+    import Editor from "$lib/components/organisms/Editor/Editor.svelte";
+    import { currentNote } from "$lib/stores/currentNote";
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
-    import Editor from "$lib/components/organisms/Editor/Editor.svelte";
-    import { throwCustomError } from "$lib/error";
-    import { currentNote } from "$lib/stores/currentNote";
+    import {
+        renameNoteEvent,
+        saveNoteAsEvent,
+        saveNoteCopyEvent,
+        saveNoteEvent,
+    } from "./noteOperations";
 
     let content = $state("");
     let title = $state("");
@@ -13,6 +17,24 @@
     let showNotification = $state(false);
     let editorRef = $state<Editor>();
 
+    // Save queue
+    let saveQueue: (() => Promise<void>)[] = [];
+    let processingQueue = false;
+
+    async function processQueue() {
+        if (processingQueue) return;
+        processingQueue = true;
+        while (saveQueue.length > 0) {
+            await saveQueue.shift()!();
+        }
+        processingQueue = false;
+    }
+
+    function enqueueSave(fn: () => Promise<void>) {
+        saveQueue.push(fn);
+        processQueue();
+    }
+
     function showSaveNotification() {
         showNotification = true;
         setTimeout(() => {
@@ -20,122 +42,95 @@
         }, 2000);
     }
 
-    async function saveNote(noteContent: string) {
-        let tempTitle = title;
-        if (title.trim().length === 0) {
-            tempTitle = "Untitled Note";
-        }
+    function saveNote(noteId: string, noteContent: string) {
+        enqueueSave(async () => {
+            isSaving = true;
 
-        // Prevent multiple save operations
-        if (isSaving) {
-            console.warn("Save operation already in progress");
-            return;
-        }
+            const result = await saveNoteEvent(noteId, noteContent);
+            if (result) showSaveNotification();
 
-        isSaving = true;
-
-        // Call the Tauri command to save the note
-        try {
-            await invoke("save_note", {
-                id: $currentNote?.id,
-                content: noteContent,
-            });
-
-            // It always saves the note unless an error occurs
-            showSaveNotification();
-        } catch (error) {
-            throwCustomError(
-                "Failed to save note: " + String(error),
-                "An error occurred while trying to save the note."
-            );
-        } finally {
             isSaving = false;
-        }
+        });
     }
 
-    async function saveNoteCopy(noteContent: string) {
-        let tempTitle = title;
-        if (title.trim().length === 0) {
-            tempTitle = "Untitled Note";
-        }
+    function saveNoteAs(noteId: string | undefined, noteContent: string) {
+        enqueueSave(async () => {
+            isSaving = true;
 
-        // Prevent multiple save operations
-        if (isSaving) {
-            console.warn("Save operation already in progress");
-            return;
-        }
-
-        isSaving = true;
-
-        // Call the Tauri command to save the note
-        try {
-            if (
-                await invoke("save_note_copy", {
-                    id: $currentNote?.id,
-                    title: tempTitle,
-                    content: noteContent,
-                })
-            ) {
-                // The user can cancel the save operation
-                showSaveNotification();
+            let tempTitle = title;
+            if (title.trim().length === 0) {
+                tempTitle = "Untitled Note";
             }
-        } catch (error) {
-            throwCustomError(
-                "Failed to save note: " + String(error),
-                "An error occurred while trying to save a copy of the note."
+
+            const result = await saveNoteAsEvent(
+                noteId,
+                tempTitle,
+                noteContent
             );
-        } finally {
+            if (result) showSaveNotification();
+
             isSaving = false;
-        }
+        });
     }
 
-    async function saveNoteAs(noteContent: string) {
-        let tempTitle = title;
-        if (title.trim().length === 0) {
-            tempTitle = "Untitled Note";
-        }
+    function saveNoteCopy(noteId: string | undefined, noteContent: string) {
+        enqueueSave(async () => {
+            isSaving = true;
 
-        // Prevent multiple save operations
-        if (isSaving) {
-            console.warn("Save operation already in progress");
-            return;
-        }
+            let tempTitle = title;
+            if (title.trim().length === 0) {
+                tempTitle = "Untitled Note";
+            }
 
-        isSaving = true;
-
-        // Call the Tauri command to save the note as a new file
-        try {
-            await invoke("save_note_as", {
-                id: $currentNote?.id,
-                title: tempTitle,
-                content: noteContent,
-            });
-
-            showSaveNotification();
-        } catch (error) {
-            throwCustomError(
-                "Failed to save note as: " + String(error),
-                "An error occurred while trying to save the note as a new file."
+            const result = await saveNoteCopyEvent(
+                noteId,
+                tempTitle,
+                noteContent
             );
-        } finally {
+            if (result) showSaveNotification();
+
             isSaving = false;
-        }
+        });
+    }
+
+    function renameCurrentNote() {
+        enqueueSave(async () => {
+            isSaving = true;
+
+            const noteId = $currentNote?.id;
+            const parentId = $currentNote?.parentId;
+            if (!noteId || !parentId) {
+                // If there's no current note, we can't rename it
+                return;
+            }
+
+            let tempTitle = title;
+            if (title.trim().length === 0) {
+                tempTitle = "Untitled Note";
+            }
+
+            const result = await renameNoteEvent(noteId, parentId, tempTitle);
+            if (result) showSaveNotification();
+
+            isSaving = false;
+        });
     }
 
     function handlekeydown(event: KeyboardEvent) {
         // Save note on Ctrl+S
+        const noteId = $currentNote?.id;
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
             const currentContent = editorRef?.getContent() || "";
-            if (!$currentNote?.id) {
-                saveNoteAs(currentContent);
+            if (noteId) {
+                saveNote(noteId, currentContent);
             } else {
-                saveNote(currentContent);
+                saveNoteAs(noteId, currentContent);
             }
         } else if (event.ctrlKey && event.key === "g") {
             event.preventDefault();
             const currentContent = editorRef?.getContent() || "";
-            saveNoteCopy(currentContent);
+            saveNoteCopy(noteId, currentContent);
         }
     }
 
@@ -178,9 +173,8 @@
     });
 
     onDestroy(() => {
-        // Clean up the event listener when the component is destroyed
-        if (unlistenNoteOpened) unlistenNoteOpened();
-        if (unlistenItemClosed) unlistenItemClosed();
+        unlistenNoteOpened?.();
+        unlistenItemClosed?.();
     });
 </script>
 
@@ -193,6 +187,7 @@
         type="text"
         placeholder="Note Title"
         bind:value={title}
+        onchange={renameCurrentNote}
         disabled={isSaving}
         autocomplete="off"
     />

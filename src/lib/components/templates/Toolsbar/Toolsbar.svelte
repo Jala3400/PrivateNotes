@@ -1,13 +1,15 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
     import ToolButton from "$lib/components/atoms/ToolButton.svelte";
     import { throwCustomError } from "$lib/error";
+    import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
+    import { invoke } from "@tauri-apps/api/core";
+ // Import your store
 
     interface Props {
-        sidebar_collapsed?: boolean;
+        openConfigModal: boolean;
     }
 
-    let { sidebar_collapsed = $bindable(false) }: Props = $props();
+    let { openConfigModal = $bindable() }: Props = $props();
 
     let tools = [
         {
@@ -16,11 +18,10 @@
             action: async () => {
                 try {
                     await invoke("reset_app");
-                    // Navigate to login page after resetting the state
                     window.location.replace("/");
                 } catch (error) {
                     throwCustomError(
-                        "Failed to reset the app" + String(error),
+                        "Failed to reset the app " + error,
                         "An error occurred while trying to reset the app. Please try again."
                     );
                 }
@@ -33,10 +34,13 @@
     <div class="top-toolsbar">
         <ToolButton
             name="Toggle Sidebar"
-            icon={sidebar_collapsed ? ">" : "<"}
-            onClick={() => (sidebar_collapsed = !sidebar_collapsed)}
+            icon={$appearanceConfig.sidebarCollapsed ? ">" : "<"}
+            onClick={() =>
+                ($appearanceConfig.sidebarCollapsed =
+                    !$appearanceConfig.sidebarCollapsed)}
         />
     </div>
+
     <div class="main-toolsbar">
         {#each tools as tool}
             <ToolButton
@@ -45,6 +49,14 @@
                 onClick={tool.action}
             />
         {/each}
+    </div>
+
+    <div class="bottom-toolsbar">
+        <ToolButton
+            name="Settings"
+            icon="⚙️"
+            onClick={() => (openConfigModal = true)}
+        />
     </div>
 </div>
 
@@ -77,8 +89,20 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5em;
+        flex: 1;
 
         width: 100%;
+        padding: 0.5em;
+    }
+
+    .bottom-toolsbar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5em;
+
+        width: 100%;
+        border-top: 1px solid var(--border-color-dark);
         padding: 0.5em;
     }
 </style>

@@ -1,22 +1,45 @@
 <script lang="ts">
-    import { onDestroy, onMount } from "svelte";
-    import { EditorView, keymap } from "@codemirror/view";
-    import { EditorState } from "@codemirror/state";
-    import { markdown } from "@codemirror/lang-markdown";
-    import { basicSetup } from "codemirror";
+    import { editorConfig } from "$lib/stores/configs/editorConfig";
     import {
-        syntaxHighlighting,
+        autocompletion,
+        closeBrackets,
+        closeBracketsKeymap,
+        completionKeymap,
+    } from "@codemirror/autocomplete";
+    import {
+        defaultKeymap,
+        history,
+        historyKeymap,
+        indentWithTab,
+    } from "@codemirror/commands";
+    import { markdown } from "@codemirror/lang-markdown";
+    import {
+        bracketMatching,
+        defaultHighlightStyle,
+        foldGutter,
+        foldKeymap,
         HighlightStyle,
+        indentOnInput,
         indentUnit,
+        syntaxHighlighting,
     } from "@codemirror/language";
+    import {
+        highlightSelectionMatches,
+        searchKeymap,
+    } from "@codemirror/search";
+    import { EditorState, StateEffect } from "@codemirror/state";
+    import {
+        drawSelection,
+        dropCursor,
+        EditorView,
+        highlightActiveLine,
+        highlightActiveLineGutter,
+        highlightSpecialChars,
+        keymap,
+        lineNumbers,
+        rectangularSelection,
+    } from "@codemirror/view";
     import { classHighlighter, tags } from "@lezer/highlight";
-    import { selectedLinePlugin } from "./SelectedLinePlugin";
-    import { indentWithTab } from "@codemirror/commands";
-    import { tableRendererPlugin } from "./TableRendererPlugin";
-    import { taskListPlugin } from "./TaskListPlugin";
-    import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
-    import { separatorLinePlugin } from "./SeparatorLinePlugin";
-    import { blockquotePlugin } from "./BlockquotePlugin";
     import {
         Strikethrough,
         Subscript,
@@ -24,7 +47,15 @@
         Table,
         TaskList,
     } from "@lezer/markdown";
+    import { vim } from "@replit/codemirror-vim";
+    import { onDestroy, onMount } from "svelte";
+    import { blockquotePlugin } from "./BlockquotePlugin";
     import "./md_style.css";
+    import { selectedLinePlugin } from "./SelectedLinePlugin";
+    import { separatorLinePlugin } from "./SeparatorLinePlugin";
+    import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
+    import { tableRendererPlugin } from "./TableRendererPlugin";
+    import { taskListPlugin } from "./TaskListPlugin";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
@@ -145,33 +176,109 @@
             { tag: tags.strikethrough, class: "md-strikethrough" },
         ]);
 
-        const indentUnitExtension = indentUnit.of("    "); // 4 spaces
-
-        const state = EditorState.create({
-            doc: content,
-            extensions: [
-                markdown({
-                    extensions: [
-                        Table,
-                        Strikethrough,
-                        TaskList,
-                        Superscript,
-                        Subscript,
-                    ],
-                }), // Don't use GFM because it hides the links
-                syntaxHighlighting(classHighlighter),
-                syntaxHighlighting(markdownHighlighting),
+        function createExtensions() {
+            const extensions = [
+                // Only render custom markdown plugins if renderMd is enabled
+                ...($editorConfig.renderMd
+                    ? [
+                          markdown({
+                              extensions: [
+                                  Table,
+                                  Strikethrough,
+                                  TaskList,
+                                  Superscript,
+                                  Subscript,
+                              ],
+                          }),
+                          syntaxHighlighting(classHighlighter),
+                          syntaxHighlighting(markdownHighlighting),
+                          tableRendererPlugin(),
+                          taskListPlugin(),
+                          subAndSuperscriptPlugin(),
+                          separatorLinePlugin(),
+                          blockquotePlugin(),
+                      ]
+                    : []),
+                // Basic editor features
                 selectedLinePlugin(),
-                tableRendererPlugin(),
-                taskListPlugin(),
-                subAndSuperscriptPlugin(),
-                separatorLinePlugin(),
-                blockquotePlugin(),
-                EditorView.lineWrapping,
-                basicSetup,
-                keymap.of([indentWithTab]),
-                indentUnitExtension,
-            ],
+                highlightSpecialChars(),
+                history(),
+                drawSelection(),
+                dropCursor(),
+                EditorState.allowMultipleSelections.of(true),
+                indentOnInput(),
+                syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+                bracketMatching(),
+                rectangularSelection(),
+                highlightActiveLine(),
+                highlightActiveLineGutter(),
+                highlightSelectionMatches(),
+            ];
+
+            if ($editorConfig.vimMode) {
+                extensions.unshift(vim());
+            }
+
+            if ($editorConfig.lineNumbers) {
+                extensions.push(lineNumbers());
+            }
+
+            if ($editorConfig.lineWrapping) {
+                extensions.push(EditorView.lineWrapping);
+            }
+
+            if ($editorConfig.autoCloseBrackets) {
+                extensions.push(closeBrackets());
+                extensions.push(autocompletion());
+            }
+
+            if ($editorConfig.foldGutter) {
+                extensions.push(foldGutter());
+            }
+
+            // Create keymap array based on config
+            const keymaps = [
+                {
+                    key: "Ctrl-g",
+                    run: () => true,
+                    // It is used in the front end to save a copy of the note
+                },
+                indentWithTab,
+                ...defaultKeymap,
+                ...historyKeymap,
+                ...completionKeymap,
+                ...searchKeymap,
+            ];
+
+            if ($editorConfig.autoCloseBrackets) {
+                keymaps.push(...closeBracketsKeymap);
+            }
+
+            if ($editorConfig.foldGutter) {
+                keymaps.push(...foldKeymap);
+            }
+
+            extensions.push(keymap.of(keymaps));
+
+            // Set tab size/indent unit
+            const tabSize = $editorConfig.tabSize || 4;
+            extensions.push(indentUnit.of(" ".repeat(tabSize)));
+
+            return extensions;
+        }
+
+        let state = EditorState.create({
+            doc: content,
+            extensions: createExtensions(),
+        });
+
+        // Watch for editorConfig changes and reconfigure extensions
+        $effect(() => {
+            if (editorView) {
+                editorView.dispatch({
+                    effects: [StateEffect.reconfigure.of(createExtensions())],
+                });
+            }
         });
 
         editorView = new EditorView({

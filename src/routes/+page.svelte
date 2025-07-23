@@ -1,5 +1,5 @@
 <script>
-    import LoginForm from "$lib/components/organisms/LoginForm/LoginForm.svelte";
+    import LoginForm from "$lib/components/templates/LoginForm/LoginForm.svelte";
 </script>
 
 <div id="container">
