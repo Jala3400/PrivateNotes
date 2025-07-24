@@ -7,18 +7,16 @@ import type { DecorationSet } from "@codemirror/view";
 
 class TableWidget extends WidgetType {
     private editorView: EditorView | null = null;
+    private source: string;
+    private isEditing: boolean = false;
     public tablePosition: { from: number; to: number } | null = null;
-    public isEditing: boolean = false;
+    public widget: HTMLDivElement | null = null;
 
-    constructor(
-        public source: string,
-        view: EditorView,
-        from: number,
-        to: number
-    ) {
+    constructor(source: string, view: EditorView, from: number, to: number) {
         super();
-        this.tablePosition = { from, to };
         this.editorView = view;
+        this.tablePosition = { from, to };
+        this.source = source;
     }
 
     // Checks if this widget should be rerendered
@@ -70,13 +68,11 @@ class TableWidget extends WidgetType {
         html += "</table>";
         content.innerHTML = html;
 
-        // Store reference to this widget instance
-        // Used to pass the editor context later
-        (content as any).__tableWidget = this;
-
         // Add extra functionality
         this.addCellEventListeners(content);
         this.addHoverButtons(content);
+
+        this.widget = content;
 
         return content;
     }
@@ -656,9 +652,11 @@ class TableWidget extends WidgetType {
     }
 
     // Focuses the first cell when entering from the top
-    public enterTableFromTop(container: HTMLElement): void {
+    public enterTableFromTop(): void {
+        if (!this.widget) return;
+
         // Find the first cell in the table
-        const firstCell = container.querySelector(
+        const firstCell = this.widget.querySelector(
             ".md-editable-cell"
         ) as HTMLElement;
 
@@ -679,9 +677,11 @@ class TableWidget extends WidgetType {
     }
 
     // Focuses the last cell when entering from the bottom
-    public enterTableFromBottom(container: HTMLElement): void {
+    public enterTableFromBottom(): void {
+        if (!this.widget) return;
+
         // Find the first cell in the last row
-        const lastCell = container.querySelector(
+        const lastCell = this.widget.querySelector(
             "tr:last-child .md-editable-cell"
         ) as HTMLElement;
 
@@ -701,9 +701,11 @@ class TableWidget extends WidgetType {
         }
     }
 
-    public enterTableFromLeft(container: HTMLElement): void {
+    public enterTableFromLeft(): void {
+        if (!this.widget) return;
+
         // Find the first cell in the last row
-        const firstCell = container.querySelector(
+        const firstCell = this.widget.querySelector(
             "tr:last-child .md-editable-cell:last-child"
         ) as HTMLElement;
 
@@ -724,6 +726,9 @@ class TableWidget extends WidgetType {
     }
 }
 
+// Array to store all active TableWidget instances
+let activeTableWidgets: TableWidget[] = [];
+
 function renderTables(
     state: EditorState,
     view: EditorView,
@@ -732,7 +737,9 @@ function renderTables(
 ) {
     const decorations: Range<Decoration>[] = [];
 
-    // Go through the syntax tree and find all Table nodes
+    // Clear previous widgets
+    activeTableWidgets = [];
+
     syntaxTree(state).iterate({
         from,
         to,
@@ -756,13 +763,16 @@ function renderTables(
                 }
             }
 
+            const widget = new TableWidget(
+                state.doc.sliceString(node.from, endPos),
+                view,
+                node.from,
+                endPos
+            );
+
+            activeTableWidgets.push(widget);
             const decoration = Decoration.replace({
-                widget: new TableWidget(
-                    state.doc.sliceString(node.from, endPos),
-                    view,
-                    node.from,
-                    endPos
-                ),
+                widget,
                 block: true,
             });
 
@@ -776,62 +786,35 @@ function renderTables(
 
 function enterTableFromTopKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    const widgets = view.dom.querySelectorAll(".cm-table-widget");
-
-    // Iterate through all table widgets in the editor
-    for (const widgetElement of widgets) {
-        const widget = (widgetElement as any).__tableWidget;
-        if (widget && widget instanceof TableWidget) {
-            // Check if cursor is positioned to enter this table from the top
-            if (widget.shouldEnterTableFromTop(cursorPos)) {
-                // Focus the first cell of the table
-                widget.enterTableFromTop(widgetElement as HTMLElement);
-                return true; // Prevent default behavior
-            }
+    for (const widget of activeTableWidgets) {
+        if (widget.shouldEnterTableFromTop(cursorPos) && widget.widget) {
+            widget.enterTableFromTop();
+            return true;
         }
     }
-
-    return false; // Allow default behavior
+    return false;
 }
 
 function enterTableFromBottomKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    const widgets = view.dom.querySelectorAll(".cm-table-widget");
-
-    // Iterate through all table widgets in the editor
-    for (const widgetElement of widgets) {
-        const widget = (widgetElement as any).__tableWidget;
-        if (widget && widget instanceof TableWidget) {
-            // Check if cursor is positioned to enter this table from the bottom
-            if (widget.shouldEnterTableFromBottom(cursorPos)) {
-                // Focus the first cell of the last row
-                widget.enterTableFromBottom(widgetElement as HTMLElement);
-                return true; // Prevent default behavior
-            }
+    for (const widget of activeTableWidgets) {
+        if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
+            widget.enterTableFromBottom();
+            return true;
         }
     }
-
-    return false; // Allow default behavior
+    return false;
 }
 
 function enterTableFromLeftKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    const widgets = view.dom.querySelectorAll(".cm-table-widget");
-
-    // Iterate through all table widgets in the editor
-    for (const widgetElement of widgets) {
-        const widget = (widgetElement as any).__tableWidget;
-        if (widget && widget instanceof TableWidget) {
-            // Check if cursor is positioned to enter this table from the left
-            if (widget.shouldEnterTableFromBottom(cursorPos)) {
-                // Focus the last cell of the table
-                widget.enterTableFromLeft(widgetElement as HTMLElement);
-                return true; // Prevent default behavior
-            }
+    for (const widget of activeTableWidgets) {
+        if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
+            widget.enterTableFromLeft();
+            return true;
         }
     }
-
-    return false; // Allow default behavior
+    return false;
 }
 
 const tableKeymap = [
