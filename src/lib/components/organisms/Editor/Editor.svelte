@@ -115,6 +115,7 @@
                 to: selection.to,
                 insert: superscriptText,
             },
+
             selection: selectedText
                 ? {
                       anchor: selection.from,
@@ -189,7 +190,7 @@
                           }),
                           syntaxHighlighting(classHighlighter),
                           syntaxHighlighting(markdownHighlighting),
-                          tableRendererPlugin(),
+                          tableRendererPlugin(editorView),
                           syntaxCorePlugin(),
                       ]
                     : []),

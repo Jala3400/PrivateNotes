@@ -10,14 +10,15 @@ class TableWidget extends WidgetType {
     public tablePosition: { from: number; to: number } | null = null;
     public isEditing: boolean = false;
 
-    constructor(public source: string, from: number, to: number) {
+    constructor(
+        public source: string,
+        view: EditorView,
+        from: number,
+        to: number
+    ) {
         super();
         this.tablePosition = { from, to };
-    }
-
-    // Sets the editor context for this widget
-    setEditorContext(editorView: EditorView | null) {
-        this.editorView = editorView;
+        this.editorView = view;
     }
 
     // Checks if this widget should be rerendered
@@ -723,7 +724,12 @@ class TableWidget extends WidgetType {
     }
 }
 
-function renderTables(state: EditorState, from?: number, to?: number) {
+function renderTables(
+    state: EditorState,
+    view: EditorView,
+    from?: number,
+    to?: number
+) {
     const decorations: Range<Decoration>[] = [];
 
     // Go through the syntax tree and find all Table nodes
@@ -753,6 +759,7 @@ function renderTables(state: EditorState, from?: number, to?: number) {
             const decoration = Decoration.replace({
                 widget: new TableWidget(
                     state.doc.sliceString(node.from, endPos),
+                    view,
                     node.from,
                     endPos
                 ),
@@ -858,20 +865,24 @@ const tableKeymap = [
     },
 ];
 
-export function tableRendererPlugin(): Extension {
+export function tableRendererPlugin(view: EditorView): Extension {
     return [
         // State field to manage table decorations
         // It is not a view plugin because it replaces line breaks
         StateField.define<DecorationSet>({
             // Initialize decorations when editor is created
             create(state) {
-                return RangeSet.of(renderTables(state), true);
+                return RangeSet.of(renderTables(state, view), true);
             },
 
             // Update decorations when document changes
             update(decorations, transaction) {
                 if (transaction.docChanged) {
-                    return RangeSet.of(renderTables(transaction.state), true);
+                    return RangeSet.of(
+                        renderTables(transaction.state, view),
+                        // true means that the decorations are sorted
+                        true
+                    );
                 }
 
                 return decorations.map(transaction.changes);
@@ -881,24 +892,6 @@ export function tableRendererPlugin(): Extension {
             provide(field) {
                 return EditorView.decorations.from(field);
             },
-        }),
-
-        // Update listener to maintain widget references
-        EditorView.updateListener.of((update) => {
-            if (update.view) {
-                // Find all table widgets and set their editor context
-                const widgets =
-                    update.view.dom.querySelectorAll(".cm-table-widget");
-                widgets.forEach((widgetElement) => {
-                    const widget = (widgetElement as any).__tableWidget;
-                    if (widget && widget instanceof TableWidget) {
-                        // Update the EditorView reference for editing functionality
-                        if (widget.tablePosition) {
-                            widget.setEditorContext(update.view);
-                        }
-                    }
-                });
-            }
         }),
 
         // Register keyboard shortcuts for table navigation
