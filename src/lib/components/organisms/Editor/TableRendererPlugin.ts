@@ -22,11 +22,8 @@ class TableWidget extends WidgetType {
     // Checks if this widget should be rerendered
     eq(widget: TableWidget): boolean {
         // Don't rerender if currently editing or the table loses focus
-        return (
-            this.isEditing ||
-            (this.source === widget.source &&
-                this.tablePosition === widget.tablePosition)
-        );
+        // todo: check if the rerenderin is really necessary
+        return this.isEditing;
     }
 
     // Converts the widget to a DOM element
