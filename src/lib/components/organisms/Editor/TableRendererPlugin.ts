@@ -723,8 +723,8 @@ class TableWidget extends WidgetType {
     }
 }
 
-// Array to store all active TableWidget instances
-let activeTableWidgets: TableWidget[] = [];
+// WeakMap to associate an editor's EditorView with TableWidget[]
+const activeTableWidgetsMap = new WeakMap<EditorView, TableWidget[]>();
 
 function renderTables(
     state: EditorState,
@@ -733,9 +733,7 @@ function renderTables(
     to?: number
 ) {
     const decorations: Range<Decoration>[] = [];
-
-    // Clear previous widgets
-    activeTableWidgets = [];
+    const widgets: TableWidget[] = [];
 
     syntaxTree(state).iterate({
         from,
@@ -767,7 +765,8 @@ function renderTables(
                 endPos
             );
 
-            activeTableWidgets.push(widget);
+            widgets.push(widget);
+
             const decoration = Decoration.replace({
                 widget,
                 block: true,
@@ -778,12 +777,22 @@ function renderTables(
         },
     });
 
+    // Save widgets in the WeakMap for this view
+    if (view && typeof view === "object") {
+        activeTableWidgetsMap.set(view, widgets);
+    }
+
     return decorations;
+}
+
+function getActiveTableWidgets(view: EditorView): TableWidget[] {
+    return activeTableWidgetsMap.get(view) || [];
 }
 
 function enterTableFromTopKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    for (const widget of activeTableWidgets) {
+    const widgets = getActiveTableWidgets(view);
+    for (const widget of widgets) {
         if (widget.shouldEnterTableFromTop(cursorPos) && widget.widget) {
             widget.enterTableFromTop();
             return true;
@@ -794,7 +803,8 @@ function enterTableFromTopKeymap(view: EditorView): boolean {
 
 function enterTableFromBottomKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    for (const widget of activeTableWidgets) {
+    const widgets = getActiveTableWidgets(view);
+    for (const widget of widgets) {
         if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
             widget.enterTableFromBottom();
             return true;
@@ -805,7 +815,8 @@ function enterTableFromBottomKeymap(view: EditorView): boolean {
 
 function enterTableFromLeftKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    for (const widget of activeTableWidgets) {
+    const widgets = getActiveTableWidgets(view);
+    for (const widget of widgets) {
         if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
             widget.enterTableFromLeft();
             return true;
