@@ -6,21 +6,34 @@ import type { EditorState, Extension, Range } from "@codemirror/state";
 import type { DecorationSet } from "@codemirror/view";
 
 class TableWidget extends WidgetType {
-    rendered: string;
     private editorView: EditorView | null = null;
+    private source: string;
+    private isEditing: boolean = false;
     public tablePosition: { from: number; to: number } | null = null;
-    public isEditing: boolean = false;
+    public widget: HTMLDivElement | null = null;
 
-    constructor(public source: string, from: number, to: number) {
+    constructor(source: string, view: EditorView, from: number, to: number) {
         super();
-
+        this.editorView = view;
         this.tablePosition = { from, to };
+        this.source = source;
+    }
 
-        // Split the source into lines and render as HTML table
-        const lines = source.split("\n");
+    // Checks if this widget should be rerendered
+    eq(widget: TableWidget): boolean {
+        // Don't rerender if currently editing or the table loses focus
+        // todo: check if the rerenderin is really necessary
+        return this.isEditing;
+    }
+
+    // Converts the widget to a DOM element
+    toDOM(): HTMLElement {
+        let content = document.createElement("div");
+        content.className = "cm-table-widget";
+
+        // Generate the HTML table from the source
+        const lines = this.source.split("\n");
         let html = '<table class="md-table">';
-
-        // For each line, create a table row
         for (let rowIndex = 0; rowIndex < lines.length; rowIndex++) {
             const line = lines[rowIndex];
             const trimmed = line.trim();
@@ -50,38 +63,13 @@ class TableWidget extends WidgetType {
         }
 
         html += "</table>";
-        this.rendered = html;
-    }
-
-    // Sets the editor context for this widget
-    setEditorContext(editorView: EditorView | null) {
-        this.editorView = editorView;
-    }
-
-    // Checks if this widget should be rerendered
-    eq(widget: TableWidget): boolean {
-        // Don't rerender if currently editing
-        // Otherwise the cells loses focus
-        if (this.isEditing || widget.isEditing) return true;
-        return (
-            this.source === widget.source &&
-            this.tablePosition === widget.tablePosition
-        );
-    }
-
-    // Converts the widget to a DOM element
-    toDOM(): HTMLElement {
-        let content = document.createElement("div");
-        content.className = "cm-table-widget";
-        content.innerHTML = this.rendered;
-
-        // Store reference to this widget instance
-        // Used to pass the editor context later
-        (content as any).__tableWidget = this;
+        content.innerHTML = html;
 
         // Add extra functionality
         this.addCellEventListeners(content);
         this.addHoverButtons(content);
+
+        this.widget = content;
 
         return content;
     }
@@ -661,9 +649,11 @@ class TableWidget extends WidgetType {
     }
 
     // Focuses the first cell when entering from the top
-    public enterTableFromTop(container: HTMLElement): void {
+    public enterTableFromTop(): void {
+        if (!this.widget) return;
+
         // Find the first cell in the table
-        const firstCell = container.querySelector(
+        const firstCell = this.widget.querySelector(
             ".md-editable-cell"
         ) as HTMLElement;
 
@@ -684,9 +674,11 @@ class TableWidget extends WidgetType {
     }
 
     // Focuses the last cell when entering from the bottom
-    public enterTableFromBottom(container: HTMLElement): void {
+    public enterTableFromBottom(): void {
+        if (!this.widget) return;
+
         // Find the first cell in the last row
-        const lastCell = container.querySelector(
+        const lastCell = this.widget.querySelector(
             "tr:last-child .md-editable-cell"
         ) as HTMLElement;
 
@@ -706,9 +698,11 @@ class TableWidget extends WidgetType {
         }
     }
 
-    public enterTableFromLeft(container: HTMLElement): void {
+    public enterTableFromLeft(): void {
+        if (!this.widget) return;
+
         // Find the first cell in the last row
-        const firstCell = container.querySelector(
+        const firstCell = this.widget.querySelector(
             "tr:last-child .md-editable-cell:last-child"
         ) as HTMLElement;
 
@@ -729,10 +723,18 @@ class TableWidget extends WidgetType {
     }
 }
 
-function renderTables(state: EditorState, from?: number, to?: number) {
-    const decorations: Range<Decoration>[] = [];
+// WeakMap to associate an editor's EditorView with TableWidget[]
+const activeTableWidgetsMap = new WeakMap<EditorView, TableWidget[]>();
 
-    // Go through the syntax tree and find all Table nodes
+function renderTables(
+    state: EditorState,
+    view: EditorView,
+    from?: number,
+    to?: number
+) {
+    const decorations: Range<Decoration>[] = [];
+    const widgets: TableWidget[] = [];
+
     syntaxTree(state).iterate({
         from,
         to,
@@ -756,12 +758,17 @@ function renderTables(state: EditorState, from?: number, to?: number) {
                 }
             }
 
+            const widget = new TableWidget(
+                state.doc.sliceString(node.from, endPos),
+                view,
+                node.from,
+                endPos
+            );
+
+            widgets.push(widget);
+
             const decoration = Decoration.replace({
-                widget: new TableWidget(
-                    state.doc.sliceString(node.from, endPos),
-                    node.from,
-                    endPos
-                ),
+                widget,
                 block: true,
             });
 
@@ -770,67 +777,52 @@ function renderTables(state: EditorState, from?: number, to?: number) {
         },
     });
 
+    // Save widgets in the WeakMap for this view
+    if (view && typeof view === "object") {
+        activeTableWidgetsMap.set(view, widgets);
+    }
+
     return decorations;
+}
+
+function getActiveTableWidgets(view: EditorView): TableWidget[] {
+    return activeTableWidgetsMap.get(view) || [];
 }
 
 function enterTableFromTopKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    const widgets = view.dom.querySelectorAll(".cm-table-widget");
-
-    // Iterate through all table widgets in the editor
-    for (const widgetElement of widgets) {
-        const widget = (widgetElement as any).__tableWidget;
-        if (widget && widget instanceof TableWidget) {
-            // Check if cursor is positioned to enter this table from the top
-            if (widget.shouldEnterTableFromTop(cursorPos)) {
-                // Focus the first cell of the table
-                widget.enterTableFromTop(widgetElement as HTMLElement);
-                return true; // Prevent default behavior
-            }
+    const widgets = getActiveTableWidgets(view);
+    for (const widget of widgets) {
+        if (widget.shouldEnterTableFromTop(cursorPos) && widget.widget) {
+            widget.enterTableFromTop();
+            return true;
         }
     }
-
-    return false; // Allow default behavior
+    return false;
 }
 
 function enterTableFromBottomKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    const widgets = view.dom.querySelectorAll(".cm-table-widget");
-
-    // Iterate through all table widgets in the editor
-    for (const widgetElement of widgets) {
-        const widget = (widgetElement as any).__tableWidget;
-        if (widget && widget instanceof TableWidget) {
-            // Check if cursor is positioned to enter this table from the bottom
-            if (widget.shouldEnterTableFromBottom(cursorPos)) {
-                // Focus the first cell of the last row
-                widget.enterTableFromBottom(widgetElement as HTMLElement);
-                return true; // Prevent default behavior
-            }
+    const widgets = getActiveTableWidgets(view);
+    for (const widget of widgets) {
+        if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
+            widget.enterTableFromBottom();
+            return true;
         }
     }
-
-    return false; // Allow default behavior
+    return false;
 }
 
 function enterTableFromLeftKeymap(view: EditorView): boolean {
     const cursorPos = view.state.selection.main.head;
-    const widgets = view.dom.querySelectorAll(".cm-table-widget");
-
-    // Iterate through all table widgets in the editor
-    for (const widgetElement of widgets) {
-        const widget = (widgetElement as any).__tableWidget;
-        if (widget && widget instanceof TableWidget) {
-            // Check if cursor is positioned to enter this table from the left
-            if (widget.shouldEnterTableFromBottom(cursorPos)) {
-                // Focus the last cell of the table
-                widget.enterTableFromLeft(widgetElement as HTMLElement);
-                return true; // Prevent default behavior
-            }
+    const widgets = getActiveTableWidgets(view);
+    for (const widget of widgets) {
+        if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
+            widget.enterTableFromLeft();
+            return true;
         }
     }
-
-    return false; // Allow default behavior
+    return false;
 }
 
 const tableKeymap = [
@@ -864,20 +856,24 @@ const tableKeymap = [
     },
 ];
 
-export function tableRendererPlugin(): Extension {
+export function tableRendererPlugin(view: EditorView): Extension {
     return [
         // State field to manage table decorations
         // It is not a view plugin because it replaces line breaks
         StateField.define<DecorationSet>({
             // Initialize decorations when editor is created
             create(state) {
-                return RangeSet.of(renderTables(state), true);
+                return RangeSet.of(renderTables(state, view), true);
             },
 
             // Update decorations when document changes
             update(decorations, transaction) {
                 if (transaction.docChanged) {
-                    return RangeSet.of(renderTables(transaction.state), true);
+                    return RangeSet.of(
+                        renderTables(transaction.state, view),
+                        // true means that the decorations are sorted
+                        true
+                    );
                 }
 
                 return decorations.map(transaction.changes);
@@ -887,24 +883,6 @@ export function tableRendererPlugin(): Extension {
             provide(field) {
                 return EditorView.decorations.from(field);
             },
-        }),
-
-        // Update listener to maintain widget references
-        EditorView.updateListener.of((update) => {
-            if (update.view) {
-                // Find all table widgets and set their editor context
-                const widgets =
-                    update.view.dom.querySelectorAll(".cm-table-widget");
-                widgets.forEach((widgetElement) => {
-                    const widget = (widgetElement as any).__tableWidget;
-                    if (widget && widget instanceof TableWidget) {
-                        // Update the EditorView reference for editing functionality
-                        if (widget.tablePosition) {
-                            widget.setEditorContext(update.view);
-                        }
-                    }
-                });
-            }
         }),
 
         // Register keyboard shortcuts for table navigation

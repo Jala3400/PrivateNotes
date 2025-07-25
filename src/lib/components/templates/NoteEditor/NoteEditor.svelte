@@ -117,9 +117,12 @@
     }
 
     function handlekeydown(event: KeyboardEvent) {
+        if (!event.ctrlKey || event.metaKey || event.altKey || event.shiftKey)
+            return;
+
         // Save note on Ctrl+S
         const noteId = $currentNote?.id;
-        if (event.ctrlKey && event.key === "s") {
+        if (event.key === "s") {
             event.preventDefault();
             const currentContent = editorRef?.getContent() || "";
             if (noteId) {
@@ -127,7 +130,7 @@
             } else {
                 saveNoteAs(noteId, currentContent);
             }
-        } else if (event.ctrlKey && event.key === "g") {
+        } else if (event.key === "g") {
             event.preventDefault();
             const currentContent = editorRef?.getContent() || "";
             saveNoteCopy(noteId, currentContent);
