@@ -49,13 +49,10 @@
     } from "@lezer/markdown";
     import { vim } from "@replit/codemirror-vim";
     import { onDestroy, onMount } from "svelte";
-    import { blockquotePlugin } from "./BlockquotePlugin";
     import "./md_style.css";
     import { selectedLinePlugin } from "./SelectedLinePlugin";
-    import { separatorLinePlugin } from "./SeparatorLinePlugin";
-    import { subAndSuperscriptPlugin } from "./SubAndSuperscriptPlugin";
+    import { syntaxCorePlugin } from "./SyntaxCorePlugin";
     import { tableRendererPlugin } from "./TableRendererPlugin";
-    import { taskListPlugin } from "./TaskListPlugin";
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
@@ -118,6 +115,7 @@
                 to: selection.to,
                 insert: superscriptText,
             },
+
             selection: selectedText
                 ? {
                       anchor: selection.from,
@@ -192,11 +190,8 @@
                           }),
                           syntaxHighlighting(classHighlighter),
                           syntaxHighlighting(markdownHighlighting),
-                          tableRendererPlugin(),
-                          taskListPlugin(),
-                          subAndSuperscriptPlugin(),
-                          separatorLinePlugin(),
-                          blockquotePlugin(),
+                          tableRendererPlugin(editorView),
+                          syntaxCorePlugin(),
                       ]
                     : []),
                 // Basic editor features

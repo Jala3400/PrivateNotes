@@ -1,9 +1,14 @@
 import type { Extension, Range } from "@codemirror/state";
 import type { DecorationSet } from "@codemirror/view";
-import { Decoration, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import {
+    Decoration,
+    EditorView,
+    ViewPlugin,
+    ViewUpdate,
+} from "@codemirror/view";
 
 /**
- * Simple plugin to add a class to selected lines
+ * Plugin to add a class to selected lines
  */
 export function selectedLinePlugin(): Extension {
     return ViewPlugin.fromClass(
@@ -28,11 +33,15 @@ export function selectedLinePlugin(): Extension {
                     const startLine = view.state.doc.lineAt(range.from);
                     const endLine = view.state.doc.lineAt(range.to);
 
-                    for (let lineNum = startLine.number; lineNum <= endLine.number; lineNum++) {
+                    for (
+                        let lineNum = startLine.number;
+                        lineNum <= endLine.number;
+                        lineNum++
+                    ) {
                         const line = view.state.doc.line(lineNum);
-                        
+
                         const lineDecoration = Decoration.line({
-                            class: "cm-selected-line"
+                            class: "cm-selected-line",
                         });
 
                         decorations.push(lineDecoration.range(line.from));
@@ -43,7 +52,7 @@ export function selectedLinePlugin(): Extension {
             }
         },
         {
-            decorations: v => v.decorations
+            decorations: (v) => v.decorations,
         }
     );
 }
