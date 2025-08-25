@@ -204,6 +204,18 @@
     </div>
 </div>
 
+<div id="info-panel">
+    {#if isSaving}
+        <span>Saving...</span>
+    {:else if $currentNote?.unsaved}
+        <span>Unsaved changes</span>
+    {:else if $currentNote}
+        <span>All changes saved</span>
+    {:else}
+        <span>No note opened</span>
+    {/if}
+</div>
+
 <style>
     .editor-container {
         display: flex;
@@ -244,6 +256,8 @@
         bottom: 0;
         right: 0;
         padding: 4px 8px;
+        font-size: 0.9em;
+        color: var(--text-secondary);
         background: var(--background-dark-light);
         border-top-left-radius: var(--border-radius-small);
         z-index: 1000;

@@ -21,6 +21,7 @@
     --popup-color: rgba(0, 0, 0, 0.9);
 
     --text-primary: hsl(0, 0%, 95%);
+    --text-secondary: hsl(0, 0%, 85%);
     --text-muted: hsl(0, 0%, 40%);
 
     --border-radius-small: 4px;
