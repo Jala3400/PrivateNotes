@@ -104,13 +104,13 @@
             const answer = await ask(
                 "This item is currently open in the editor. Do you want to close it? Unsaved changes will be lost.",
                 {
-                    title: "Close Item",
+                    title: "Unsaved Changes",
                     kind: "warning",
                 }
             );
 
             if (answer === false) {
-                // User chose not to close the item
+                // User chose not to proceed
                 return;
             }
         }

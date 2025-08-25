@@ -1,6 +1,8 @@
 <script lang="ts">
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
     import { currentNote } from "$lib/stores/currentNote";
+    import { addNotification } from "$lib/stores/notifications";
+    import { NotificationType } from "$lib/types";
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
     import {
@@ -9,8 +11,6 @@
         saveNoteCopyEvent,
         saveNoteEvent,
     } from "./noteOperations";
-    import { addNotification } from "$lib/stores/notifications";
-    import { NotificationType } from "$lib/types";
 
     let content = $state("");
     let title = $state("");
