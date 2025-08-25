@@ -8,6 +8,7 @@
     let passValid = $state(false);
     let password = $state("");
     let confirmPassword = $state("");
+    let generatingPassword = $state(false);
 
     async function login(event: Event) {
         event.preventDefault();
@@ -32,6 +33,8 @@
 
         // Attempt to derive the encryption key
         try {
+            generatingPassword = true;
+
             await invoke("derive_encryption_key", { username, password });
             // Navigate to /Notes after successful login
             window.location.replace("/Notes");
@@ -95,6 +98,7 @@
         class="greatbtn"
         disabled={!(passValid && password === confirmPassword)}
         text="Login"
+        loading={generatingPassword}
     />
 </form>
 

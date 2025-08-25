@@ -1,8 +1,14 @@
 <script lang="ts">
-    let { text = "", ...restProps } = $props();
+    let { text = "", loading = false, ...restProps } = $props();
 </script>
 
-<button {...restProps}>{text}</button>
+<button {...restProps}>
+    {#if loading}
+        <span class="spinner"></span>
+    {:else}
+        {text}
+    {/if}
+</button>
 
 <style>
     button {
@@ -37,5 +43,24 @@
             var(--danger-color) 0px 0px 8px,
             inset var(--danger-color) 0px 0px 8px;
         opacity: 0.8;
+    }
+
+    .spinner {
+        display: inline-block;
+        height: 100%;
+        aspect-ratio: 1;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
     }
 </style>
