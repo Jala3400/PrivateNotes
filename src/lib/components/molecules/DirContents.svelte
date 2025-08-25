@@ -27,7 +27,13 @@
                 disabled={!item.isNote}
                 title={item.name}
             >
-                <span class="item-name">{item.name}</span>
+                <span class="item-name">
+                    {item.name}
+                </span>
+
+                {#if $currentNote?.id === item.id && $currentNote?.unsaved}
+                    <span class="save-indicator"> ●️ </span>
+                {/if}
             </button>
         {/if}
     </div>
@@ -46,7 +52,6 @@
         padding: var(--file-item-padding);
         border-radius: var(--border-radius-small);
         font-size: 0.85em;
-        color: var(--text-muted);
         width: 100%;
         padding-left: var(--folder-indicator-width);
         text-align: left;
@@ -57,27 +62,22 @@
 
     .file-item:hover {
         background-color: var(--background-dark-lighter);
-        color: var(--text-primary);
     }
 
     .file-item:disabled {
         cursor: default;
-        opacity: 0.7;
     }
 
     .file-item:disabled:hover {
         background-color: transparent;
-        color: var(--text-muted);
     }
 
     /* Notes should be styles different from normal files */
     .file-item.note-file {
-        color: var(--main-color);
         cursor: pointer;
     }
 
     .file-item.note-file:hover {
-        color: var(--main-color-light);
         background-color: var(--background-dark-lighter);
     }
 
@@ -90,5 +90,30 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        color: var(--text-muted);
+    }
+
+    .file-item:hover .item-name {
+        color: var(--text-primary);
+    }
+
+    .file-item:disabled:hover .item-name {
+        color: var(--text-muted);
+    }
+
+    .note-file .item-name {
+        color: var(--main-color);
+    }
+
+    .note-file:hover .item-name {
+        color: var(--main-color-light);
+    }
+
+    .save-indicator {
+        color: var(--text-muted);
+    }
+
+    .file-item:hover .save-indicator {
+        color: var(--text-primary);
     }
 </style>

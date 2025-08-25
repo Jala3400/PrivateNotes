@@ -146,6 +146,7 @@
     .item-name {
         font-weight: 500;
         color: var(--text-primary);
+        text-align: left;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
