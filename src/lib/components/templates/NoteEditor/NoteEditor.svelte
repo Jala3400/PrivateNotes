@@ -18,9 +18,27 @@
     let editorKey = $state(Date.now());
     let editorRef = $state<Editor>();
 
+    // Statistics
+    let characterCount = $state(0);
+    let wordCount = $state(0);
+    let lineCount = $state(0);
+
     // Save queue
     let saveQueue: (() => Promise<void>)[] = [];
     let processingQueue = false;
+
+    function calculateStats(text: string) {
+        characterCount = text.length;
+        wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+        lineCount = text.split(/\r\n|\r|\n/).length;
+    }
+
+    function handleContentChange() {
+        if (editorRef) {
+            const currentContent = editorRef.getContent();
+            calculateStats(currentContent);
+        }
+    }
 
     async function processQueue() {
         if (processingQueue) return;
@@ -162,6 +180,9 @@
                     unsaved: false,
                 };
 
+                // Calculate initial stats
+                calculateStats(content);
+
                 // Force editor component to restart by using key
                 editorKey = Date.now();
             }
@@ -173,6 +194,7 @@
                 title = "";
                 content = "";
                 $currentNote = null;
+                calculateStats(""); // Reset stats
                 editorKey = Date.now(); // Force re-render of the editor
             }
         });
@@ -199,7 +221,11 @@
     />
     <div id="note-contents">
         {#key editorKey}
-            <Editor bind:this={editorRef} {content} />
+            <Editor
+                bind:this={editorRef}
+                {content}
+                onContentChange={handleContentChange}
+            />
         {/key}
     </div>
 </div>
@@ -210,10 +236,14 @@
     {:else if $currentNote?.unsaved}
         <span>Unsaved changes</span>
     {:else if $currentNote}
-        <span>All changes saved</span>
+        <span>Saved</span>
     {:else}
         <span>No note opened</span>
     {/if}
+    <span>-</span>
+    <span>{characterCount} chars</span>
+    <span>{wordCount} words</span>
+    <span>{lineCount} lines</span>
 </div>
 
 <style>
@@ -261,5 +291,7 @@
         background: var(--background-dark-light);
         border-top-left-radius: var(--border-radius-small);
         z-index: 1000;
+        display: flex;
+        gap: 6px;
     }
 </style>
