@@ -12,6 +12,8 @@
         notifications,
         removeNotification,
     } from "$lib/stores/notifications";
+    import { fly } from "svelte/transition";
+    import { quintOut } from "svelte/easing";
 
     let { children } = $props();
 
@@ -70,6 +72,8 @@
             role="presentation"
             class="notification notification-{notification.type}"
             onclick={() => removeNotification(notification.id)}
+            in:fly={{ x: 300, duration: 150, easing: quintOut }}
+            out:fly={{ x: 300, duration: 150, easing: quintOut }}
         >
             {notification.message}
         </div>
@@ -87,6 +91,7 @@
         bottom: 1em;
         right: 1em;
         z-index: 1000;
+        user-select: none;
     }
 
     .notification {
@@ -101,14 +106,14 @@
     }
 
     .notification-success {
-        border: 2px solid var(--main-color);
+        border: 1px solid var(--main-color);
     }
 
     .notification-error {
-        border: 2px solid var(--danger-color);
+        border: 1px solid var(--danger-color);
     }
 
     .notification-info {
-        border: 2px solid var(--border-color);
+        border: 1px solid var(--border-color);
     }
 </style>
