@@ -304,5 +304,6 @@
         z-index: 1000;
         display: flex;
         gap: 6px;
+        user-select: none;
     }
 </style>

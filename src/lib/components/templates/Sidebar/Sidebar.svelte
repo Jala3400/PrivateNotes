@@ -197,6 +197,8 @@
         border-right: 1px solid var(--border-color-dark);
 
         overflow: hidden;
+
+        user-select: none;
     }
 
     .sidebar.collapsed {

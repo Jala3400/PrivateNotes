@@ -108,5 +108,6 @@
     .config-group-container {
         padding: 1.3em;
         padding-top: 0.85em;
+        user-select: none;
     }
 </style>
