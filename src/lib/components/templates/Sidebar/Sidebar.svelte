@@ -99,10 +99,10 @@
 
     async function closeItem(id: string) {
         // Check if the current note is the one being closed
-        if ($currentNote?.parentId === id) {
+        if ($currentNote?.parentId === id && $currentNote?.unsaved) {
             // Create a Yes/No dialog
             const answer = await ask(
-                "This item is currently open in the editor. Do you want to close it?",
+                "This item is currently open in the editor. Do you want to close it? Unsaved changes will be lost.",
                 {
                     title: "Close Item",
                     kind: "warning",
