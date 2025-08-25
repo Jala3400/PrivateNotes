@@ -131,6 +131,21 @@
 
     async function openNote(id: string, parentId: string) {
         try {
+            if ($currentNote?.unsaved) {
+                const answer = await ask(
+                    "You have unsaved changes in the current note. Do you want to proceed? Unsaved changes will be lost.",
+                    {
+                        title: "Unsaved Changes",
+                        kind: "warning",
+                    }
+                );
+
+                if (answer === false) {
+                    // User chose not to proceed
+                    return;
+                }
+            }
+
             await invoke("open_note_from_id", { id, parentId });
         } catch (error) {
             throwCustomError(

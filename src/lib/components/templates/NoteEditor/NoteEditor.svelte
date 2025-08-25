@@ -34,6 +34,10 @@
     }
 
     function handleContentChange() {
+        if ($currentNote) {
+            $currentNote.unsaved = true;
+        }
+
         if (editorRef) {
             const currentContent = editorRef.getContent();
             calculateStats(currentContent);
@@ -54,6 +58,13 @@
         processQueue();
     }
 
+    function successSave() {
+        if ($currentNote) {
+            $currentNote.unsaved = false;
+        }
+        showSaveNotification();
+    }
+
     function showSaveNotification() {
         addNotification("Note saved", NotificationType.SUCCESS);
     }
@@ -67,7 +78,7 @@
             isSaving = true;
 
             const result = await saveNoteEvent(noteId, noteContent);
-            if (result) showSaveNotification();
+            if (result) successSave();
 
             isSaving = false;
         });
@@ -87,7 +98,7 @@
                 tempTitle,
                 noteContent
             );
-            if (result) showSaveNotification();
+            if (result) successSave();
 
             isSaving = false;
         });
@@ -107,7 +118,7 @@
                 tempTitle,
                 noteContent
             );
-            if (result) showSaveNotification();
+            if (result) successSave();
 
             isSaving = false;
         });

@@ -34,7 +34,10 @@
                 onclick={() => openNote(item.id, item.parentId || "")}
                 title={item.name}
             >
-                <span class="item-name">{item.name}</span>
+                <span class="item-name">
+                    {item.name}
+                </span>
+
                 {#if unsaved}
                     <span class="save-indicator"> ●️ </span>
                 {/if}
@@ -146,6 +149,15 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        flex: 1;
+    }
+
+    .save-indicator {
+        color: var(--text-muted);
+    }
+
+    .item:hover .save-indicator {
+        color: var(--text-primary);
     }
 
     .close-btn {
