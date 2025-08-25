@@ -84,10 +84,6 @@
         width: 100%;
     }
 
-    .option-row:hover .option-label {
-        text-decoration: underline;
-    }
-
     .option-label {
         width: 100%;
         overflow: hidden;

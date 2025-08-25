@@ -33,7 +33,6 @@
 
     input[type="number"]:hover,
     input[type="number"]:focus {
-        background-color: var(--background-dark-lighter);
         border-color: var(--main-color-light);
         outline: none;
     }
