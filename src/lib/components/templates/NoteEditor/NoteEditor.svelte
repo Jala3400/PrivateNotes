@@ -9,12 +9,13 @@
         saveNoteCopyEvent,
         saveNoteEvent,
     } from "./noteOperations";
+    import { addNotification } from "$lib/stores/notifications";
+    import { NotificationType } from "$lib/types";
 
     let content = $state("");
     let title = $state("");
     let isSaving = $state(false);
     let editorKey = $state(Date.now());
-    let showNotification = $state(false);
     let editorRef = $state<Editor>();
 
     // Save queue
@@ -36,10 +37,11 @@
     }
 
     function showSaveNotification() {
-        showNotification = true;
-        setTimeout(() => {
-            showNotification = false;
-        }, 2000);
+        addNotification("Note saved", NotificationType.SUCCESS);
+    }
+
+    function showRenamedNotification() {
+        addNotification("Note renamed", NotificationType.SUCCESS);
     }
 
     function saveNote(noteId: string, noteContent: string) {
@@ -110,7 +112,7 @@
             }
 
             const result = await renameNoteEvent(noteId, parentId, tempTitle);
-            if (result) showSaveNotification();
+            if (result) showRenamedNotification();
 
             isSaving = false;
         });
@@ -202,10 +204,6 @@
     </div>
 </div>
 
-{#if showNotification}
-    <div class="notification">Note saved</div>
-{/if}
-
 <style>
     .editor-container {
         display: flex;
@@ -241,7 +239,7 @@
         overflow: hidden;
     }
 
-    .notification {
+    #info-panel {
         position: fixed;
         bottom: 0;
         right: 0;

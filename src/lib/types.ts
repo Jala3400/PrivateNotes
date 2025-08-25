@@ -54,3 +54,15 @@ export interface Command {
     requireArgs?: boolean;
     execute: (args: string[]) => void;
 }
+
+export enum NotificationType {
+    INFO = "info",
+    SUCCESS = "success",
+    ERROR = "error",
+}
+
+export interface CustomNotification {
+    id: number;
+    message: string;
+    type: NotificationType;
+}
