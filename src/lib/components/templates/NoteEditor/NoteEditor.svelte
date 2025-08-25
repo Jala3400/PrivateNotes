@@ -157,6 +157,7 @@
                 $currentNote = {
                     id: noteId,
                     parentId: parentId,
+                    unsaved: false,
                 };
 
                 // Force editor component to restart by using key

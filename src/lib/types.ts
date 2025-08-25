@@ -10,9 +10,10 @@ export interface FileSystemItem {
     collapsed: boolean;
 }
 
-export interface NoteIds {
+export interface CurrentNote {
     id: string;
     parentId: string;
+    unsaved: boolean;
 }
 
 export type Options = Record<string, any>;

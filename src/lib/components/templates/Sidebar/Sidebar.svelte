@@ -157,7 +157,15 @@
             </div>
         {:else}
             {#each openedItems as item}
-                <Item {item} {closeItem} {openNote} />
+                <Item
+                    {item}
+                    {closeItem}
+                    {openNote}
+                    unsaved={$currentNote?.id === item.id &&
+                    $currentNote?.parentId === item.parentId
+                        ? $currentNote.unsaved
+                        : undefined}
+                />
             {/each}
         {/if}
     </div>

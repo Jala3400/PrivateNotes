@@ -7,9 +7,10 @@
         item: FileSystemItem;
         closeItem: (id: string, parentId: string) => void;
         openNote: (id: string, parentId: string) => void;
+        unsaved?: boolean;
     }
 
-    let { item, closeItem, openNote }: Props = $props();
+    let { item, closeItem, openNote, unsaved }: Props = $props();
     let children = $derived(
         item.children?.filter((child) => {
             return !(child.isDirectory && child.name == ".lockd");
@@ -34,6 +35,9 @@
                 title={item.name}
             >
                 <span class="item-name">{item.name}</span>
+                {#if unsaved}
+                    <span class="save-indicator"> ●️ </span>
+                {/if}
             </button>
             <button
                 class="close-btn"
