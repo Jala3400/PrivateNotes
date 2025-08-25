@@ -7,13 +7,8 @@
     import { onDestroy, onMount } from "svelte";
     import "../app.css";
     import { NotificationType } from "$lib/types";
-    import {
-        addNotification,
-        notifications,
-        removeNotification,
-    } from "$lib/stores/notifications";
-    import { fly } from "svelte/transition";
-    import { quintOut } from "svelte/easing";
+    import { addNotification } from "$lib/stores/notifications";
+    import NotificationContainer from "$lib/components/organisms/NotificationContainer/NotificationContainer.svelte";
 
     let { children } = $props();
 
@@ -65,55 +60,6 @@
     });
 </script>
 
-<!-- CustomNotifications container -->
-<div class="notification-container">
-    {#each $notifications as notification (notification.id)}
-        <div
-            role="presentation"
-            class="notification notification-{notification.type}"
-            onclick={() => removeNotification(notification.id)}
-            in:fly={{ x: 300, duration: 150, easing: quintOut }}
-            out:fly={{ x: 300, duration: 150, easing: quintOut }}
-        >
-            {notification.message}
-        </div>
-    {/each}
-</div>
+<NotificationContainer />
 
 {@render children()}
-
-<style>
-    .notification-container {
-        position: fixed;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5em;
-        bottom: 1em;
-        right: 1em;
-        z-index: 1000;
-        user-select: none;
-    }
-
-    .notification {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.5em 0.7em;
-        border-radius: var(--border-radius-medium);
-        cursor: pointer;
-        max-width: 15em;
-        min-width: 15em;
-    }
-
-    .notification-success {
-        border: 1px solid var(--main-color);
-    }
-
-    .notification-error {
-        border: 1px solid var(--danger-color);
-    }
-
-    .notification-info {
-        border: 1px solid var(--border-color);
-    }
-</style>
