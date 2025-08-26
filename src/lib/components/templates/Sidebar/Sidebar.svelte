@@ -158,7 +158,7 @@
 
 <div class="sidebar" class:collapsed={$appearanceConfig.sidebarCollapsed}>
     <div class="sidebar-header">
-        <h2>Opened Items</h2>
+        <h2 class="sidebar-header-title">Opened Items</h2>
     </div>
 
     <div class="sidebar-content">
@@ -191,12 +191,21 @@
         overflow: hidden;
 
         user-select: none;
+
+        transition: var(--transition);
     }
 
     .sidebar.collapsed {
         width: 0;
-        padding: 0;
+        padding-right: 0;
+        padding-left: 0;
         border: none;
+    }
+
+    .sidebar-header-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .sidebar-content {

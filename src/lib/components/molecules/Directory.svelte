@@ -40,6 +40,12 @@
         text-align: center;
     }
 
+    .item-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .directory-toggle {
         display: flex;
         align-items: center;
