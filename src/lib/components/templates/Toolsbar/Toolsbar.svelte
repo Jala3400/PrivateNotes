@@ -79,7 +79,7 @@
         flex-direction: column;
         align-items: center;
 
-        width: 3em;
+        width: var(--top-height);
         height: 100%;
 
         background-color: var(--background-dark-light);

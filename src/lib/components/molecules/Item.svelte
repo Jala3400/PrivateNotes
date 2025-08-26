@@ -2,6 +2,7 @@
     import { currentNote } from "$lib/stores/currentNote";
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
+    import ExpandedIcon from "$lib/components/atoms/ExpandedIcon.svelte";
 
     interface Props {
         item: FileSystemItem;
@@ -10,7 +11,7 @@
         unsaved?: boolean;
     }
 
-    let { item, closeItem, openNote, unsaved }: Props = $props();
+    let { item, closeItem, openNote }: Props = $props();
     let children = $derived(
         item.children?.filter((child) => {
             return !(child.isDirectory && child.name == ".lockd");
@@ -58,6 +59,7 @@
     <div class="item" class:collapsed>
         <div class="item-header">
             <button class="item-title" onclick={() => (collapsed = !collapsed)}>
+                <ExpandedIcon expanded={!collapsed} />
                 <span class="item-name">{item.name}</span>
             </button>
             <button
@@ -88,11 +90,7 @@
     .item {
         display: flex;
         flex-direction: column;
-        gap: 0.5em;
-
-        padding: 0.5em;
-        border-radius: var(--border-radius-medium);
-        background-color: var(--background-dark);
+        padding: var(--file-item-padding);
     }
 
     .current-note {
@@ -116,6 +114,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.1em;
+        padding-left: 1em;
     }
 
     .no-items {
@@ -136,11 +135,10 @@
     .item-title {
         display: flex;
         align-items: center;
-        gap: 0.5em;
+        gap: 0.2em;
         background: none;
         border: none;
         color: var(--text-primary);
-        padding: var(--file-item-padding);
         border-radius: var(--border-radius-small);
         font-size: 1em;
         flex: 1;
@@ -171,7 +169,6 @@
         border: none;
         color: var(--text-muted);
         cursor: pointer;
-        padding: 0.2em;
     }
 
     .item:hover .close-btn {

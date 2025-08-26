@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
+    import ExpandedIcon from "$lib/components/atoms/ExpandedIcon.svelte";
 
     interface Props {
         item: FileSystemItem;
@@ -21,7 +22,7 @@
         }}
         title={item.name}
     >
-        <span class="expand-icon" class:expanded={!collapsed}> > </span>
+        <ExpandedIcon expanded={!collapsed} />
         <span class="item-name">{item.name}</span>
     </button>
     {#if !collapsed}
@@ -32,16 +33,6 @@
 </div>
 
 <style>
-    .expand-icon {
-        width: var(--folder-indicator-width);
-        color: var(--text-muted);
-        transition: transform var(--transition);
-    }
-
-    .expand-icon.expanded {
-        transform: rotate(90deg);
-    }
-
     .item-name {
         overflow: hidden;
         text-overflow: ellipsis;

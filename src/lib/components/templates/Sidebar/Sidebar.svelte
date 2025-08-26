@@ -158,7 +158,7 @@
 
 <div class="sidebar" class:collapsed={$appearanceConfig.sidebarCollapsed}>
     <div class="sidebar-header">
-        <h2 class="sidebar-header-title">Opened Items</h2>
+        <h2>Opened Items</h2>
     </div>
 
     <div class="sidebar-content">
@@ -182,9 +182,7 @@
     .sidebar {
         display: flex;
         flex-direction: column;
-        gap: 1em;
 
-        padding: 1em;
         background-color: var(--background-dark-light);
         border-right: 1px solid var(--border-color-dark);
 
@@ -196,24 +194,24 @@
     }
 
     .sidebar.collapsed {
-        width: 0;
-        padding-right: 0;
-        padding-left: 0;
         border: none;
     }
 
-    .sidebar-header-title {
+    .sidebar-header {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        height: var(--top-height);
+        padding: 0.5em;
+        border-bottom: 1px solid var(--border-color);
+        font-weight: bold;
+        font-size: fit-content;
     }
 
     .sidebar-content {
         display: flex;
         flex-direction: column;
-        gap: 0.8em;
         overflow: auto;
-        padding-right: 8px;
     }
 
     .empty-state {
