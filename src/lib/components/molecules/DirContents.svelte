@@ -116,4 +116,8 @@
     .file-item:hover .save-indicator {
         color: var(--text-primary);
     }
+
+    .current-note .item-name {
+        color: var(--main-color-light);
+    }
 </style>

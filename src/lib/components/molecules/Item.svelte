@@ -108,6 +108,10 @@
         color: var(--main-color-light);
     }
 
+    .item.current-note .item-name {
+        color: var(--main-color-light);
+    }
+
     .file-tree {
         display: flex;
         flex-direction: column;
