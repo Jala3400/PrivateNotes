@@ -203,7 +203,7 @@
         white-space: nowrap;
         height: var(--top-height);
         padding: 0.5em;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color-dark);
         font-weight: bold;
         font-size: fit-content;
     }
@@ -215,6 +215,7 @@
     }
 
     .empty-state {
+        padding: 1em;
         color: var(--text-muted);
     }
 </style>
