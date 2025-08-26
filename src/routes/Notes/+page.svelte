@@ -45,6 +45,8 @@
         width: 100%;
 
         overflow: hidden;
+
+        transition: grid-template-columns var(--transition);
     }
 
     .main-content {
