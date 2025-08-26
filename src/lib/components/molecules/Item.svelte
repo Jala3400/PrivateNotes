@@ -38,7 +38,7 @@
                     {item.name}
                 </span>
 
-                {#if unsaved}
+                {#if $currentNote?.id === item.id && $currentNote?.parentId === item.parentId ? $currentNote.unsaved : undefined}
                     <span class="save-indicator"> ●️ </span>
                 {/if}
             </button>
