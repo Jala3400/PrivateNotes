@@ -21,9 +21,7 @@
         }}
         title={item.name}
     >
-        <span class="expand-icon">
-            {collapsed ? "▶" : "▼"}
-        </span>
+        <span class="expand-icon" class:expanded={!collapsed}> > </span>
         <span class="item-name">{item.name}</span>
     </button>
     {#if !collapsed}
@@ -35,9 +33,13 @@
 
 <style>
     .expand-icon {
-        font-size: 0.7em;
         width: var(--folder-indicator-width);
-        text-align: center;
+        color: var(--text-muted);
+        transition: transform var(--transition);
+    }
+
+    .expand-icon.expanded {
+        transform: rotate(90deg);
     }
 
     .item-name {
