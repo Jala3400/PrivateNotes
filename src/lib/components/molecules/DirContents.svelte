@@ -51,7 +51,7 @@
         gap: 0.3em;
         padding: var(--file-item-padding);
         border-radius: var(--border-radius-small);
-        font-size: 0.85em;
+        font-size: 1em;
         width: 100%;
         padding-left: var(--folder-indicator-width);
         text-align: left;

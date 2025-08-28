@@ -49,6 +49,7 @@
         border-radius: var(--border-radius-small);
         color: var(--text-primary);
         width: 100%;
+        font-size: 1em;
     }
 
     .directory-toggle:hover {
