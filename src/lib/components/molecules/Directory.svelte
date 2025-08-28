@@ -1,7 +1,7 @@
 <script lang="ts">
+    import ExpandedIcon from "$lib/components/atoms/ExpandedIcon.svelte";
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
-    import ExpandedIcon from "$lib/components/atoms/ExpandedIcon.svelte";
 
     interface Props {
         item: FileSystemItem;
@@ -50,6 +50,7 @@
         color: var(--text-primary);
         width: 100%;
         font-size: 1em;
+        outline: none;
     }
 
     .directory-toggle:hover {

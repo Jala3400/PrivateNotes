@@ -90,7 +90,6 @@
     .item {
         display: flex;
         flex-direction: column;
-        padding: var(--file-item-padding);
     }
 
     .current-note {
@@ -130,6 +129,12 @@
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
+        padding: var(--file-item-padding);
+        border-radius: var(--border-radius-small);
+    }
+
+    .item-header:hover {
+        background-color: var(--background-dark-lighter);
     }
 
     .item-title {
@@ -143,6 +148,7 @@
         font-size: 1em;
         flex: 1;
         overflow: hidden;
+        outline: none;
     }
 
     .item-name {

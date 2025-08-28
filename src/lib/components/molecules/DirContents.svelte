@@ -57,6 +57,7 @@
         text-align: left;
         background: none;
         border: none;
+        outline: none;
         cursor: pointer;
     }
 
