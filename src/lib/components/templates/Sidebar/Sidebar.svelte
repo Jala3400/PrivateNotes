@@ -202,6 +202,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         height: var(--top-height);
+        min-height: var(--top-height);
         padding: 0.5em;
         border-bottom: 1px solid var(--border-color-dark);
         font-weight: bold;

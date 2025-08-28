@@ -95,6 +95,8 @@
         width: 100%;
         border-bottom: 1px solid var(--border-color-dark);
         padding: 0.5em;
+        height: var(--top-height);
+        min-height: var(--top-height);
     }
 
     .main-toolsbar {
