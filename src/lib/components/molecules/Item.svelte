@@ -35,6 +35,8 @@
                 onclick={() => openNote(item.id, item.parentId || "")}
                 title={item.name}
             >
+                <span class="file-icon">{item.isNote ? "📄" : "📋"}</span>
+
                 <span class="item-name">
                     {item.name}
                 </span>
@@ -113,7 +115,8 @@
         display: flex;
         flex-direction: column;
         gap: 0.1em;
-        padding-left: 1em;
+        border-left: 1px solid var(--border-color-dark);
+        margin-left: 0.75em;
     }
 
     .no-items {
@@ -139,7 +142,7 @@
 
     .item-title {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         gap: 0.2em;
         background: none;
         border: none;

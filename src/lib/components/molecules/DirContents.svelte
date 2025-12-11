@@ -27,6 +27,7 @@
                 disabled={!item.isNote}
                 title={item.name}
             >
+                <span class="file-icon">{item.isNote ? "📄" : "📋"}</span>
                 <span class="item-name">
                     {item.name}
                 </span>
@@ -47,7 +48,7 @@
 
     .file-item {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         gap: 0.3em;
         padding: var(--file-item-padding);
         padding-left: var(--folder-indicator-width);
