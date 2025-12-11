@@ -1,6 +1,8 @@
 <script lang="ts">
     import Editor from "$lib/components/organisms/Editor/Editor.svelte";
     import { currentNote } from "$lib/stores/currentNote";
+    import { addNotification } from "$lib/stores/notifications";
+    import { NotificationType } from "$lib/types";
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
     import {
@@ -14,12 +16,33 @@
     let title = $state("");
     let isSaving = $state(false);
     let editorKey = $state(Date.now());
-    let showNotification = $state(false);
     let editorRef = $state<Editor>();
+
+    // Statistics
+    let characterCount = $state(0);
+    let wordCount = $state(0);
+    let lineCount = $state(0);
 
     // Save queue
     let saveQueue: (() => Promise<void>)[] = [];
     let processingQueue = false;
+
+    function calculateStats(text: string) {
+        characterCount = text.length;
+        wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+        lineCount = text.split(/\r\n|\r|\n/).length;
+    }
+
+    function handleContentChange() {
+        if ($currentNote) {
+            $currentNote.unsaved = true;
+        }
+
+        if (editorRef) {
+            const currentContent = editorRef.getContent();
+            calculateStats(currentContent);
+        }
+    }
 
     async function processQueue() {
         if (processingQueue) return;
@@ -35,11 +58,19 @@
         processQueue();
     }
 
+    function successSave() {
+        if ($currentNote) {
+            $currentNote.unsaved = false;
+        }
+        showSaveNotification();
+    }
+
     function showSaveNotification() {
-        showNotification = true;
-        setTimeout(() => {
-            showNotification = false;
-        }, 2000);
+        addNotification("Note saved", NotificationType.SUCCESS);
+    }
+
+    function showRenamedNotification() {
+        addNotification("Note renamed", NotificationType.SUCCESS);
     }
 
     function saveNote(noteId: string, noteContent: string) {
@@ -47,7 +78,7 @@
             isSaving = true;
 
             const result = await saveNoteEvent(noteId, noteContent);
-            if (result) showSaveNotification();
+            if (result) successSave();
 
             isSaving = false;
         });
@@ -67,7 +98,7 @@
                 tempTitle,
                 noteContent
             );
-            if (result) showSaveNotification();
+            if (result) successSave();
 
             isSaving = false;
         });
@@ -87,7 +118,7 @@
                 tempTitle,
                 noteContent
             );
-            if (result) showSaveNotification();
+            if (result) successSave();
 
             isSaving = false;
         });
@@ -110,7 +141,7 @@
             }
 
             const result = await renameNoteEvent(noteId, parentId, tempTitle);
-            if (result) showSaveNotification();
+            if (result) showRenamedNotification();
 
             isSaving = false;
         });
@@ -157,7 +188,11 @@
                 $currentNote = {
                     id: noteId,
                     parentId: parentId,
+                    unsaved: false,
                 };
+
+                // Calculate initial stats
+                calculateStats(content);
 
                 // Force editor component to restart by using key
                 editorKey = Date.now();
@@ -170,6 +205,7 @@
                 title = "";
                 content = "";
                 $currentNote = null;
+                calculateStats(""); // Reset stats
                 editorKey = Date.now(); // Force re-render of the editor
             }
         });
@@ -196,14 +232,30 @@
     />
     <div id="note-contents">
         {#key editorKey}
-            <Editor bind:this={editorRef} {content} />
+            <Editor
+                bind:this={editorRef}
+                {content}
+                onContentChange={handleContentChange}
+            />
         {/key}
     </div>
 </div>
 
-{#if showNotification}
-    <div class="notification">Note saved</div>
-{/if}
+<div id="info-panel">
+    {#if isSaving}
+        <span>Saving...</span>
+    {:else if $currentNote?.unsaved}
+        <span>Unsaved changes</span>
+    {:else if $currentNote}
+        <span>Saved</span>
+    {:else}
+        <span>No note opened</span>
+    {/if}
+    <span>-</span>
+    <span>{characterCount} chars</span>
+    <span>{wordCount} words</span>
+    <span>{lineCount} lines</span>
+</div>
 
 <style>
     .editor-container {
@@ -240,13 +292,18 @@
         overflow: hidden;
     }
 
-    .notification {
+    #info-panel {
         position: fixed;
         bottom: 0;
         right: 0;
         padding: 4px 8px;
+        font-size: 0.9em;
+        color: var(--text-secondary);
         background: var(--background-dark-light);
         border-top-left-radius: var(--border-radius-small);
         z-index: 1000;
+        display: flex;
+        gap: 6px;
+        user-select: none;
     }
 </style>

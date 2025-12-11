@@ -2,11 +2,13 @@
     import { currentNote } from "$lib/stores/currentNote";
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
+    import ExpandedIcon from "$lib/components/atoms/ExpandedIcon.svelte";
 
     interface Props {
         item: FileSystemItem;
         closeItem: (id: string, parentId: string) => void;
         openNote: (id: string, parentId: string) => void;
+        unsaved?: boolean;
     }
 
     let { item, closeItem, openNote }: Props = $props();
@@ -33,7 +35,15 @@
                 onclick={() => openNote(item.id, item.parentId || "")}
                 title={item.name}
             >
-                <span class="item-name">{item.name}</span>
+                <span class="file-icon">{item.isNote ? "📄" : "📋"}</span>
+
+                <span class="item-name">
+                    {item.name}
+                </span>
+
+                {#if $currentNote?.id === item.id && $currentNote?.parentId === item.parentId ? $currentNote.unsaved : undefined}
+                    <span class="save-indicator"> ●️ </span>
+                {/if}
             </button>
             <button
                 class="close-btn"
@@ -51,6 +61,7 @@
     <div class="item" class:collapsed>
         <div class="item-header">
             <button class="item-title" onclick={() => (collapsed = !collapsed)}>
+                <ExpandedIcon expanded={!collapsed} />
                 <span class="item-name">{item.name}</span>
             </button>
             <button
@@ -81,11 +92,6 @@
     .item {
         display: flex;
         flex-direction: column;
-        gap: 0.5em;
-
-        padding: 0.5em;
-        border-radius: var(--border-radius-medium);
-        background-color: var(--background-dark);
     }
 
     .current-note {
@@ -101,10 +107,16 @@
         color: var(--main-color-light);
     }
 
+    .item.current-note .item-name {
+        color: var(--main-color-light);
+    }
+
     .file-tree {
         display: flex;
         flex-direction: column;
         gap: 0.1em;
+        border-left: 1px solid var(--border-color-dark);
+        margin-left: 0.75em;
     }
 
     .no-items {
@@ -120,28 +132,44 @@
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
+        padding: var(--file-item-padding);
+        border-radius: var(--border-radius-small);
+    }
+
+    .item-header:hover {
+        background-color: var(--background-dark-lighter);
     }
 
     .item-title {
         display: flex;
-        align-items: center;
-        gap: 0.5em;
+        align-items: flex-end;
+        gap: 0.2em;
         background: none;
         border: none;
         color: var(--text-primary);
-        padding: var(--file-item-padding);
         border-radius: var(--border-radius-small);
         font-size: 1em;
         flex: 1;
         overflow: hidden;
+        outline: none;
     }
 
     .item-name {
         font-weight: 500;
         color: var(--text-primary);
+        text-align: left;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        flex: 1;
+    }
+
+    .save-indicator {
+        color: var(--text-muted);
+    }
+
+    .item:hover .save-indicator {
+        color: var(--text-primary);
     }
 
     .close-btn {
@@ -150,7 +178,6 @@
         border: none;
         color: var(--text-muted);
         cursor: pointer;
-        padding: 0.2em;
     }
 
     .item:hover .close-btn {

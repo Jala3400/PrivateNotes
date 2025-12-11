@@ -54,9 +54,15 @@
     import { syntaxCorePlugin } from "./SyntaxCorePlugin";
     import { tableRendererPlugin } from "./TableRendererPlugin";
 
+    interface Props {
+        content: string;
+        onContentChange: () => void;
+    }
+
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
-    let { content = "" } = $props();
+
+    let { content = "", onContentChange } = $props();
 
     let contextMenu = $state<HTMLDivElement>();
     let showContextMenu = $state(false);
@@ -194,6 +200,7 @@
                           syntaxCorePlugin(),
                       ]
                     : []),
+
                 // Basic editor features
                 selectedLinePlugin(),
                 highlightSpecialChars(),
@@ -208,6 +215,12 @@
                 highlightActiveLine(),
                 highlightActiveLineGutter(),
                 highlightSelectionMatches(),
+
+                EditorView.updateListener.of((update) => {
+                    if (update.docChanged) {
+                        onContentChange();
+                    }
+                }),
             ];
 
             if ($editorConfig.vimMode) {

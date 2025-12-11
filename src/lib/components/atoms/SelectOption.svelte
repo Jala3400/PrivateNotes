@@ -41,7 +41,6 @@
     select:hover,
     select:focus {
         border-color: var(--main-color-light);
-        background-color: var(--background-dark-lighter);
     }
 
     option {

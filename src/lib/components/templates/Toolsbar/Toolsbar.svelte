@@ -3,7 +3,7 @@
     import { throwCustomError } from "$lib/error";
     import { appearanceConfig } from "$lib/stores/configs/appearanceConfig";
     import { invoke } from "@tauri-apps/api/core";
- // Import your store
+    import { ask } from "@tauri-apps/plugin-dialog";
 
     interface Props {
         openConfigModal: boolean;
@@ -17,6 +17,19 @@
             icon: "R",
             action: async () => {
                 try {
+                    const answer = await ask(
+                        "This will reset the app to its starting state, closing the current note and clearing the password. Are you sure you want to proceed?",
+                        {
+                            title: "Reset the app",
+                            kind: "warning",
+                        }
+                    );
+
+                    if (answer === false) {
+                        // User chose not to close the item
+                        return;
+                    }
+
                     await invoke("reset_app");
                     window.location.replace("/");
                 } catch (error) {
@@ -66,7 +79,7 @@
         flex-direction: column;
         align-items: center;
 
-        width: 3em;
+        width: var(--top-height);
         height: 100%;
 
         background-color: var(--background-dark-light);
@@ -82,6 +95,8 @@
         width: 100%;
         border-bottom: 1px solid var(--border-color-dark);
         padding: 0.5em;
+        height: var(--top-height);
+        min-height: var(--top-height);
     }
 
     .main-toolsbar {
