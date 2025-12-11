@@ -35,7 +35,7 @@
 
 /* List items */
 /* Only the first child of a direct child of cm-line (only the first dot in a list)*/
-.cm-line>.md-list-item.tok-meta:first-child {
+.cm-line > .md-list-item.tok-meta:first-child {
     display: inline;
 }
 
@@ -59,6 +59,20 @@
 }
 
 .md-task-item-checked {
+    color: var(--text-muted);
+}
+
+/* Spoiler Text Styles */
+.md-spoiler-hidden {
+    color: transparent;
+    background-color: var(--background-dark-lighter);
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    user-select: none;
+}
+
+.md-spoiler-visible {
+    background-color: transparent;
     color: var(--text-muted);
 }
 
@@ -108,10 +122,14 @@
 
 /* Inline code */
 .md-code-inline {
-    background-color: color-mix(in srgb, var(--background-dark-lighter), transparent 50%);
+    background-color: color-mix(
+        in srgb,
+        var(--background-dark-lighter),
+        transparent 50%
+    );
     color: var(--main-color-light);
     border-radius: var(--border-radius-small);
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
     font-size: 0.9em;
     padding: 0 0.2em;
 }
@@ -250,11 +268,19 @@
 }
 
 .cm-selectionMatch {
-    background-color: color-mix(in srgb, var(--text-primary), transparent 80%) !important;
+    background-color: color-mix(
+        in srgb,
+        var(--text-primary),
+        transparent 80%
+    ) !important;
 }
 
 .cm-focused .cm-matchingBracket {
-    background-color: color-mix(in srgb, var(--main-color), transparent 80%) !important;
+    background-color: color-mix(
+        in srgb,
+        var(--main-color),
+        transparent 80%
+    ) !important;
 }
 
 /* Panels */
@@ -417,7 +443,6 @@
     border-left: 0;
     border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
 }
-
 
 /* Context menu styling */
 .context-menu {
