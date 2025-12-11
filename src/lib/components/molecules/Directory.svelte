@@ -59,6 +59,7 @@
     }
 
     .dir-contents {
-        margin-left: 0.5em;
+        border-left: 1px solid var(--border-color-dark);
+        margin-left: 0.75em;
     }
 </style>
