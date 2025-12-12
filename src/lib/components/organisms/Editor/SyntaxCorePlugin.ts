@@ -11,6 +11,7 @@ import {
 // Import handlers from each plugin
 import { decorateBlockquote } from "./CoreDecorations/BlockquotePlugin";
 import { decorateSeparatorLine } from "./CoreDecorations/SeparatorLinePlugin";
+import { decorateSpoiler } from "./CoreDecorations/SpoilerPlugin";
 import { decorateSubscript } from "./CoreDecorations/SubscriptPlugin";
 import { decorateSuperscript } from "./CoreDecorations/SuperscriptPlugin";
 import { decorateTaskList } from "./CoreDecorations/TaskListPlugin";
@@ -55,6 +56,9 @@ export function syntaxCorePlugin(): Extension {
                                 break;
                             case "Task":
                                 decorateTaskList(node, view, decorations);
+                                break;
+                            case "Spoiler":
+                                decorateSpoiler(node, view, decorations);
                                 break;
                         }
                     },

@@ -53,6 +53,7 @@
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import { syntaxCorePlugin } from "./SyntaxCorePlugin";
     import { tableRendererPlugin } from "./TableRendererPlugin";
+    import { spoilerExtension } from "./SpoilerParser";
 
     interface Props {
         content: string;
@@ -192,6 +193,7 @@
                                   TaskList,
                                   Superscript,
                                   Subscript,
+                                  spoilerExtension,
                               ],
                           }),
                           syntaxHighlighting(classHighlighter),
