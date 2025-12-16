@@ -1,9 +1,9 @@
 import { syntaxTree } from "@codemirror/language";
 import { RangeSet, StateField } from "@codemirror/state";
-import { Decoration, EditorView, keymap, WidgetType } from "@codemirror/view";
+import { Decoration, EditorView, keymap, ViewPlugin, WidgetType } from "@codemirror/view";
 
 import type { EditorState, Extension, Range } from "@codemirror/state";
-import type { DecorationSet } from "@codemirror/view";
+import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 
 class TableWidget extends WidgetType {
     private editorView: EditorView | null = null;
@@ -12,11 +12,14 @@ class TableWidget extends WidgetType {
     public tablePosition: { from: number; to: number } | null = null;
     public widget: HTMLDivElement | null = null;
 
-    constructor(source: string, view: EditorView, from: number, to: number) {
+    constructor(source: string, from: number, to: number) {
         super();
-        this.editorView = view;
         this.tablePosition = { from, to };
         this.source = source;
+    }
+
+    setView(view: EditorView) {
+        this.editorView = view;
     }
 
     // Checks if this widget should be rerendered
@@ -726,14 +729,12 @@ class TableWidget extends WidgetType {
 // WeakMap to associate an editor's EditorView with TableWidget[]
 const activeTableWidgetsMap = new WeakMap<EditorView, TableWidget[]>();
 
-function renderTables(
+function buildTableDecorations(
     state: EditorState,
-    view: EditorView,
     from?: number,
     to?: number
 ) {
     const decorations: Range<Decoration>[] = [];
-    const widgets: TableWidget[] = [];
 
     syntaxTree(state).iterate({
         from,
@@ -760,12 +761,9 @@ function renderTables(
 
             const widget = new TableWidget(
                 state.doc.sliceString(node.from, endPos),
-                view,
                 node.from,
                 endPos
             );
-
-            widgets.push(widget);
 
             const decoration = Decoration.replace({
                 widget,
@@ -776,11 +774,6 @@ function renderTables(
             decorations.push(decoration.range(node.from, endPos));
         },
     });
-
-    // Save widgets in the WeakMap for this view
-    if (view && typeof view === "object") {
-        activeTableWidgetsMap.set(view, widgets);
-    }
 
     return decorations;
 }
@@ -856,34 +849,74 @@ const tableKeymap = [
     },
 ];
 
-export function tableRendererPlugin(view: EditorView): Extension {
+// StateField is required for block decorations (ViewPlugin cannot provide them)
+const tableStateField = StateField.define<DecorationSet>({
+    create(state) {
+        return RangeSet.of(buildTableDecorations(state), true);
+    },
+
+    update(decorations, transaction) {
+        if (transaction.docChanged) {
+            return RangeSet.of(
+                buildTableDecorations(transaction.state),
+                true
+            );
+        }
+        return decorations.map(transaction.changes);
+    },
+
+    provide(field) {
+        return EditorView.decorations.from(field);
+    },
+});
+
+// ViewPlugin for widget lifecycle management
+const tableViewPlugin = ViewPlugin.fromClass(
+    class {
+        view: EditorView;
+
+        constructor(view: EditorView) {
+            this.view = view;
+            this.collectWidgets();
+        }
+
+        update(update: ViewUpdate) {
+            if (update.docChanged) {
+                this.collectWidgets();
+            }
+        }
+
+        collectWidgets() {
+            const widgets: TableWidget[] = [];
+            const field = this.view.state.field(tableStateField, false);
+            
+            if (field) {
+                field.between(0, this.view.state.doc.length, (from, to, value) => {
+                    if (value.spec.widget instanceof TableWidget) {
+                        const widget = value.spec.widget as TableWidget;
+                        widget.setView(this.view);
+                        widgets.push(widget);
+                    }
+                });
+            }
+            
+            activeTableWidgetsMap.set(this.view, widgets);
+        }
+
+        destroy() {
+            // Clean up WeakMap entry when view is destroyed
+            activeTableWidgetsMap.delete(this.view);
+        }
+    }
+);
+
+export function tableRendererPlugin(): Extension {
     return [
-        // State field to manage table decorations
-        // It is not a view plugin because it replaces line breaks
-        StateField.define<DecorationSet>({
-            // Initialize decorations when editor is created
-            create(state) {
-                return RangeSet.of(renderTables(state, view), true);
-            },
-
-            // Update decorations when document changes
-            update(decorations, transaction) {
-                if (transaction.docChanged) {
-                    return RangeSet.of(
-                        renderTables(transaction.state, view),
-                        // true means that the decorations are sorted
-                        true
-                    );
-                }
-
-                return decorations.map(transaction.changes);
-            },
-
-            // Provide decorations to the editor view
-            provide(field) {
-                return EditorView.decorations.from(field);
-            },
-        }),
+        // StateField for block decorations (required by CodeMirror)
+        tableStateField,
+        
+        // ViewPlugin for widget lifecycle management
+        tableViewPlugin,
 
         // Register keyboard shortcuts for table navigation
         keymap.of(tableKeymap),
