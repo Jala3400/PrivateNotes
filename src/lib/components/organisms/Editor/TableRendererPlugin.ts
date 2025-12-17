@@ -1,9 +1,9 @@
 import { syntaxTree } from "@codemirror/language";
 import { RangeSet, StateField } from "@codemirror/state";
-import { Decoration, EditorView, keymap, ViewPlugin, WidgetType } from "@codemirror/view";
+import { Decoration, EditorView, keymap, WidgetType } from "@codemirror/view";
 
 import type { EditorState, Extension, Range } from "@codemirror/state";
-import type { DecorationSet, ViewUpdate } from "@codemirror/view";
+import type { DecorationSet } from "@codemirror/view";
 
 class TableWidget extends WidgetType {
     private editorView: EditorView | null = null;
@@ -18,10 +18,6 @@ class TableWidget extends WidgetType {
         this.source = source;
     }
 
-    setView(view: EditorView) {
-        this.editorView = view;
-    }
-
     // Checks if this widget should be rerendered
     eq(widget: TableWidget): boolean {
         // Don't rerender if currently editing or the table loses focus
@@ -30,7 +26,10 @@ class TableWidget extends WidgetType {
     }
 
     // Converts the widget to a DOM element
-    toDOM(): HTMLElement {
+    toDOM(view: EditorView): HTMLElement {
+        // Store the view reference when the widget is rendered
+        this.editorView = view;
+
         let content = document.createElement("div");
         content.className = "cm-table-widget";
 
@@ -726,9 +725,6 @@ class TableWidget extends WidgetType {
     }
 }
 
-// WeakMap to associate an editor's EditorView with TableWidget[]
-const activeTableWidgetsMap = new WeakMap<EditorView, TableWidget[]>();
-
 function buildTableDecorations(
     state: EditorState,
     from?: number,
@@ -778,42 +774,52 @@ function buildTableDecorations(
     return decorations;
 }
 
-function getActiveTableWidgets(view: EditorView): TableWidget[] {
-    return activeTableWidgetsMap.get(view) || [];
+// Helper to find table widgets from the StateField
+function findTableWidgetAtCursor(
+    view: EditorView,
+    predicate: (widget: TableWidget, cursorPos: number) => boolean
+): TableWidget | null {
+    const cursorPos = view.state.selection.main.head;
+    const field = view.state.field(tableStateField, false);
+    if (!field) return null;
+
+    let foundWidget: TableWidget | null = null;
+    field.between(0, view.state.doc.length, (from, to, value) => {
+        if (foundWidget) return false; // Stop iteration if found
+        if (value.spec.widget instanceof TableWidget) {
+            const widget = value.spec.widget as TableWidget;
+            if (predicate(widget, cursorPos) && widget.widget) {
+                foundWidget = widget;
+                return false; // Stop iteration
+            }
+        }
+    });
+    return foundWidget;
 }
 
 function enterTableFromTopKeymap(view: EditorView): boolean {
-    const cursorPos = view.state.selection.main.head;
-    const widgets = getActiveTableWidgets(view);
-    for (const widget of widgets) {
-        if (widget.shouldEnterTableFromTop(cursorPos) && widget.widget) {
-            widget.enterTableFromTop();
-            return true;
-        }
+    const widget = findTableWidgetAtCursor(view, (w, pos) => w.shouldEnterTableFromTop(pos));
+    if (widget) {
+        widget.enterTableFromTop();
+        return true;
     }
     return false;
 }
 
 function enterTableFromBottomKeymap(view: EditorView): boolean {
-    const cursorPos = view.state.selection.main.head;
-    const widgets = getActiveTableWidgets(view);
-    for (const widget of widgets) {
-        if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
-            widget.enterTableFromBottom();
-            return true;
-        }
+    const widget = findTableWidgetAtCursor(view, (w, pos) => w.shouldEnterTableFromBottom(pos));
+    if (widget) {
+        widget.enterTableFromBottom();
+        return true;
     }
     return false;
 }
 
 function enterTableFromLeftKeymap(view: EditorView): boolean {
-    const cursorPos = view.state.selection.main.head;
-    const widgets = getActiveTableWidgets(view);
-    for (const widget of widgets) {
-        if (widget.shouldEnterTableFromBottom(cursorPos) && widget.widget) {
-            widget.enterTableFromLeft();
-            return true;
-        }
+    const widget = findTableWidgetAtCursor(view, (w, pos) => w.shouldEnterTableFromBottom(pos));
+    if (widget) {
+        widget.enterTableFromLeft();
+        return true;
     }
     return false;
 }
@@ -870,55 +876,13 @@ const tableStateField = StateField.define<DecorationSet>({
     },
 });
 
-// ViewPlugin for widget lifecycle management
-const tableViewPlugin = ViewPlugin.fromClass(
-    class {
-        view: EditorView;
-
-        constructor(view: EditorView) {
-            this.view = view;
-            this.collectWidgets();
-        }
-
-        update(update: ViewUpdate) {
-            if (update.docChanged) {
-                this.collectWidgets();
-            }
-        }
-
-        collectWidgets() {
-            const widgets: TableWidget[] = [];
-            const field = this.view.state.field(tableStateField, false);
-            
-            if (field) {
-                field.between(0, this.view.state.doc.length, (from, to, value) => {
-                    if (value.spec.widget instanceof TableWidget) {
-                        const widget = value.spec.widget as TableWidget;
-                        widget.setView(this.view);
-                        widgets.push(widget);
-                    }
-                });
-            }
-            
-            activeTableWidgetsMap.set(this.view, widgets);
-        }
-
-        destroy() {
-            // Clean up WeakMap entry when view is destroyed
-            activeTableWidgetsMap.delete(this.view);
-        }
-    }
-);
-
 export function tableRendererPlugin(): Extension {
     return [
         // StateField for block decorations (required by CodeMirror)
         tableStateField,
-        
-        // ViewPlugin for widget lifecycle management
-        tableViewPlugin,
 
         // Register keyboard shortcuts for table navigation
         keymap.of(tableKeymap),
     ];
 }
+
