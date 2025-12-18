@@ -99,18 +99,18 @@
 
     async function closeItem(id: string) {
         // Check if the current note is the one being closed
-        if ($currentNote?.parentId === id) {
+        if ($currentNote?.parentId === id && $currentNote?.unsaved) {
             // Create a Yes/No dialog
             const answer = await ask(
-                "This item is currently open in the editor. Do you want to close it?",
+                "This item is currently open in the editor. Do you want to close it? Unsaved changes will be lost.",
                 {
-                    title: "Close Item",
+                    title: "Unsaved Changes",
                     kind: "warning",
                 }
             );
 
             if (answer === false) {
-                // User chose not to close the item
+                // User chose not to proceed
                 return;
             }
         }
@@ -131,6 +131,21 @@
 
     async function openNote(id: string, parentId: string) {
         try {
+            if ($currentNote?.unsaved) {
+                const answer = await ask(
+                    "You have unsaved changes in the current note. Do you want to proceed? Unsaved changes will be lost.",
+                    {
+                        title: "Unsaved Changes",
+                        kind: "warning",
+                    }
+                );
+
+                if (answer === false) {
+                    // User chose not to proceed
+                    return;
+                }
+            }
+
             await invoke("open_note_from_id", { id, parentId });
         } catch (error) {
             throwCustomError(
@@ -167,30 +182,41 @@
     .sidebar {
         display: flex;
         flex-direction: column;
-        gap: 1em;
 
-        padding: 1em;
         background-color: var(--background-dark-light);
         border-right: 1px solid var(--border-color-dark);
 
         overflow: hidden;
+
+        user-select: none;
+
+        transition: var(--transition);
     }
 
     .sidebar.collapsed {
-        width: 0;
-        padding: 0;
         border: none;
+    }
+
+    .sidebar-header {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        height: var(--top-height);
+        min-height: var(--top-height);
+        padding: 0.5em;
+        border-bottom: 1px solid var(--border-color-dark);
+        font-weight: bold;
+        font-size: fit-content;
     }
 
     .sidebar-content {
         display: flex;
         flex-direction: column;
-        gap: 0.8em;
         overflow: auto;
-        padding-right: 8px;
     }
 
     .empty-state {
+        padding: 1em;
         color: var(--text-muted);
     }
 </style>

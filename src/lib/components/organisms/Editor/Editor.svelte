@@ -53,10 +53,17 @@
     import { selectedLinePlugin } from "./SelectedLinePlugin";
     import { syntaxCorePlugin } from "./SyntaxCorePlugin";
     import { tableRendererPlugin } from "./TableRendererPlugin";
+    import { spoilerExtension } from "./SpoilerParser";
+
+    interface Props {
+        content: string;
+        onContentChange: () => void;
+    }
 
     let editorContainer: HTMLDivElement;
     let editorView: EditorView;
-    let { content = "" } = $props();
+
+    let { content = "", onContentChange } = $props();
 
     let contextMenu = $state<HTMLDivElement>();
     let showContextMenu = $state(false);
@@ -186,14 +193,16 @@
                                   TaskList,
                                   Superscript,
                                   Subscript,
+                                  spoilerExtension,
                               ],
                           }),
                           syntaxHighlighting(classHighlighter),
                           syntaxHighlighting(markdownHighlighting),
-                          tableRendererPlugin(editorView),
+                          tableRendererPlugin(),
                           syntaxCorePlugin(),
                       ]
                     : []),
+
                 // Basic editor features
                 selectedLinePlugin(),
                 highlightSpecialChars(),
@@ -208,6 +217,12 @@
                 highlightActiveLine(),
                 highlightActiveLineGutter(),
                 highlightSelectionMatches(),
+
+                EditorView.updateListener.of((update) => {
+                    if (update.docChanged) {
+                        onContentChange();
+                    }
+                }),
             ];
 
             if ($editorConfig.vimMode) {

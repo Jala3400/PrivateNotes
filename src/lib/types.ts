@@ -10,9 +10,10 @@ export interface FileSystemItem {
     collapsed: boolean;
 }
 
-export interface NoteIds {
+export interface CurrentNote {
     id: string;
     parentId: string;
+    unsaved: boolean;
 }
 
 export type Options = Record<string, any>;
@@ -52,4 +53,16 @@ export interface Command {
     pattern: RegExp;
     requireArgs?: boolean;
     execute: (args: string[]) => void;
+}
+
+export enum NotificationType {
+    INFO = "info",
+    SUCCESS = "success",
+    ERROR = "error",
+}
+
+export interface CustomNotification {
+    id: number;
+    message: string;
+    type: NotificationType;
 }

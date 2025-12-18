@@ -1,4 +1,5 @@
 <script lang="ts">
+    import ExpandedIcon from "$lib/components/atoms/ExpandedIcon.svelte";
     import type { FileSystemItem } from "$lib/types";
     import DirContents from "./DirContents.svelte";
 
@@ -21,9 +22,7 @@
         }}
         title={item.name}
     >
-        <span class="expand-icon">
-            {collapsed ? "▶" : "▼"}
-        </span>
+        <ExpandedIcon expanded={!collapsed} />
         <span class="item-name">{item.name}</span>
     </button>
     {#if !collapsed}
@@ -34,10 +33,10 @@
 </div>
 
 <style>
-    .expand-icon {
-        font-size: 0.7em;
-        width: var(--folder-indicator-width);
-        text-align: center;
+    .item-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .directory-toggle {
@@ -50,6 +49,8 @@
         border-radius: var(--border-radius-small);
         color: var(--text-primary);
         width: 100%;
+        font-size: 1em;
+        outline: none;
     }
 
     .directory-toggle:hover {
@@ -58,6 +59,7 @@
     }
 
     .dir-contents {
-        margin-left: 0.5em;
+        border-left: 1px solid var(--border-color-dark);
+        margin-left: 0.75em;
     }
 </style>

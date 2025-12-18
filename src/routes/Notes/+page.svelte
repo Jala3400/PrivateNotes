@@ -39,12 +39,14 @@
 <style>
     .app-layout {
         display: grid;
-        grid-template-columns: 3em var(--sidebar-width) auto;
+        grid-template-columns: var(--top-height) var(--sidebar-width) auto;
 
         height: 100%;
         width: 100%;
 
         overflow: hidden;
+
+        transition: grid-template-columns var(--transition);
     }
 
     .main-content {

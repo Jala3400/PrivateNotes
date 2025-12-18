@@ -21,7 +21,8 @@
     --popup-color: rgba(0, 0, 0, 0.9);
 
     --text-primary: hsl(0, 0%, 95%);
-    --text-muted: hsl(0, 0%, 40%);
+    --text-secondary: hsl(0, 0%, 85%);
+    --text-muted: hsl(0, 0%, 50%);
 
     --border-radius-small: 4px;
     --border-radius-medium: 8px;
@@ -32,8 +33,10 @@
     --font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     --font-size: 16px;
 
+    --top-height: 3em;
+
     --folder-indicator-width: 12px;
-    --file-item-padding: 0.2em 0.3em;
+    --file-item-padding: 0.4em 0.4em;
 }
 
 * {

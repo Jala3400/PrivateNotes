@@ -6,6 +6,9 @@
     import { listen } from "@tauri-apps/api/event";
     import { onDestroy, onMount } from "svelte";
     import "../app.css";
+    import { NotificationType } from "$lib/types";
+    import { addNotification } from "$lib/stores/notifications";
+    import NotificationContainer from "$lib/components/organisms/NotificationContainer/NotificationContainer.svelte";
 
     let { children } = $props();
 
@@ -28,23 +31,25 @@
 
     onMount(async () => {
         unlistenCustomError = await listen("error", async (event) => {
-            // Handle error events
             throwCustomError(event.payload as string);
         });
 
         unlistenRcOpen = await listen("rc-opened", async (event) => {
-            // Handle rc-opened events
             runCommandScript(event.payload as string);
+            addNotification(
+                "Command script executed",
+                NotificationType.SUCCESS
+            );
         });
 
         unlistenConfigOpen = await listen("config-opened", async (event) => {
-            // Handle config-opened events
             loadConfigFile(
                 JSON.parse(event.payload as string) as Record<
                     string,
                     Record<string, any>
                 >
             );
+            addNotification("Configuration loaded", NotificationType.SUCCESS);
         });
     });
 
@@ -54,5 +59,7 @@
         unlistenConfigOpen?.();
     });
 </script>
+
+<NotificationContainer />
 
 {@render children()}
