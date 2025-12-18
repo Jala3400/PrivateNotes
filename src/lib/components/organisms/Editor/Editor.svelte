@@ -198,7 +198,7 @@
                           }),
                           syntaxHighlighting(classHighlighter),
                           syntaxHighlighting(markdownHighlighting),
-                          tableRendererPlugin(editorView),
+                          tableRendererPlugin(),
                           syntaxCorePlugin(),
                       ]
                     : []),

@@ -35,9 +35,8 @@
                 onclick={() => openNote(item.id, item.parentId || "")}
                 title={item.name}
             >
-                <span class="file-icon">{item.isNote ? "📄" : "📋"}</span>
-
                 <span class="item-name">
+                    <span class="file-icon">{item.isNote ? "🗎" : "🗋"}</span>
                     {item.name}
                 </span>
 
