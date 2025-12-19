@@ -27,6 +27,8 @@
     let contextMenuX = $state(0);
     let contextMenuY = $state(0);
 
+    $inspect("editorConfig", showContextMenu);
+
     // Define context menu items using editor methods
     const contextMenuItems: ContextMenuItem[] = [
         {
@@ -81,6 +83,18 @@
         editor.focus();
     }
 
+    function handleKeyDown(event: KeyboardEvent) {
+        if (event.key === "Escape" && showContextMenu) {
+            hideContextMenu();
+        }
+    }
+
+    function handleDocumentClick(event: MouseEvent) {
+        if (showContextMenu && contextMenu && !contextMenu.contains(event.target as Node)) {
+            hideContextMenu();
+        }
+    }
+
     onMount(() => {
         // Convert Svelte store to plain config object
         const config: EditorConfig = {
@@ -100,6 +114,10 @@
         });
 
         editor.mount(editorContainer, content);
+
+        // Add event listeners
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("click", handleDocumentClick);
 
         // Watch for editorConfig changes and update editor
         $effect(() => {
@@ -121,12 +139,16 @@
         if (editor) {
             editor.destroy();
         }
+        // Remove event listeners
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("click", handleDocumentClick);
     });
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
 
 {#if showContextMenu}
+    <!-- svelte-ignore a11y_interactive_supports_focus -->
     <div
         class="context-menu"
         bind:this={contextMenu}
@@ -160,17 +182,4 @@
         border: 1px solid var(--background-dark-lighter);
     }
 
-    .context-menu-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 999;
-        display: none;
-    }
-
-    .context-menu-backdrop.visible {
-        display: block;
-    }
 </style>

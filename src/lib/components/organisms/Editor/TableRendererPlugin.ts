@@ -11,6 +11,11 @@ class TableWidget extends WidgetType {
     private isEditing: boolean = false;
     public tablePosition: { from: number; to: number } | null = null;
     public widget: HTMLDivElement | null = null;
+    private activeMenuListeners: {
+        closeMenu: (e: MouseEvent) => void;
+        closeMenuOnEsc: (e: KeyboardEvent) => void;
+        closeOnContextMenu: (e: MouseEvent) => void;
+    } | null = null;
 
     constructor(source: string, from: number, to: number) {
         super();
@@ -476,8 +481,7 @@ class TableWidget extends WidgetType {
         const closeMenu = (e: MouseEvent) => {
             if (!menu.contains(e.target as Node)) {
                 this.removeContextMenu();
-                document.removeEventListener("click", closeMenu);
-                document.removeEventListener("keydown", closeMenuOnEsc);
+                this.cleanupMenuListeners();
             }
         };
 
@@ -485,9 +489,25 @@ class TableWidget extends WidgetType {
         const closeMenuOnEsc = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 this.removeContextMenu();
-                document.removeEventListener("click", closeMenu);
-                document.removeEventListener("keydown", closeMenuOnEsc);
+                this.cleanupMenuListeners();
             }
+        };
+
+        // Close table menu and allow editor menu to show when right-clicking outside
+        const closeOnContextMenu = (e: MouseEvent) => {
+            const target = e.target as Node;
+            if (!menu.contains(target)) {
+                this.removeContextMenu();
+                this.cleanupMenuListeners();
+                // Don't prevent default - let the editor's context menu show
+            }
+        };
+
+        // Store listeners for cleanup
+        this.activeMenuListeners = {
+            closeMenu,
+            closeMenuOnEsc,
+            closeOnContextMenu
         };
 
         // Add event listeners to close the menu
@@ -495,6 +515,7 @@ class TableWidget extends WidgetType {
         setTimeout(() => {
             document.addEventListener("click", closeMenu);
             document.addEventListener("keydown", closeMenuOnEsc);
+            document.addEventListener("contextmenu", closeOnContextMenu);
         }, 0);
     }
 
@@ -502,6 +523,15 @@ class TableWidget extends WidgetType {
         document
             .querySelectorAll(".context-menu")
             .forEach((menu) => menu.remove());
+    }
+
+    private cleanupMenuListeners(): void {
+        if (this.activeMenuListeners) {
+            document.removeEventListener("click", this.activeMenuListeners.closeMenu);
+            document.removeEventListener("keydown", this.activeMenuListeners.closeMenuOnEsc);
+            document.removeEventListener("contextmenu", this.activeMenuListeners.closeOnContextMenu);
+            this.activeMenuListeners = null;
+        }
     }
 
     private handleCellKeydown(
