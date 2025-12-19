@@ -3,6 +3,8 @@
     import { onDestroy, onMount } from "svelte";
     import { CodeMirrorEditor } from "./EditorCore";
     import type { EditorConfig } from "./EditorCore";
+    import ContextMenu from "./ContextMenu.svelte";
+    import { ContextMenuManager, type ContextMenuState } from "./contextMenuManager";
     import "./md_style.css";
 
     interface Props {
@@ -10,195 +12,33 @@
         onContentChange: () => void;
     }
 
-    interface ContextMenuItem {
-        id: string;
-        text: string;
-        action: (() => void) | null;
-        type?: "item" | "separator";
-    }
-
     let editorContainer: HTMLDivElement;
     let editor: CodeMirrorEditor;
+    let contextMenuManager: ContextMenuManager;
 
     let { content = "", onContentChange }: Props = $props();
 
-    let contextMenu = $state<HTMLDivElement>();
-    let showContextMenu = $state(false);
-    let contextMenuX = $state(0);
-    let contextMenuY = $state(0);
-    let contextMenuItems = $state<ContextMenuItem[]>([]);
-
-    $inspect("editorConfig", showContextMenu);
+    let contextMenuState = $state<ContextMenuState>({
+        show: false,
+        x: 0,
+        y: 0,
+        items: [],
+    });
 
     export function getContent(): string {
         return editor ? editor.getContent() : content;
     }
 
-    function hideContextMenu() {
-        showContextMenu = false;
-    }
-
     function handleContextMenu(event: MouseEvent) {
-        contextMenuX = event.clientX;
-        contextMenuY = event.clientY;
-
-        // Check if we're in a table context
-        const tableContext = editor.getTableContext();
-
-        if (tableContext) {
-            // Build merged menu with table operations
-            const { widget, row, col } = tableContext;
-            contextMenuItems = [
-                {
-                    id: "add-row-above",
-                    text: "Add Row Above",
-                    action: () => widget.addRow(row),
-                    type: "item",
-                },
-                {
-                    id: "add-row-below",
-                    text: "Add Row Below",
-                    action: () => widget.addRow(row + 1),
-                    type: "item",
-                },
-                {
-                    id: "add-col-left",
-                    text: "Add Column Left",
-                    action: () => widget.addColumn(col),
-                    type: "item",
-                },
-                {
-                    id: "add-col-right",
-                    text: "Add Column Right",
-                    action: () => widget.addColumn(col + 1),
-                    type: "item",
-                },
-                {
-                    id: "separator-1",
-                    text: "---",
-                    action: null,
-                    type: "separator",
-                },
-                {
-                    id: "move-row-up",
-                    text: "Move Row Up",
-                    action: () => widget.moveRowUp(row),
-                    type: "item",
-                },
-                {
-                    id: "move-row-down",
-                    text: "Move Row Down",
-                    action: () => widget.moveRowDown(row),
-                    type: "item",
-                },
-                {
-                    id: "move-col-left",
-                    text: "Move Column Left",
-                    action: () => widget.moveColumnLeft(col),
-                    type: "item",
-                },
-                {
-                    id: "move-col-right",
-                    text: "Move Column Right",
-                    action: () => widget.moveColumnRight(col),
-                    type: "item",
-                },
-                {
-                    id: "separator-2",
-                    text: "---",
-                    action: null,
-                    type: "separator",
-                },
-                {
-                    id: "delete-row",
-                    text: "Delete Row",
-                    action: () => widget.deleteRow(row),
-                    type: "item",
-                },
-                {
-                    id: "delete-col",
-                    text: "Delete Column",
-                    action: () => widget.deleteColumn(col),
-                    type: "item",
-                },
-                {
-                    id: "separator-3",
-                    text: "---",
-                    action: null,
-                    type: "separator",
-                },
-                {
-                    id: "superscript",
-                    text: "Insert Superscript",
-                    action: () => editor.insertSuperscript(),
-                    type: "item",
-                },
-                {
-                    id: "subscript",
-                    text: "Insert Subscript",
-                    action: () => editor.insertSubscript(),
-                    type: "item",
-                },
-            ];
-        } else {
-            // Standard editor menu
-            contextMenuItems = [
-                {
-                    id: "superscript",
-                    text: "Insert Superscript",
-                    action: () => editor.insertSuperscript(),
-                    type: "item",
-                },
-                {
-                    id: "subscript",
-                    text: "Insert Subscript",
-                    action: () => editor.insertSubscript(),
-                    type: "item",
-                },
-                {
-                    id: "separator-1",
-                    text: "---",
-                    action: null,
-                    type: "separator",
-                },
-                {
-                    id: "table",
-                    text: "Insert Table",
-                    action: () => editor.insertTable(),
-                    type: "item",
-                },
-                {
-                    id: "tasklist",
-                    text: "Insert Task List",
-                    action: () => editor.insertTaskList(),
-                    type: "item",
-                },
-            ];
-        }
-
-        showContextMenu = true;
+        contextMenuManager.show(event.clientX, event.clientY);
     }
 
-    function handleMenuItemClick(item: ContextMenuItem) {
-        item.action?.();
-        hideContextMenu();
-        editor.focus();
+    function handleMenuItemClick(itemId: string) {
+        contextMenuManager.executeItem(itemId);
     }
 
-    function handleKeyDown(event: KeyboardEvent) {
-        if (event.key === "Escape" && showContextMenu) {
-            hideContextMenu();
-        }
-    }
-
-    function handleDocumentClick(event: MouseEvent) {
-        if (
-            showContextMenu &&
-            contextMenu &&
-            !contextMenu.contains(event.target as Node)
-        ) {
-            hideContextMenu();
-        }
+    function handleMenuClose() {
+        contextMenuManager.hide();
     }
 
     onMount(() => {
@@ -221,9 +61,13 @@
 
         editor.mount(editorContainer, content);
 
-        // Add event listeners
-        document.addEventListener("keydown", handleKeyDown);
-        document.addEventListener("click", handleDocumentClick);
+        // Initialize context menu manager
+        contextMenuManager = new ContextMenuManager(editor);
+        
+        // Subscribe to context menu state changes
+        const unsubscribe = contextMenuManager.subscribe((state) => {
+            contextMenuState = state;
+        });
 
         // Watch for editorConfig changes and update editor
         $effect(() => {
@@ -239,44 +83,29 @@
                 });
             }
         });
+
+        return () => {
+            unsubscribe();
+        };
     });
 
     onDestroy(() => {
         if (editor) {
             editor.destroy();
         }
-        // Remove event listeners
-        document.removeEventListener("keydown", handleKeyDown);
-        document.removeEventListener("click", handleDocumentClick);
     });
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
 
-{#if showContextMenu}
-    <!-- svelte-ignore a11y_interactive_supports_focus -->
-    <div
-        class="context-menu"
-        bind:this={contextMenu}
-        style="left: {contextMenuX}px; top: {contextMenuY}px;"
-        role="menu"
-        onmousedown={(e) => e.preventDefault()}
-    >
-        {#each contextMenuItems as item}
-            {#if item.type === "separator" || item.text === "---"}
-                <div class="context-menu-separator"></div>
-            {:else}
-                <button
-                    class="context-menu-item"
-                    onclick={() => handleMenuItemClick(item)}
-                    role="menuitem"
-                >
-                    {item.text}
-                </button>
-            {/if}
-        {/each}
-    </div>
-{/if}
+<ContextMenu
+    show={contextMenuState.show}
+    x={contextMenuState.x}
+    y={contextMenuState.y}
+    items={contextMenuState.items}
+    onItemClick={handleMenuItemClick}
+    onClose={handleMenuClose}
+/>
 
 <style>
     .editor-container {
