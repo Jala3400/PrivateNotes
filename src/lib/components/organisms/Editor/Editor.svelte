@@ -10,49 +10,59 @@
         onContentChange: () => void;
     }
 
+    interface ContextMenuItem {
+        id: string;
+        text: string;
+        action: (() => void) | null;
+        type?: "item" | "separator";
+    }
+
     let editorContainer: HTMLDivElement;
     let editor: CodeMirrorEditor;
 
-    let { content = "", onContentChange } = $props();
+    let { content = "", onContentChange }: Props = $props();
 
     let contextMenu = $state<HTMLDivElement>();
     let showContextMenu = $state(false);
     let contextMenuX = $state(0);
     let contextMenuY = $state(0);
 
+    // Define context menu items using editor methods
+    const contextMenuItems: ContextMenuItem[] = [
+        {
+            id: "superscript",
+            text: "Insert Superscript",
+            action: () => editor.insertSuperscript(),
+            type: "item",
+        },
+        {
+            id: "subscript",
+            text: "Insert Subscript",
+            action: () => editor.insertSubscript(),
+            type: "item",
+        },
+        {
+            id: "separator-1",
+            text: "---",
+            action: null,
+            type: "separator",
+        },
+        {
+            id: "table",
+            text: "Insert Table",
+            action: () => editor.insertTable(),
+            type: "item",
+        },
+        {
+            id: "tasklist",
+            text: "Insert Task List",
+            action: () => editor.insertTaskList(),
+            type: "item",
+        },
+    ];
+
     export function getContent(): string {
         return editor ? editor.getContent() : content;
-    }
-
-    function insertTable() {
-        const tableTemplate = `
-| Header | Header |
-|--------|--------|
-| Cell   | Cell   |
-`;
-
-        editor.insertText(tableTemplate);
-        hideContextMenu();
-        editor.focus();
-    }
-
-    function insertTaskList() {
-        const taskListTemplate = `- [ ] `;
-        editor.insertAtLineStart(taskListTemplate);
-        hideContextMenu();
-        editor.focus();
-    }
-
-    function insertSuperscript() {
-        editor.wrapSelection("^", "^");
-        hideContextMenu();
-        editor.focus();
-    }
-
-    function insertSubscript() {
-        editor.wrapSelection("~", "~");
-        hideContextMenu();
-        editor.focus();
     }
 
     function hideContextMenu() {
@@ -63,6 +73,12 @@
         contextMenuX = event.clientX;
         contextMenuY = event.clientY;
         showContextMenu = true;
+    }
+
+    function handleMenuItemClick(item: ContextMenuItem) {
+        item.action?.();
+        hideContextMenu();
+        editor.focus();
     }
 
     onMount(() => {
@@ -99,37 +115,13 @@
                 });
             }
         });
-
-        // Hide context menu when clicking elsewhere
-        document.addEventListener("click", hideContextMenu);
-
-        // Hide context menu when pressing Escape
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                hideContextMenu();
-            }
-        });
     });
 
     onDestroy(() => {
         if (editor) {
             editor.destroy();
         }
-        document.removeEventListener("click", hideContextMenu);
-        document.removeEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                hideContextMenu();
-            }
-        });
     });
-
-    const contextMenuItems = [
-        { text: "Insert Superscript", action: insertSuperscript },
-        { text: "Insert Subscript", action: insertSubscript },
-        { text: "---", action: null },
-        { text: "Insert Table", action: insertTable },
-        { text: "Insert Task List", action: insertTaskList },
-    ];
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
@@ -139,12 +131,18 @@
         class="context-menu"
         bind:this={contextMenu}
         style="left: {contextMenuX}px; top: {contextMenuY}px;"
+        role="menu"
+        onmousedown={(e) => e.preventDefault()}
     >
         {#each contextMenuItems as item}
-            {#if item.text === "---"}
+            {#if item.type === "separator" || item.text === "---"}
                 <div class="context-menu-separator"></div>
             {:else}
-                <button class="context-menu-item" onclick={item.action}>
+                <button
+                    class="context-menu-item"
+                    onclick={() => handleMenuItemClick(item)}
+                    role="menuitem"
+                >
                     {item.text}
                 </button>
             {/if}
@@ -160,5 +158,19 @@
         overflow-y: auto;
         border-radius: var(--border-radius-medium);
         border: 1px solid var(--background-dark-lighter);
+    }
+
+    .context-menu-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999;
+        display: none;
+    }
+
+    .context-menu-backdrop.visible {
+        display: block;
     }
 </style>
