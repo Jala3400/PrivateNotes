@@ -1,10 +1,10 @@
 <script lang="ts">
     import { editorConfig } from "$lib/stores/configs/editorConfig";
     import { onDestroy, onMount } from "svelte";
-    import { CodeMirrorEditor } from "./EditorCore";
-    import type { EditorConfig } from "./EditorCore";
+    import { CodeMirrorEditor } from "$lib/editor/EditorCore";
+    import type { EditorConfig } from "$lib/editor/EditorCore";
     import { EditorContextMenuManager } from "./editorContextMenu";
-    import "./md_style.css";
+    import "$lib/editor/md_style.css";
 
     interface Props {
         content: string;

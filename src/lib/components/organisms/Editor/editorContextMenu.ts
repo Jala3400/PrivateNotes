@@ -1,9 +1,9 @@
-import type { CodeMirrorEditor } from "./EditorCore";
+import type { CodeMirrorEditor } from "$lib/editor/EditorCore";
+import type { TableWidget } from "$lib/editor/TableRendererPlugin";
 import {
-    contextMenuStore,
+    contextMenu as contextMenu,
     type ContextMenuItem,
-} from "$lib/components/organisms/GlobalContextMenu";
-import type { TableWidget } from "./TableRendererPlugin";
+} from "$lib/stores/contextMenu";
 
 /**
  * Editor-specific context menu manager that builds menu items
@@ -91,13 +91,13 @@ export class EditorContextMenuManager {
               )
             : this.defaultMenuItems;
 
-        contextMenuStore.show(x, y, items);
+        contextMenu.show(x, y, items);
     }
 
     /**
      * Hide context menu
      */
     hide(): void {
-        contextMenuStore.hide();
+        contextMenu.hide();
     }
 }

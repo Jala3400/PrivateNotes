@@ -1,7 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { contextMenuStore, type ContextMenuItem } from "./contextMenuStore";
-
+    import {
+        contextMenu,
+        type ContextMenuItem,
+    } from "../../../stores/contextMenu";
     let menuElement = $state<HTMLDivElement>();
     let adjustedX = $state(0);
     let adjustedY = $state(0);
@@ -47,31 +49,31 @@
     function handleItemClick(item: ContextMenuItem) {
         if (item.type !== "separator" && item.action) {
             item.action();
-            contextMenuStore.hide();
+            contextMenu.hide();
         }
     }
 
     function handleClickOutside(event: MouseEvent) {
         if (
-            $contextMenuStore.show &&
+            $contextMenu.show &&
             menuElement &&
             !menuElement.contains(event.target as Node)
         ) {
-            contextMenuStore.hide();
+            contextMenu.hide();
         }
     }
 
     function handleEscape(event: KeyboardEvent) {
-        if (event.key === "Escape" && $contextMenuStore.show) {
-            contextMenuStore.hide();
+        if (event.key === "Escape" && $contextMenu.show) {
+            contextMenu.hide();
         }
     }
 
     // Update position when show state changes or position changes
     $effect(() => {
-        if ($contextMenuStore.show) {
+        if ($contextMenu.show) {
             // Need to wait for next tick to get accurate dimensions
-            calculatePosition($contextMenuStore.x, $contextMenuStore.y);
+            calculatePosition($contextMenu.x, $contextMenu.y);
         }
     });
 
@@ -86,7 +88,7 @@
     });
 </script>
 
-{#if $contextMenuStore.show}
+{#if $contextMenu.show}
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <!-- svelte-ignore a11y_interactive_supports_focus -->
     <div
@@ -96,7 +98,7 @@
         role="menu"
         onmousedown={(e) => e.preventDefault()}
     >
-        {#each $contextMenuStore.items as item, index (index)}
+        {#each $contextMenu.items as item, index (index)}
             {#if item.type === "separator"}
                 <div class="context-menu-separator"></div>
             {:else}

@@ -9,7 +9,7 @@
     import { NotificationType } from "$lib/types";
     import { addNotification } from "$lib/stores/notifications";
     import NotificationContainer from "$lib/components/organisms/NotificationContainer/NotificationContainer.svelte";
-    import { GlobalContextMenu } from "$lib/components/organisms/GlobalContextMenu";
+    import GlobalContextMenu from "$lib/components/organisms/GlobalContextMenu/GlobalContextMenu.svelte";
 
     let { children } = $props();
 
