@@ -3,8 +3,7 @@
     import { onDestroy, onMount } from "svelte";
     import { CodeMirrorEditor } from "./EditorCore";
     import type { EditorConfig } from "./EditorCore";
-    import ContextMenu from "./ContextMenu.svelte";
-    import { ContextMenuManager, type ContextMenuState } from "./contextMenuManager";
+    import { EditorContextMenuManager } from "./editorContextMenu";
     import "./md_style.css";
 
     interface Props {
@@ -14,16 +13,9 @@
 
     let editorContainer: HTMLDivElement;
     let editor: CodeMirrorEditor;
-    let contextMenuManager: ContextMenuManager;
+    let contextMenuManager: EditorContextMenuManager;
 
     let { content = "", onContentChange }: Props = $props();
-
-    let contextMenuState = $state<ContextMenuState>({
-        show: false,
-        x: 0,
-        y: 0,
-        items: [],
-    });
 
     export function getContent(): string {
         return editor ? editor.getContent() : content;
@@ -31,14 +23,6 @@
 
     function handleContextMenu(event: MouseEvent) {
         contextMenuManager.show(event.clientX, event.clientY);
-    }
-
-    function handleMenuItemClick(itemId: string) {
-        contextMenuManager.executeItem(itemId);
-    }
-
-    function handleMenuClose() {
-        contextMenuManager.hide();
     }
 
     onMount(() => {
@@ -61,13 +45,8 @@
 
         editor.mount(editorContainer, content);
 
-        // Initialize context menu manager
-        contextMenuManager = new ContextMenuManager(editor);
-        
-        // Subscribe to context menu state changes
-        const unsubscribe = contextMenuManager.subscribe((state) => {
-            contextMenuState = state;
-        });
+        // Initialize editor-specific context menu manager
+        contextMenuManager = new EditorContextMenuManager(editor);
 
         // Watch for editorConfig changes and update editor
         $effect(() => {
@@ -83,10 +62,6 @@
                 });
             }
         });
-
-        return () => {
-            unsubscribe();
-        };
     });
 
     onDestroy(() => {
@@ -97,15 +72,6 @@
 </script>
 
 <div class="editor-container" bind:this={editorContainer}></div>
-
-<ContextMenu
-    show={contextMenuState.show}
-    x={contextMenuState.x}
-    y={contextMenuState.y}
-    items={contextMenuState.items}
-    onItemClick={handleMenuItemClick}
-    onClose={handleMenuClose}
-/>
 
 <style>
     .editor-container {
