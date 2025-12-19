@@ -11,11 +11,6 @@ class TableWidget extends WidgetType {
     private isEditing: boolean = false;
     public tablePosition: { from: number; to: number } | null = null;
     public widget: HTMLDivElement | null = null;
-    private activeMenuListeners: {
-        closeMenu: (e: MouseEvent) => void;
-        closeMenuOnEsc: (e: KeyboardEvent) => void;
-        closeOnContextMenu: (e: MouseEvent) => void;
-    } | null = null;
 
     constructor(source: string, from: number, to: number) {
         super();
@@ -94,12 +89,6 @@ class TableWidget extends WidgetType {
 
             cell.addEventListener("blur", () => {
                 this.isEditing = false;
-            });
-
-            cell.addEventListener("contextmenu", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                this.showContextMenu(event as MouseEvent, cell as HTMLElement);
             });
 
             cell.addEventListener("keydown", (event) => {
@@ -200,7 +189,10 @@ class TableWidget extends WidgetType {
         };
     }
 
-    private addRow(index: number) {
+    /**
+     * Add a row at the specified index
+     */
+    public addRow(index: number) {
         // Split the source into lines
         const lines = this.source.split("\n");
 
@@ -227,7 +219,10 @@ class TableWidget extends WidgetType {
         this.updateTableSource(lines.join("\n"));
     }
 
-    private addColumn(index: number) {
+    /**
+     * Add a column at the specified index
+     */
+    public addColumn(index: number) {
         // Split the source into lines
         const lines = this.source.split("\n");
 
@@ -254,7 +249,10 @@ class TableWidget extends WidgetType {
         this.updateTableSource(updatedLines.join("\n"));
     }
 
-    private deleteRow(rowIndex: number) {
+    /**
+     * Delete a row at the specified index
+     */
+    public deleteRow(rowIndex: number) {
         // Split the source into lines
         const lines = this.source.split("\n");
 
@@ -271,7 +269,10 @@ class TableWidget extends WidgetType {
         this.updateTableSource(lines.join("\n"));
     }
 
-    private deleteColumn(colIndex: number) {
+    /**
+     * Delete a column at the specified index
+     */
+    public deleteColumn(colIndex: number) {
         // Split the source into lines
         const lines = this.source.split("\n");
 
@@ -295,7 +296,10 @@ class TableWidget extends WidgetType {
         this.updateTableSource(updatedLines.join("\n"));
     }
 
-    private moveRowUp(rowIndex: number) {
+    /**
+     * Move a row up
+     */
+    public moveRowUp(rowIndex: number) {
         if (rowIndex <= 0) return; // Can't move first row up
 
         // Split the source into lines
@@ -316,7 +320,10 @@ class TableWidget extends WidgetType {
         this.updateTableSource(lines.join("\n"));
     }
 
-    private moveRowDown(rowIndex: number) {
+    /**
+     * Move a row down
+     */
+    public moveRowDown(rowIndex: number) {
         // Split the source into lines
         const lines = this.source.split("\n");
 
@@ -336,7 +343,10 @@ class TableWidget extends WidgetType {
         this.updateTableSource(lines.join("\n"));
     }
 
-    private moveColumnLeft(colIndex: number) {
+    /**
+     * Move a column left
+     */
+    public moveColumnLeft(colIndex: number) {
         if (colIndex <= 0) return; // Can't move left leftmost column
 
         // Split the source into lines
@@ -365,7 +375,10 @@ class TableWidget extends WidgetType {
         this.updateTableSource(updatedLines.join("\n"));
     }
 
-    private moveColumnRight(colIndex: number) {
+    /**
+     * Move a column right
+     */
+    public moveColumnRight(colIndex: number) {
         // Split the source into lines
         const lines = this.source.split("\n");
         const firstLine = lines[0];
@@ -410,128 +423,6 @@ class TableWidget extends WidgetType {
                 insert: newSource,
             },
         });
-    }
-
-    private showContextMenu(event: MouseEvent, cell: HTMLElement): void {
-        // Get the row and column indices from the cell
-        const row = parseInt(cell.dataset.row || "0");
-        const col = parseInt(cell.dataset.col || "0");
-
-        // Remove any existing context menu
-        this.removeContextMenu();
-
-        // Create a new context menu
-        const menu = document.createElement("div");
-        menu.className = "context-menu";
-        menu.style.setProperty("--menu-x", `${event.pageX}px`);
-        menu.style.setProperty("--menu-y", `${event.pageY}px`);
-
-        // Specify menu items
-        const menuItems = [
-            { text: "Add Row Above", action: () => this.addRow(row) },
-            { text: "Add Row Below", action: () => this.addRow(row + 1) },
-            { text: "Add Column Left", action: () => this.addColumn(col) },
-            { text: "Add Column Right", action: () => this.addColumn(col + 1) },
-            { text: "---", action: null }, // Separator
-            { text: "Move Row Up", action: () => this.moveRowUp(row) },
-            { text: "Move Row Down", action: () => this.moveRowDown(row) },
-            {
-                text: "Move Column Left",
-                action: () => this.moveColumnLeft(col),
-            },
-            {
-                text: "Move Column Right",
-                action: () => this.moveColumnRight(col),
-            },
-            { text: "---", action: null }, // Separator
-            { text: "Delete Row", action: () => this.deleteRow(row) },
-            { text: "Delete Column", action: () => this.deleteColumn(col) },
-        ];
-
-        // Create menu items
-        menuItems.forEach((item) => {
-            if (item.text === "---") {
-                // Create a separator
-                const separator = document.createElement("div");
-                separator.className = "context-menu-separator";
-                menu.appendChild(separator);
-            } else {
-                // Create a menu item
-                const menuItem = document.createElement("button");
-                menuItem.className = "context-menu-item";
-                menuItem.textContent = item.text;
-
-                // Assign action if provided
-                menuItem.onclick = (e) => {
-                    e.stopPropagation();
-                    if (item.action) {
-                        item.action();
-                    }
-                    this.removeContextMenu();
-                };
-
-                // Append the menu item to the menu
-                menu.appendChild(menuItem);
-            }
-        });
-
-        document.body.appendChild(menu);
-
-        // Close menu when clicking outside
-        const closeMenu = (e: MouseEvent) => {
-            if (!menu.contains(e.target as Node)) {
-                this.removeContextMenu();
-                this.cleanupMenuListeners();
-            }
-        };
-
-        // Close menu when pressing Escape
-        const closeMenuOnEsc = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                this.removeContextMenu();
-                this.cleanupMenuListeners();
-            }
-        };
-
-        // Close table menu and allow editor menu to show when right-clicking outside
-        const closeOnContextMenu = (e: MouseEvent) => {
-            const target = e.target as Node;
-            if (!menu.contains(target)) {
-                this.removeContextMenu();
-                this.cleanupMenuListeners();
-                // Don't prevent default - let the editor's context menu show
-            }
-        };
-
-        // Store listeners for cleanup
-        this.activeMenuListeners = {
-            closeMenu,
-            closeMenuOnEsc,
-            closeOnContextMenu
-        };
-
-        // Add event listeners to close the menu
-        // Use setTimeout to ensure the menu is rendered before adding listeners
-        setTimeout(() => {
-            document.addEventListener("click", closeMenu);
-            document.addEventListener("keydown", closeMenuOnEsc);
-            document.addEventListener("contextmenu", closeOnContextMenu);
-        }, 0);
-    }
-
-    private removeContextMenu(): void {
-        document
-            .querySelectorAll(".context-menu")
-            .forEach((menu) => menu.remove());
-    }
-
-    private cleanupMenuListeners(): void {
-        if (this.activeMenuListeners) {
-            document.removeEventListener("click", this.activeMenuListeners.closeMenu);
-            document.removeEventListener("keydown", this.activeMenuListeners.closeMenuOnEsc);
-            document.removeEventListener("contextmenu", this.activeMenuListeners.closeOnContextMenu);
-            this.activeMenuListeners = null;
-        }
     }
 
     private handleCellKeydown(
@@ -753,6 +644,28 @@ class TableWidget extends WidgetType {
             }
         }
     }
+
+    /**
+     * Get the current cell position (row, col) from the focused cell
+     */
+    public getCurrentCellPosition(): { row: number; col: number } | null {
+        if (!this.widget) return null;
+
+        const activeElement = document.activeElement;
+        if (!activeElement || !this.widget.contains(activeElement)) {
+            return null;
+        }
+
+        const cell = activeElement as HTMLElement;
+        if (!cell.classList.contains("md-editable-cell")) {
+            return null;
+        }
+
+        const row = parseInt(cell.dataset.row || "0");
+        const col = parseInt(cell.dataset.col || "0");
+
+        return { row, col };
+    }
 }
 
 function buildTableDecorations(
@@ -915,4 +828,7 @@ export function tableRendererPlugin(): Extension {
         keymap.of(tableKeymap),
     ];
 }
+
+// Export the state field and TableWidget for external access
+export { tableStateField, TableWidget };
 

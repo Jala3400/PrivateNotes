@@ -26,42 +26,9 @@
     let showContextMenu = $state(false);
     let contextMenuX = $state(0);
     let contextMenuY = $state(0);
+    let contextMenuItems = $state<ContextMenuItem[]>([]);
 
     $inspect("editorConfig", showContextMenu);
-
-    // Define context menu items using editor methods
-    const contextMenuItems: ContextMenuItem[] = [
-        {
-            id: "superscript",
-            text: "Insert Superscript",
-            action: () => editor.insertSuperscript(),
-            type: "item",
-        },
-        {
-            id: "subscript",
-            text: "Insert Subscript",
-            action: () => editor.insertSubscript(),
-            type: "item",
-        },
-        {
-            id: "separator-1",
-            text: "---",
-            action: null,
-            type: "separator",
-        },
-        {
-            id: "table",
-            text: "Insert Table",
-            action: () => editor.insertTable(),
-            type: "item",
-        },
-        {
-            id: "tasklist",
-            text: "Insert Task List",
-            action: () => editor.insertTaskList(),
-            type: "item",
-        },
-    ];
 
     export function getContent(): string {
         return editor ? editor.getContent() : content;
@@ -74,6 +41,141 @@
     function handleContextMenu(event: MouseEvent) {
         contextMenuX = event.clientX;
         contextMenuY = event.clientY;
+
+        // Check if we're in a table context
+        const tableContext = editor.getTableContext();
+
+        if (tableContext) {
+            // Build merged menu with table operations
+            const { widget, row, col } = tableContext;
+            contextMenuItems = [
+                {
+                    id: "add-row-above",
+                    text: "Add Row Above",
+                    action: () => widget.addRow(row),
+                    type: "item",
+                },
+                {
+                    id: "add-row-below",
+                    text: "Add Row Below",
+                    action: () => widget.addRow(row + 1),
+                    type: "item",
+                },
+                {
+                    id: "add-col-left",
+                    text: "Add Column Left",
+                    action: () => widget.addColumn(col),
+                    type: "item",
+                },
+                {
+                    id: "add-col-right",
+                    text: "Add Column Right",
+                    action: () => widget.addColumn(col + 1),
+                    type: "item",
+                },
+                {
+                    id: "separator-1",
+                    text: "---",
+                    action: null,
+                    type: "separator",
+                },
+                {
+                    id: "move-row-up",
+                    text: "Move Row Up",
+                    action: () => widget.moveRowUp(row),
+                    type: "item",
+                },
+                {
+                    id: "move-row-down",
+                    text: "Move Row Down",
+                    action: () => widget.moveRowDown(row),
+                    type: "item",
+                },
+                {
+                    id: "move-col-left",
+                    text: "Move Column Left",
+                    action: () => widget.moveColumnLeft(col),
+                    type: "item",
+                },
+                {
+                    id: "move-col-right",
+                    text: "Move Column Right",
+                    action: () => widget.moveColumnRight(col),
+                    type: "item",
+                },
+                {
+                    id: "separator-2",
+                    text: "---",
+                    action: null,
+                    type: "separator",
+                },
+                {
+                    id: "delete-row",
+                    text: "Delete Row",
+                    action: () => widget.deleteRow(row),
+                    type: "item",
+                },
+                {
+                    id: "delete-col",
+                    text: "Delete Column",
+                    action: () => widget.deleteColumn(col),
+                    type: "item",
+                },
+                {
+                    id: "separator-3",
+                    text: "---",
+                    action: null,
+                    type: "separator",
+                },
+                {
+                    id: "superscript",
+                    text: "Insert Superscript",
+                    action: () => editor.insertSuperscript(),
+                    type: "item",
+                },
+                {
+                    id: "subscript",
+                    text: "Insert Subscript",
+                    action: () => editor.insertSubscript(),
+                    type: "item",
+                },
+            ];
+        } else {
+            // Standard editor menu
+            contextMenuItems = [
+                {
+                    id: "superscript",
+                    text: "Insert Superscript",
+                    action: () => editor.insertSuperscript(),
+                    type: "item",
+                },
+                {
+                    id: "subscript",
+                    text: "Insert Subscript",
+                    action: () => editor.insertSubscript(),
+                    type: "item",
+                },
+                {
+                    id: "separator-1",
+                    text: "---",
+                    action: null,
+                    type: "separator",
+                },
+                {
+                    id: "table",
+                    text: "Insert Table",
+                    action: () => editor.insertTable(),
+                    type: "item",
+                },
+                {
+                    id: "tasklist",
+                    text: "Insert Task List",
+                    action: () => editor.insertTaskList(),
+                    type: "item",
+                },
+            ];
+        }
+
         showContextMenu = true;
     }
 
@@ -90,7 +192,11 @@
     }
 
     function handleDocumentClick(event: MouseEvent) {
-        if (showContextMenu && contextMenu && !contextMenu.contains(event.target as Node)) {
+        if (
+            showContextMenu &&
+            contextMenu &&
+            !contextMenu.contains(event.target as Node)
+        ) {
             hideContextMenu();
         }
     }
@@ -181,5 +287,4 @@
         border-radius: var(--border-radius-medium);
         border: 1px solid var(--background-dark-lighter);
     }
-
 </style>

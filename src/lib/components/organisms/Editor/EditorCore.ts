@@ -21,10 +21,7 @@ import {
     indentUnit,
     syntaxHighlighting,
 } from "@codemirror/language";
-import {
-    highlightSelectionMatches,
-    searchKeymap,
-} from "@codemirror/search";
+import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import { EditorState, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import {
@@ -49,7 +46,11 @@ import {
 import { vim } from "@replit/codemirror-vim";
 import { selectedLinePlugin } from "./SelectedLinePlugin";
 import { syntaxCorePlugin } from "./SyntaxCorePlugin";
-import { tableRendererPlugin } from "./TableRendererPlugin";
+import {
+    tableRendererPlugin,
+    tableStateField,
+    TableWidget,
+} from "./TableRendererPlugin";
 import { spoilerExtension } from "./SpoilerParser";
 
 export interface EditorConfig {
@@ -155,7 +156,7 @@ export class CodeMirrorEditor {
      */
     updateConfig(newConfig: EditorConfig): void {
         this.config = { ...this.config, ...newConfig };
-        
+
         if (this.view) {
             this.view.dispatch({
                 effects: [StateEffect.reconfigure.of(this.createExtensions())],
@@ -270,6 +271,54 @@ export class CodeMirrorEditor {
      */
     insertSubscript(): void {
         this.wrapSelection("~", "~");
+    }
+
+    /**
+     * Get the table widget and cell position if cursor is in a table cell
+     */
+    getTableContext(): {
+        widget: TableWidget;
+        row: number;
+        col: number;
+    } | null {
+        if (!this.view) return null;
+
+        const field = this.view.state.field(tableStateField, false);
+        if (!field) return null;
+
+        // Check if the active element is a table cell
+        const activeElement = document.activeElement;
+        if (
+            !activeElement ||
+            !activeElement.classList.contains("md-editable-cell")
+        ) {
+            return null;
+        }
+
+        // Find the table widget containing this cell
+        let foundWidget: TableWidget | null = null;
+        field.between(0, this.view.state.doc.length, (from, to, value) => {
+            if (foundWidget) return false;
+            if (value.spec.widget instanceof TableWidget) {
+                const widget = value.spec.widget as TableWidget;
+                // Check if the active cell is within this widget's DOM
+                if (widget.widget && widget.widget.contains(activeElement)) {
+                    foundWidget = widget;
+                    return false;
+                }
+            }
+        });
+
+        if (!foundWidget) return null;
+
+        // Type assertion to help TypeScript understand this is definitely a TableWidget
+        const tableWidget = foundWidget as TableWidget;
+
+        // Get cell position from the widget
+        const cellPos = tableWidget.getCurrentCellPosition();
+        if (!cellPos) return null;
+
+        return { widget: tableWidget, row: cellPos.row, col: cellPos.col };
     }
 
     /**
