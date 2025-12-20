@@ -39,11 +39,12 @@
                     <span class="file-icon">{item.isNote ? "🗎" : "🗋"}</span>
                     {item.name}
                 </span>
-
-                {#if $currentNote?.id === item.id && $currentNote?.parentId === item.parentId ? $currentNote.unsaved : undefined}
-                    <span class="save-indicator"> ●️ </span>
-                {/if}
             </button>
+
+            {#if $currentNote?.id === item.id && $currentNote?.parentId === item.parentId ? $currentNote.unsaved : undefined}
+                <span class="save-indicator"> ●️ </span>
+            {/if}
+
             <button
                 class="close-btn"
                 onclick={(e) => {
@@ -128,6 +129,7 @@
 
     .item-header {
         display: flex;
+        gap: 0.5em;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
