@@ -15,7 +15,7 @@ export function decorateSpoiler(
 
     // Check if cursor is inside the spoiler text
     const isCursorInside = selections.some(
-        ({ from, to }) => from >= node.from && to <= node.to
+        ({ from, to }) => from >= node.from + 1 && to <= node.to - 1
     );
 
     // If cursor is not inside, hide the content
