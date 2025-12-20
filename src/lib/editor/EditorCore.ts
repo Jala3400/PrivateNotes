@@ -285,39 +285,6 @@ export class CodeMirrorEditor {
     }
 
     /**
-     * Insert a table template at the cursor position
-     */
-    insertTable(): void {
-        const tableTemplate = `
-| Header | Header |
-|--------|---------|
-| Cell   | Cell   |
-`;
-        this.insertText(tableTemplate);
-    }
-
-    /**
-     * Insert a task list at the beginning of the current line
-     */
-    insertTaskList(): void {
-        this.insertAtLineStart("- [ ] ");
-    }
-
-    /**
-     * Wrap selection with superscript markers
-     */
-    insertSuperscript(): void {
-        this.wrapSelection("^", "^");
-    }
-
-    /**
-     * Wrap selection with subscript markers
-     */
-    insertSubscript(): void {
-        this.wrapSelection("~", "~");
-    }
-
-    /**
      * Get the table widget and cell position if cursor is in a table cell
      */
     getTableContext(): {

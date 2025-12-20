@@ -21,7 +21,7 @@
         return editor ? editor.getContent() : content;
     }
 
-    function handleContextMenu(event: MouseEvent) {
+    function onContextMenu(event: MouseEvent) {
         contextMenuManager.show(event.clientX, event.clientY);
     }
 
@@ -40,7 +40,7 @@
         // Initialize the editor core
         editor = new CodeMirrorEditor(config, {
             onContentChange,
-            onContextMenu: handleContextMenu,
+            onContextMenu,
         });
 
         const keymaps = [

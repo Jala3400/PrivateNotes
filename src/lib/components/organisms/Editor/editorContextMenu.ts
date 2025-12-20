@@ -19,19 +19,56 @@ export class EditorContextMenuManager {
         // Create default menu items once
         this.defaultMenuItems = [
             {
-                text: "Insert Superscript",
-                action: () => this.editor.insertSuperscript(),
+                text: "Wrap with Italic",
+                action: () => this.wrapWithItalic(),
+            },
+            { text: "Wrap with Bold", action: () => this.wrapWithBold() },
+            {
+                text: "Wrap with Strikethrough",
+                action: () => this.wrapWithStrikethrough(),
             },
             {
-                text: "Insert Subscript",
-                action: () => this.editor.insertSubscript(),
+                text: "Wrap with Inline Code",
+                action: () => this.wrapWithInlineCode(),
             },
+            { text: "Wrap with Spoiler", action: () => this.wrapWithSpoiler() },
+            {
+                text: "Wrap with Superscript",
+                action: () => this.wrapWithSuperScript(),
+            },
+            {
+                text: "Wrap with Subscript",
+                action: () => this.wrapWithSubScript(),
+            },
+            {
+                text: "Wrap with Code Block",
+                action: () => this.wrapWithCodeBlock(),
+            },
+
             { type: "separator" },
-            { text: "Insert Table", action: () => this.editor.insertTable() },
+
+            { text: "Insert Table", action: () => this.insertTable() },
             {
                 text: "Insert Task List",
-                action: () => this.editor.insertTaskList(),
+                action: () => this.insertTaskList(),
             },
+            {
+                text: "Insert Numbered List",
+                action: () => this.insertNumberedList(),
+            },
+            {
+                text: "Insert Bulleted List",
+                action: () => this.insertBulletedList(),
+            },
+            {
+                text: "Insert Blockquote",
+                action: () => this.insertBlockquote(),
+            },
+            {
+                text: "Insert Horizontal Rule",
+                action: () => this.insertHorizontalRule(),
+            },
+            { text: "Insert Link", action: () => this.insertLink() },
         ];
     }
 
@@ -51,7 +88,9 @@ export class EditorContextMenuManager {
                 text: "Add Column Right",
                 action: () => widget.addColumn(col + 1),
             },
+
             { type: "separator" },
+
             { text: "Move Row Up", action: () => widget.moveRowUp(row) },
             { text: "Move Row Down", action: () => widget.moveRowDown(row) },
             {
@@ -62,19 +101,124 @@ export class EditorContextMenuManager {
                 text: "Move Column Right",
                 action: () => widget.moveColumnRight(col),
             },
+
             { type: "separator" },
+
             { text: "Delete Row", action: () => widget.deleteRow(row) },
             { text: "Delete Column", action: () => widget.deleteColumn(col) },
-            { type: "separator" },
-            {
-                text: "Insert Superscript",
-                action: () => this.editor.insertSuperscript(),
-            },
-            {
-                text: "Insert Subscript",
-                action: () => this.editor.insertSubscript(),
-            },
         ];
+    }
+
+    // * Wrap selection
+    /**
+     * Wrap selection with italic markers
+     */
+    private wrapWithItalic(): void {
+        this.editor.wrapSelection("*", "*");
+    }
+
+    /**
+     * Wrap selection with bold markers
+     */
+    private wrapWithBold(): void {
+        this.editor.wrapSelection("**", "**");
+    }
+
+    /**
+     * Wrap selection with strikethrough markers
+     */
+    private wrapWithStrikethrough(): void {
+        this.editor.wrapSelection("~~", "~~");
+    }
+
+    /**
+     * Wrap selection with inline code markers
+     */
+    private wrapWithInlineCode(): void {
+        this.editor.wrapSelection("`", "`");
+    }
+    /**
+     * Wrap selection with spoiler markers
+     */
+    private wrapWithSpoiler(): void {
+        this.editor.wrapSelection("||", "||");
+    }
+
+    /**
+     * Wrap selection with superscript markers
+     */
+    private wrapWithSuperScript(): void {
+        this.editor.wrapSelection("^", "^");
+    }
+
+    /**
+     * Wrap selection with subscript markers
+     */
+    private wrapWithSubScript(): void {
+        this.editor.wrapSelection("~", "~");
+    }
+
+    /**
+     * Wrap selection with code block markers
+     */
+    private wrapWithCodeBlock(): void {
+        this.editor.wrapSelection("```\n", "\n```");
+    }
+
+    // * Insert elements
+
+    /**
+     * Insert a table template at the cursor position
+     */
+    private insertTable(): void {
+        const tableTemplate = `
+| Header | Header |
+|--------|---------|
+| Cell   | Cell   |
+`;
+        this.editor.insertText(tableTemplate);
+    }
+
+    /**
+     * Insert a task list at the beginning of the current line
+     */
+    private insertTaskList(): void {
+        this.editor.insertAtLineStart("- [ ] ");
+    }
+
+    /**
+     * Insert a numbered list at the beginning of the current line
+     */
+    private insertNumberedList(): void {
+        this.editor.insertAtLineStart("1. ");
+    }
+
+    /**
+     * Insert a bulleted list at the beginning of the current line
+     */
+    private insertBulletedList(): void {
+        this.editor.insertAtLineStart("- ");
+    }
+
+    /**
+     * Insert a blockquote at the beginning of the current line
+     */
+    private insertBlockquote(): void {
+        this.editor.insertAtLineStart("> ");
+    }
+
+    /**
+     * Insert a horizontal rule at the cursor position
+     */
+    private insertHorizontalRule(): void {
+        this.editor.insertText("\n---\n");
+    }
+
+    /**
+     * Insert a link at the cursor position
+     */
+    private insertLink(): void {
+        this.editor.insertText("[Link Text](http://example.com)");
     }
 
     /**
