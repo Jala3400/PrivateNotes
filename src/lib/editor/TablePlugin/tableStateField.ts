@@ -13,10 +13,7 @@ export const tableStateField = StateField.define<DecorationSet>({
 
     update(decorations, transaction) {
         if (transaction.docChanged) {
-            return RangeSet.of(
-                buildTableDecorations(transaction.state),
-                true
-            );
+            return RangeSet.of(buildTableDecorations(transaction.state), true);
         }
         return decorations.map(transaction.changes);
     },

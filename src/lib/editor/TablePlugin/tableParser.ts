@@ -63,7 +63,10 @@ export class ParsedTable {
 
         // Calculate trimmed length (sum of all row lengths + newlines)
         this._trimmedLength = this.rows.reduce(
-            (acc, row, idx) => acc + row.original.length + (idx < this.rows.length - 1 ? 1 : 0),
+            (acc, row, idx) =>
+                acc +
+                row.original.length +
+                (idx < this.rows.length - 1 ? 1 : 0),
             0
         );
 
@@ -119,9 +122,15 @@ export class ParsedTable {
      * Get the content rows (excluding separator)
      */
     getContentRows(): { row: TableRow; index: number }[] {
-        return this.rows
-            .map((row, index) => ({ row, index }))
-            .filter(({ row }) => !row.isSeparator);
+        return this.rows.reduce<{ row: TableRow; index: number }[]>(
+            (acc, row, index) => {
+                if (!row.isSeparator) {
+                    acc.push({ row, index });
+                }
+                return acc;
+            },
+            []
+        );
     }
 
     /**
