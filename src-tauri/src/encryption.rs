@@ -55,7 +55,7 @@ pub fn decrypt_data(key: &[u8; 32], file_data: &[u8]) -> Result<Vec<u8>, String>
     // Decrypt the content
     cipher
         .decrypt(nonce, encrypted_content)
-        .map_err(|e| format!("Decryption failed: {}", e))
+        .map_err(|e| format!("Decryption failed: {}, is it the correct password?", e))
 }
 
 #[tauri::command]
