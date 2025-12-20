@@ -224,6 +224,10 @@ export class TableWidget extends WidgetType {
     private updateTableSource(newSource: string) {
         if (!this.editorView || !this.tablePosition) return;
 
+        // Reset editing state so the table gets re-rendered
+        // It has to go before the dispatch to avoid eq() returning true
+        this.isEditing = false;
+
         // Update the editor source
         this.editorView.dispatch({
             changes: {
@@ -232,9 +236,6 @@ export class TableWidget extends WidgetType {
                 insert: newSource,
             },
         });
-
-        // Reset editing state so the table gets re-rendered
-        this.isEditing = false;
     }
 
     private handleCellKeydown(
