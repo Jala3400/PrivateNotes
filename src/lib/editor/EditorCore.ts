@@ -98,7 +98,7 @@ export class CodeMirrorEditor {
         initialContent: string = "",
         keymaps: KeyBinding[] = [],
         extensions: Extension[] = [],
-        config?: EditorConfig,
+        config?: EditorConfig
     ): EditorView {
         if (config) {
             this.config = { ...this.config, ...config };
@@ -191,7 +191,9 @@ export class CodeMirrorEditor {
      * Build all extensions combining custom extensions, config-based extensions, and custom keymaps
      */
     private buildExtensions(): Extension[] {
-        return this.customExtensions.concat(this.createExtensions(this.customKeymaps));
+        return this.customExtensions.concat(
+            this.createExtensions(this.customKeymaps)
+        );
     }
 
     /**
@@ -385,8 +387,26 @@ export class CodeMirrorEditor {
             extensions.push(foldGutter());
         }
 
+        // Keymaps for wrapping selected text with markdown characters
+        const wrapKeymaps: KeyBinding[] = ["*", "`", "_", "|", "~", "^"].map(
+            (char) => ({
+                key: char,
+                run: (view: EditorView) => {
+                    if (
+                        view.state.selection.main.from !==
+                        view.state.selection.main.to
+                    ) {
+                        this.wrapSelection(char, char);
+                        return true;
+                    }
+                    return false;
+                },
+            })
+        );
+
         // Create keymap array based on config
         const keymaps = [
+            ...wrapKeymaps,
             ...customKeymaps,
             indentWithTab,
             ...defaultKeymap,
