@@ -43,7 +43,16 @@
             onContextMenu: handleContextMenu,
         });
 
-        editor.mount(editorContainer, content);
+        const keymaps = [
+            {
+                key: "Ctrl-g",
+                run: () => true,
+                // It is used in #NoteEditor to trigger saving
+                // Overrides a search command in CodeMirror
+            },
+        ];
+
+        editor.mount(editorContainer, content, keymaps);
 
         // Initialize editor-specific context menu manager
         contextMenuManager = new EditorContextMenuManager(editor);

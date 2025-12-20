@@ -34,6 +34,7 @@ import {
     keymap,
     lineNumbers,
     rectangularSelection,
+    type KeyBinding,
 } from "@codemirror/view";
 import { classHighlighter, tags } from "@lezer/highlight";
 import {
@@ -73,6 +74,8 @@ export class CodeMirrorEditor {
     private config: EditorConfig;
     private callbacks: EditorCallbacks;
     private markdownHighlighting: Extension;
+    private customKeymaps: KeyBinding[] = [];
+    private customExtensions: Extension[] = [];
 
     constructor(config: EditorConfig = {}, callbacks: EditorCallbacks = {}) {
         this.config = config;
@@ -97,10 +100,22 @@ export class CodeMirrorEditor {
     /**
      * Initialize the editor and attach it to a DOM element
      */
-    mount(parent: HTMLElement, initialContent: string = ""): EditorView {
+    mount(
+        parent: HTMLElement,
+        initialContent: string = "",
+        keymaps: KeyBinding[] = [],
+        extensions: Extension[] = [],
+        config?: EditorConfig
+    ): EditorView {
+        if (config) {
+            this.config = { ...this.config, ...config };
+        }
+        this.customKeymaps = keymaps;
+        this.customExtensions = extensions;
+
         const state = EditorState.create({
             doc: initialContent,
-            extensions: this.createExtensions(),
+            extensions: this.buildExtensions(),
         });
 
         this.view = new EditorView({
@@ -156,12 +171,41 @@ export class CodeMirrorEditor {
      */
     updateConfig(newConfig: EditorConfig): void {
         this.config = { ...this.config, ...newConfig };
+        this.reconfigureExtensions();
+    }
 
+    /**
+     * Update custom keymaps
+     */
+    updateKeymaps(keymaps: KeyBinding[]): void {
+        this.customKeymaps = keymaps;
+        this.reconfigureExtensions();
+    }
+
+    /**
+     * Update custom extensions
+     */
+    updateExtensions(extensions: Extension[]): void {
+        this.customExtensions = extensions;
+        this.reconfigureExtensions();
+    }
+
+    /**
+     * Reconfigure editor extensions by dispatching effects
+     */
+    private reconfigureExtensions(): void {
         if (this.view) {
             this.view.dispatch({
-                effects: [StateEffect.reconfigure.of(this.createExtensions())],
+                effects: [StateEffect.reconfigure.of(this.buildExtensions())],
             });
         }
+    }
+
+    /**
+     * Build all extensions combining custom extensions, config-based extensions, and custom keymaps
+     */
+    private buildExtensions(): Extension[] {
+        return this.customExtensions.concat(this.createExtensions(this.customKeymaps));
     }
 
     /**
@@ -324,7 +368,7 @@ export class CodeMirrorEditor {
     /**
      * Create extensions based on current configuration
      */
-    private createExtensions(): Extension[] {
+    private createExtensions(customKeymaps: KeyBinding[] = []): Extension[] {
         const extensions: Extension[] = [
             // Only render custom markdown plugins if renderMd is enabled
             ...(this.config.renderMd
@@ -401,11 +445,7 @@ export class CodeMirrorEditor {
 
         // Create keymap array based on config
         const keymaps = [
-            {
-                key: "Ctrl-g",
-                run: () => true,
-                // It is used in the front end to save a copy of the note
-            },
+            ...customKeymaps,
             indentWithTab,
             ...defaultKeymap,
             ...historyKeymap,

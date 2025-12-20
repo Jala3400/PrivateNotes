@@ -18,7 +18,7 @@ export class TableWidget extends WidgetType {
     // Checks if this widget should be rerendered
     eq(widget: TableWidget): boolean {
         // Don't rerender if currently editing or the table loses focus
-        // todo: check if the rerenderin is really necessary
+        // todo: check if the rerendering is really necessary
         return this.isEditing;
     }
 
@@ -224,9 +224,6 @@ export class TableWidget extends WidgetType {
     private updateTableSource(newSource: string) {
         if (!this.editorView || !this.tablePosition) return;
 
-        // Reset editing state so the table gets re-rendered
-        this.isEditing = false;
-
         // Update the editor source
         this.editorView.dispatch({
             changes: {
@@ -235,6 +232,9 @@ export class TableWidget extends WidgetType {
                 insert: newSource,
             },
         });
+
+        // Reset editing state so the table gets re-rendered
+        this.isEditing = false;
     }
 
     private handleCellKeydown(
