@@ -64,22 +64,15 @@ export interface EditorConfig {
     tabSize?: number;
 }
 
-export interface EditorCallbacks {
-    onContentChange?: () => void;
-    onContextMenu?: (event: MouseEvent) => void;
-}
-
 export class CodeMirrorEditor {
     private view: EditorView | null = null;
     private config: EditorConfig;
-    private callbacks: EditorCallbacks;
     private markdownHighlighting: Extension;
     private customKeymaps: KeyBinding[] = [];
     private customExtensions: Extension[] = [];
 
-    constructor(config: EditorConfig = {}, callbacks: EditorCallbacks = {}) {
+    constructor(config: EditorConfig = {}) {
         this.config = config;
-        this.callbacks = callbacks;
 
         // Create custom markdown highlighting style
         const highlightStyle = HighlightStyle.define([
@@ -105,11 +98,12 @@ export class CodeMirrorEditor {
         initialContent: string = "",
         keymaps: KeyBinding[] = [],
         extensions: Extension[] = [],
-        config?: EditorConfig
+        config?: EditorConfig,
     ): EditorView {
         if (config) {
             this.config = { ...this.config, ...config };
         }
+
         this.customKeymaps = keymaps;
         this.customExtensions = extensions;
 
@@ -122,14 +116,6 @@ export class CodeMirrorEditor {
             state,
             parent,
         });
-
-        // Add context menu event listener if callback provided
-        if (this.callbacks.onContextMenu) {
-            this.view.dom.addEventListener("contextmenu", (event) => {
-                event.preventDefault();
-                this.callbacks.onContextMenu?.(event);
-            });
-        }
 
         return this.view;
     }
@@ -372,17 +358,6 @@ export class CodeMirrorEditor {
             highlightActiveLineGutter(),
             highlightSelectionMatches(),
         ];
-
-        // Add content change listener
-        if (this.callbacks.onContentChange) {
-            extensions.push(
-                EditorView.updateListener.of((update) => {
-                    if (update.docChanged) {
-                        this.callbacks.onContentChange?.();
-                    }
-                })
-            );
-        }
 
         // Add vim mode if enabled
         if (this.config.vimMode) {

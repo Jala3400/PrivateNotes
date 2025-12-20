@@ -4,6 +4,7 @@
     import { CodeMirrorEditor } from "$lib/editor/EditorCore";
     import type { EditorConfig } from "$lib/editor/EditorCore";
     import { EditorContextMenuManager } from "./editorContextMenu";
+    import { EditorView } from "@codemirror/view";
     import "$lib/editor/md_style.css";
 
     interface Props {
@@ -21,10 +22,6 @@
         return editor ? editor.getContent() : content;
     }
 
-    function onContextMenu(event: MouseEvent) {
-        contextMenuManager.show(event.clientX, event.clientY);
-    }
-
     onMount(() => {
         // Convert Svelte store to plain config object
         const config: EditorConfig = {
@@ -38,24 +35,37 @@
         };
 
         // Initialize the editor core
-        editor = new CodeMirrorEditor(config, {
-            onContentChange,
-            onContextMenu,
-        });
+        editor = new CodeMirrorEditor(config);
+
+        // Initialize editor-specific context menu manager first
+        contextMenuManager = new EditorContextMenuManager(editor);
+
+        // Create extensions for content change handling
+        const extensions = [
+            EditorView.updateListener.of((update) => {
+                if (update.docChanged) {
+                    onContentChange();
+                }
+            }),
+        ];
 
         const keymaps = [
             {
                 key: "Ctrl-g",
-                run: () => true,
-                // It is used in #NoteEditor to trigger saving
+                run: () => true, // true means "handled", so no further processing occurs
+                // It is used in #NoteEditor.svelte to trigger saving
                 // Overrides a search command in CodeMirror
             },
         ];
 
-        editor.mount(editorContainer, content, keymaps);
+        editor.mount(editorContainer, content, keymaps, extensions);
 
-        // Initialize editor-specific context menu manager
-        contextMenuManager = new EditorContextMenuManager(editor);
+        // Add context menu handler to the container to capture events from both
+        // CodeMirror and table widget elements (through event bubbling)
+        editorContainer.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            contextMenuManager.show(event.clientX, event.clientY);
+        });
 
         // Watch for editorConfig changes and update editor
         $effect(() => {
