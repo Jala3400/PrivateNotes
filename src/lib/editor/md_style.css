@@ -444,62 +444,6 @@
     border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
 }
 
-/* Context menu styling */
-.context-menu {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    padding: 0.25em;
-    background-color: var(--background-dark-light);
-    border: 1px solid var(--border-color-dark);
-    border-radius: var(--border-radius-medium);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    min-width: 160px;
-    overflow: hidden;
-    font-family: inherit;
-
-    /* Modern CSS viewport constraints */
-    max-inline-size: calc(100vi - 2rem);
-    max-block-size: calc(100vb - 2rem);
-    inset-inline-start: clamp(1rem, var(--menu-x), calc(100vi - 160px - 1rem));
-    inset-block-start: clamp(1rem, var(--menu-y), calc(100vb - 330px - 1rem));
-}
-
-.context-menu-item {
-    padding: 0.5em 0.66em;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--text-primary);
-    background-color: var(--background-dark-light);
-    border: none;
-    text-align: left;
-}
-
-.context-menu-item,
-.context-menu-separator {
-    width: 100%;
-}
-
-.context-menu-item {
-    border-radius: var(--border-radius-small);
-}
-
-.context-menu-item:hover {
-    background-color: var(--background-dark-lighter);
-}
-
-.context-menu-item:active {
-    background-color: var(--main-color);
-    color: var(--background-dark);
-}
-
-.context-menu-separator {
-    height: 1px;
-    background-color: var(--border-color-dark);
-    margin: 0.3em;
-}
-
 /* Vim plugin styles */
 .cm-vimCursorLayer .cm-fat-cursor {
     background: var(--main-color-dark);
