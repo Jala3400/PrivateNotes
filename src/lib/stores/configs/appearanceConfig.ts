@@ -5,7 +5,7 @@ import {
     type Options,
 } from "$lib/types";
 import { writable } from "svelte/store";
-import { initialConfig, optionsFromSections } from "./configUtils";
+import { getInitialConfig, optionsFromSections } from "./configUtils";
 
 const appearanceConfigSections: ConfigurationSection[] = [
     {
@@ -58,7 +58,13 @@ const appearanceKey = "appearance";
 
 export const appearanceConfig = writable<Options>({
     ...defaultAppearanceConfig,
-    ...initialConfig[appearanceKey],
+});
+
+void getInitialConfig().then((config) => {
+    appearanceConfig.update((currentConfig) => ({
+        ...currentConfig,
+        ...config[appearanceKey],
+    }));
 });
 
 function setAppearanceConfig(newConfig: Options) {

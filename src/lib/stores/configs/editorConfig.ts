@@ -5,7 +5,7 @@ import {
     type Options,
 } from "$lib/types";
 import { writable } from "svelte/store";
-import { initialConfig, optionsFromSections } from "./configUtils";
+import { getInitialConfig, optionsFromSections } from "./configUtils";
 
 const editorConfigSections: ConfigurationSection[] = [
     {
@@ -74,7 +74,13 @@ const editorKey = "editor";
 
 export const editorConfig = writable<Options>({
     ...defaultEditorConfig,
-    ...initialConfig[editorKey],
+});
+
+void getInitialConfig().then((config) => {
+    editorConfig.update((currentConfig) => ({
+        ...currentConfig,
+        ...config[editorKey],
+    }));
 });
 
 function setEditorConfig(newConfig: Options) {
